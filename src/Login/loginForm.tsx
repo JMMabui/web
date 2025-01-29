@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom' // Importe o hook useNavigate do React Router
+import { useNavigate } from 'react-router-dom'
 
-function welcome() {
+function Welcome() {
   return (
-    <div className=" sm:mx-auto mx-auto sm:w-full  ">
+    <div className="sm:mx-auto mx-auto sm:w-full">
       <h1 className="mt-10 text-center text-xl/5 font-bold tracking-tight text-gray-900">
         Bem-Vindo
       </h1>
       <p className="mt-3 text-center text-3.5 font-medium tracking-tight text-gray-500">
-        A MMA SCHOOL e um software de gestao academica do Instituto Superior
-        Maria Mae de Africa. Abaixo, encontrara instrucoes de como realizar a
-        sua pre-inscricao, onde so sera validado, com apresentacao de documentos
-        fisicos e o comprovativo de pagamento, na secretaria da instituicao
+        A MMA SCHOOL é um software de gestão acadêmica do Instituto Superior
+        Maria Mãe de África. Abaixo, encontrará instruções de como realizar a
+        sua pré-inscrição, que será validada apenas com a apresentação de
+        documentos físicos e o comprovativo de pagamento, na secretaria da
+        instituição.
       </p>
     </div>
   )
@@ -30,8 +31,20 @@ export function LoginForm() {
   }
 
   // Função para lidar com o envio do formulário
-  const handleSubmit = e => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault() // Impede o comportamento padrão do formulário
+
+    const form = e.target as HTMLFormElement
+
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value
+    const password = (form.elements.namedItem('password') as HTMLInputElement)
+      .value
+
+    // Validação básica dos campos
+    if (!email || !password) {
+      alert('Por favor, preencha todos os campos.')
+      return
+    }
 
     // Aqui você pode adicionar a lógica de envio dos dados, como uma requisição API
     // Simulando um redirecionamento após a inscrição bem-sucedida
@@ -72,7 +85,7 @@ export function LoginForm() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-900"
             >
-              Password
+              Senha
             </label>
             <div className="mt-2">
               <input
@@ -115,7 +128,7 @@ export function LoginForm() {
           </div>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            Já tens uma conta?{' '}
+            Já tem uma conta?{' '}
             <button
               type="button"
               onClick={handleSwitchToLogin}
@@ -151,7 +164,7 @@ export function LoginForm() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-900"
             >
-              Password
+              Senha
             </label>
             <div className="mt-2">
               <input
@@ -184,7 +197,7 @@ export function LoginForm() {
           </div>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            Ainda não tens conta?{' '}
+            Ainda não tem uma conta?{' '}
             <button
               type="button"
               onClick={handleSwitchToSignup}
