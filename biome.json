@@ -26,7 +26,8 @@
         "noVar": "off"
       },
       "a11y": {
-        "useValidAnchor": "off"
+        "useValidAnchor": "off",
+        "noLabelWithoutControl": "off"
       }
     }
   },
