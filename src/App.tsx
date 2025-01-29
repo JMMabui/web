@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { LoginForm } from './Login/loginForm'
 import { Personal_data } from './registration/person_data'
 import { Inscricao } from './registration/course'
-
+import { Dashboard } from './dashboard/dashboard-empty'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 function header_primary() {
@@ -233,10 +233,10 @@ function PreInstituto() {
 export function App() {
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      {header_primary()}
+      {/* {header_primary()} */}
       <Router>
         <Routes>
-          <Route path="/" element={<LoginForm />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/pagina-de-confirmacao" element={PreInstituto()} />
         </Routes>
       </Router>

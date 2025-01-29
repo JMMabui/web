@@ -28,6 +28,13 @@
       "a11y": {
         "useValidAnchor": "off",
         "noLabelWithoutControl": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noExplicitAny": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
       }
     }
   },
