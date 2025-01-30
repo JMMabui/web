@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export const Enrollments = () => {
   const [ano, setAno] = useState('')
@@ -106,7 +106,7 @@ export const Enrollments = () => {
   }, [ano, semestre]) // A dependência é o ano e semestre
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-yellow-400 text-gray-800 rounded-md flex">
+    <div className="max-w-4xl mx-auto p-6 bg-yellow-200 text-black rounded-md flex">
       <div className="w-1/2 pr-6">
         <h2 className="text-2xl font-semibold mb-4">Formulário de Inscrição</h2>
 
@@ -118,7 +118,7 @@ export const Enrollments = () => {
             id="ano"
             value={ano}
             onChange={e => setAno(e.target.value)}
-            className="w-full p-2 rounded-md bg-gray-700 text-white"
+            className="w-full p-2 rounded-md bg-yellow-300 text-black"
           >
             <option value="">Selecione o ano</option>
             <option value="1">1º Ano</option>
@@ -136,7 +136,7 @@ export const Enrollments = () => {
             id="semestre"
             value={semestre}
             onChange={e => setSemestre(e.target.value)}
-            className="w-full p-2 rounded-md bg-gray-700 text-white"
+            className="w-full p-2 rounded-md bg-yellow-300 text-black"
           >
             <option value="">Selecione o semestre</option>
             <option value="1">1º Semestre</option>
@@ -148,7 +148,7 @@ export const Enrollments = () => {
           <h3 className="text-lg font-medium">Cadeiras Obrigatórias:</h3>
           <ul className="mt-2">
             {cadeiras.map((cadeira, index) => (
-              <li key={index} className="text-sm text-gray-900">
+              <li key={index} className="text-sm text-black">
                 {cadeira} (Obrigatória)
               </li>
             ))}
@@ -168,7 +168,7 @@ export const Enrollments = () => {
             </label>
             <select
               id="anoAdicional"
-              className="w-full p-2 rounded-md bg-gray-700 text-white"
+              className="w-full p-2 rounded-md bg-yellow-300 text-black"
               onChange={e => setAno(e.target.value)}
             >
               <option value="">Selecione o ano</option>
@@ -188,7 +188,7 @@ export const Enrollments = () => {
             </label>
             <select
               id="semestreAdicional"
-              className="w-full p-2 rounded-md bg-gray-700 text-white"
+              className="w-full p-2 rounded-md bg-yellow-300 text-black"
               onChange={e => setSemestre(e.target.value)}
             >
               <option value="">Selecione o semestre</option>

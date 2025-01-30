@@ -18,7 +18,26 @@ function Welcome() {
   )
 }
 
+const usuarios = [
+  {
+    username: 'justinsalomon2@gmail.com',
+    senha: 'senha123',
+  },
+  {
+    username: 'usuario2',
+    senha: 'senha456',
+  },
+  {
+    username: 'admin',
+    senha: 'admin123',
+  },
+]
+
 export function LoginForm() {
+  const [username, setUsername] = useState('')
+  const [senha, setSenha] = useState('')
+  const [mensagemErro, setMensagemErro] = useState('')
+  const [usuarioLogado, setUsuarioLogado] = useState(false)
   const [isSignup, setIsSignup] = useState(false)
   const navigate = useNavigate() // Usando o hook useNavigate
 
@@ -30,30 +49,37 @@ export function LoginForm() {
     setIsSignup(false)
   }
 
-  // Função para lidar com o envio do formulário
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault() // Impede o comportamento padrão do formulário
+  // Função para fazer login
+  const handleLogin = () => {
+    // Verificar se o usuário existe e a senha está correta
+    const usuario = usuarios.find(user => user.username === username)
 
-    const form = e.target as HTMLFormElement
-
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value
-    const password = (form.elements.namedItem('password') as HTMLInputElement)
-      .value
-
-    // Validação básica dos campos
-    if (!email || !password) {
-      alert('Por favor, preencha todos os campos.')
+    if (!usuario) {
+      setMensagemErro('Usuário não registrado!')
       return
     }
 
-    // Aqui você pode adicionar a lógica de envio dos dados, como uma requisição API
-    // Simulando um redirecionamento após a inscrição bem-sucedida
+    if (usuario.senha !== senha) {
+      setMensagemErro('Senha incorreta!')
+      return
+    }
+
+    // Se o login for bem-sucedido, "logar" o usuário
+    setUsuarioLogado(true)
+    setMensagemErro('') // Limpa a mensagem de erro
+
+    // Redirecionar para o dashboard ou página principal
+    navigate('/dashboard/dashboard-empty') // Substitua pelo caminho correto
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
     if (isSignup) {
-      // Após a inscrição, redireciona para uma página de confirmação ou login
-      navigate('/pagina-de-confirmacao') // Substitua pelo caminho real da sua página
+      // Simulação de redirecionamento após inscrição
+      navigate('/registration')
     } else {
-      // Lógica para login (se necessário)
-      navigate('/pagina-de-dashboard') // Redireciona para a página de dashboard após o login
+      handleLogin() // Chama a função de login quando o formulário é enviado
     }
   }
 
@@ -61,6 +87,7 @@ export function LoginForm() {
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
       {isSignup ? (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Formulário de Inscrição */}
           <div>
             <label
               htmlFor="email"
@@ -91,25 +118,6 @@ export function LoginForm() {
               <input
                 id="password"
                 name="password"
-                type="password"
-                required
-                autoComplete="new-password"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirm-password"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Confirme a senha
-            </label>
-            <div className="mt-2">
-              <input
-                id="confirm-password"
-                name="confirm-password"
                 type="password"
                 required
                 autoComplete="new-password"
@@ -140,6 +148,7 @@ export function LoginForm() {
         </form>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Formulário de Login */}
           <div>
             <label
               htmlFor="email"
@@ -154,6 +163,8 @@ export function LoginForm() {
                 type="email"
                 required
                 autoComplete="email"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
               />
             </div>
@@ -173,19 +184,17 @@ export function LoginForm() {
                 type="password"
                 required
                 autoComplete="current-password"
+                value={senha}
+                onChange={e => setSenha(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
               />
             </div>
           </div>
 
-          <div className="text-sm">
-            <a
-              href="#"
-              className="font-semibold text-cyan-600 hover:text-cyan-500"
-            >
-              Esqueceu a senha?
-            </a>
-          </div>
+          {/* Exibir mensagem de erro */}
+          {mensagemErro && (
+            <div className="text-red-500 text-sm">{mensagemErro}</div>
+          )}
 
           <div>
             <button

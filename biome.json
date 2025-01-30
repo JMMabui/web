@@ -23,11 +23,13 @@
       "recommended": true,
       "style": {
         "noNonNullAssertion": "off",
-        "noVar": "off"
+        "noVar": "off",
+        "noUselessElse": "off"
       },
       "a11y": {
         "useValidAnchor": "off",
-        "noLabelWithoutControl": "off"
+        "noLabelWithoutControl": "off",
+        "noSvgWithoutTitle": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
@@ -35,6 +37,9 @@
       },
       "correctness": {
         "useExhaustiveDependencies": "off"
+      },
+      "complexity": {
+        "noForEach": "off"
       }
     }
   },

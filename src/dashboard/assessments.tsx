@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 export const Assessments = () => {
   const [cadeiraSelecionada, setCadeiraSelecionada] = useState<string>('')
@@ -15,7 +15,6 @@ export const Assessments = () => {
       { data: '10/12/2024', tipo: 'Prova', nota: 14, peso: 50 },
       { data: '20/12/2024', tipo: 'Experimento', nota: 16, peso: 50 },
     ],
-
     'Cultura 1': [
       { data: '10/12/2024', tipo: 'Prova', nota: 10, peso: 50 },
       { data: '20/12/2024', tipo: 'Experimento', nota: 10, peso: 50 },
@@ -66,11 +65,9 @@ export const Assessments = () => {
     notaExame: number
   ) => {
     const notaMinima = 10
-    // Se o aluno está admitido e passou no exame, ele está aprovado
     if (mediaFrequencia >= 10 && notaExame >= notaMinima) {
       return 'Aprovado'
     }
-    // Caso contrário, se o aluno passou no exame de recorrência ou é aprovado
     if (notaExame >= notaMinima) {
       return 'Aprovado após Recorrência'
     }
@@ -78,7 +75,7 @@ export const Assessments = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white text-gray-800 rounded-md">
+    <div className="max-w-4xl mx-auto p-6 bg-yellow-200 text-black rounded-md">
       <h2 className="text-2xl font-semibold mb-4">
         Selecione uma Cadeira para Ver as Avaliações
       </h2>
@@ -91,7 +88,7 @@ export const Assessments = () => {
           id="cadeira"
           value={cadeiraSelecionada}
           onChange={e => handleSelectCadeira(e.target.value)}
-          className="w-full p-2 rounded-md bg-gray-700 text-white"
+          className="w-full p-2 rounded-md bg-yellow-300 text-black"
         >
           <option value="">Selecione a cadeira</option>
           {Object.keys(avaliacoesPorCadeira).map(cadeira => (
@@ -107,13 +104,15 @@ export const Assessments = () => {
           <h3 className="text-xl font-semibold">
             Avaliações para {cadeiraSelecionada}:
           </h3>
-          <table className="min-w-full mt-4 border-collapse border border-gray-300">
+          <table className="min-w-full mt-4 border-collapse border border-yellow-500">
             <thead>
               <tr>
-                <th className="px-4 py-2 border">Data</th>
-                <th className="px-4 py-2 border">Tipo de Avaliação</th>
-                <th className="px-4 py-2 border">Nota (0-20)</th>
-                <th className="px-4 py-2 border">Peso (%)</th>
+                <th className="px-4 py-2 border bg-yellow-300">Data</th>
+                <th className="px-4 py-2 border bg-yellow-300">
+                  Tipo de Avaliação
+                </th>
+                <th className="px-4 py-2 border bg-yellow-300">Nota (0-20)</th>
+                <th className="px-4 py-2 border bg-yellow-300">Peso (%)</th>
               </tr>
             </thead>
             <tbody>
@@ -154,7 +153,6 @@ export const Assessments = () => {
             {frequencia.situacao === 'Admitido' ? 'Admitido' : 'Excluído'}
           </p>
 
-          {/* Exibir a Nota do Exame somente se o aluno estiver Admitido ou em Exame de Recorrência */}
           {(frequencia.situacao === 'Admitido' ||
             frequencia.situacao === 'Exame de Recorrência') &&
             frequencia.notaExame !== undefined && (
@@ -169,7 +167,6 @@ export const Assessments = () => {
               </>
             )}
 
-          {/* Situação final considerando a média de frequência e a nota do exame */}
           <p>
             <strong>Situação Final:</strong>{' '}
             {verificarSituacaoFinal(frequencia.media, frequencia.notaExame)}
