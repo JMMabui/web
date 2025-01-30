@@ -1,12 +1,32 @@
-import React, { useState } from 'react'
 import logo from './assents/dark-logo.png'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { LoginForm } from './Login/loginForm'
-import { Personal_data } from './registration/person_data'
-import { Inscricao } from './registration/course'
 import { Dashboard_Empty } from './dashboard/dashboard-empty'
 import { PreInstituto } from './registration/pre_instituto'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
+
+// Definição do tipo para o curso
+
+export function App() {
+    return (
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        {/* {header_primary()} */}
+
+        <Router>
+          <Routes>
+            <Route path="/" element={<LoginForm />} />
+            <Route path="/registration" element={<PreInstituto />} />
+            <Route
+              path="/dashboard/dashboard-empty"
+              element={<Dashboard_Empty />}
+            />{' '}
+            {/* Página do dashboard */}
+          </Routes>
+        </Router>
+      </div>
+    )
+  }
+
 
 function header_primary() {
   return (
@@ -18,25 +38,6 @@ function header_primary() {
       <h2 className=" text-center text-xl font-semibold tracking-tight text-gray-500">
         Sistema de Gestao Academico
       </h2>
-    </div>
-  )
-}
-
-export function App() {
-  return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      {/* {header_primary()} */}
-      <Router>
-        <Routes>
-          <Route path="/" element={<LoginForm />} />
-          <Route path="/registration" element={<PreInstituto />} />
-          <Route
-            path="/dashboard/dashboard-empty"
-            element={<Dashboard_Empty />}
-          />{' '}
-          {/* Página do dashboard */}
-        </Routes>
-      </Router>
     </div>
   )
 }
