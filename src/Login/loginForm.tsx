@@ -1,46 +1,86 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 
-function Welcome() {
-  return (
-    <div className="sm:mx-auto mx-auto sm:w-full">
-      <h1 className="mt-10 text-center text-xl/5 font-bold tracking-tight text-gray-900">
-        Bem-Vindo
-      </h1>
-      <p className="mt-3 text-center text-3.5 font-medium tracking-tight text-gray-500">
-        A MMA SCHOOL é um software de gestão acadêmica do Instituto Superior
-        Maria Mãe de África. Abaixo, encontrará instruções de como realizar a
-        sua pré-inscrição, que será validada apenas com a apresentação de
-        documentos físicos e o comprovativo de pagamento, na secretaria da
-        instituição.
-      </p>
-    </div>
-  )
+type LoginData = {
+  email: string
+  password: string
 }
 
-const usuarios = [
-  {
-    username: 'justinsalomon2@gmail.com',
-    senha: 'senha123',
-  },
-  {
-    username: 'usuario2',
-    senha: 'senha456',
-  },
-  {
-    username: 'admin',
-    senha: 'admin123',
-  },
-]
+type UserData = {
+  email: string
+  password: string
+  contact: string
+}
+
+async function loginRequest({ email, password }: LoginData) {
+  const response = await fetch('http://localhost:3333/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Erro ao fazer login')
+  }
+
+  return response.json()
+}
+
+async function signupRequest({ email, password, contact }: UserData) {
+  const response = await fetch('http://localhost:3333/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password, contact }),
+  })
+
+  if (!response.ok) {
+    const errorData = await response.json()
+    throw new Error(errorData.message || 'Erro ao registrar usuário')
+  }
+
+  return response.json()
+}
 
 export function LoginForm() {
-  const [username, setUsername] = useState('')
-  const [senha, setSenha] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [contact, setContact] = useState('')
   const [mensagemErro, setMensagemErro] = useState('')
-  const [usuarioLogado, setUsuarioLogado] = useState(false)
   const [isSignup, setIsSignup] = useState(false)
-  const navigate = useNavigate() // Usando o hook useNavigate
+  const navigate = useNavigate()
 
+  // Usando o useMutation do react-query para gerenciar o login
+  const mutation = useMutation({
+    mutationFn: loginRequest,
+    onError: (error: Error) => {
+      setMensagemErro(error.message)
+    },
+    onSuccess: data => {
+      // Armazenar o token no localStorage
+      localStorage.setItem('token', data.token)
+      setMensagemErro('')
+      navigate('/dashboard/dashboard-empty') // Redireciona para o dashboard
+    },
+  })
+
+  const signupMutation = useMutation({
+    mutationFn: signupRequest,
+    onError: (error: Error) => {
+      setMensagemErro(error.message)
+    },
+    onSuccess: () => {
+      setMensagemErro('')
+      navigate('/registration') // Redireciona para a página de sucesso após o signup
+    },
+  })
+
+  // Função para alternar entre login e inscrição
   const handleSwitchToSignup = () => {
     setIsSignup(true)
   }
@@ -49,37 +89,50 @@ export function LoginForm() {
     setIsSignup(false)
   }
 
-  // Função para fazer login
-  const handleLogin = () => {
-    // Verificar se o usuário existe e a senha está correta
-    const usuario = usuarios.find(user => user.username === username)
+  // Função de login
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
 
-    if (!usuario) {
-      setMensagemErro('Usuário não registrado!')
+    if (!email || !password) {
+      setMensagemErro('Por favor, preencha todos os campos!')
       return
     }
 
-    if (usuario.senha !== senha) {
-      setMensagemErro('Senha incorreta!')
+    // Chama o mutation para login
+    mutation.mutate({ email, password })
+  }
+
+  // Função de inscrição
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Validação de campos
+    if (!email || !password || !contact) {
+      setMensagemErro('Por favor, preencha todos os campos!')
       return
     }
 
-    // Se o login for bem-sucedido, "logar" o usuário
-    setUsuarioLogado(true)
-    setMensagemErro('') // Limpa a mensagem de erro
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setMensagemErro('Por favor, insira um email válido.')
+      return
+    }
 
-    // Redirecionar para o dashboard ou página principal
-    navigate('/dashboard/dashboard-empty') // Substitua pelo caminho correto
+    if (password.length < 6) {
+      setMensagemErro('A senha precisa ter no mínimo 6 caracteres.')
+      return
+    }
+
+    // Chama o mutation para inscrição
+    signupMutation.mutate({ email, password, contact })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (isSignup) {
-      // Simulação de redirecionamento após inscrição
-      navigate('/registration')
+      handleSignup(e) // Chama a função de signup
     } else {
-      handleLogin() // Chama a função de login quando o formulário é enviado
+      handleLogin(e) // Chama a função de login
     }
   }
 
@@ -102,6 +155,8 @@ export function LoginForm() {
                 type="email"
                 required
                 autoComplete="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
               />
             </div>
@@ -121,6 +176,28 @@ export function LoginForm() {
                 type="password"
                 required
                 autoComplete="new-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="contact"
+              className="block text-sm font-medium text-gray-900"
+            >
+              Contato
+            </label>
+            <div className="mt-2">
+              <input
+                id="contact"
+                name="contact"
+                type="text"
+                required
+                value={contact}
+                onChange={e => setContact(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
               />
             </div>
@@ -163,8 +240,8 @@ export function LoginForm() {
                 type="email"
                 required
                 autoComplete="email"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
               />
             </div>
@@ -184,8 +261,8 @@ export function LoginForm() {
                 type="password"
                 required
                 autoComplete="current-password"
-                value={senha}
-                onChange={e => setSenha(e.target.value)}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
               />
             </div>
