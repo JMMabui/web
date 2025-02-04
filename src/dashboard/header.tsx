@@ -1,7 +1,30 @@
 import { UserCircle } from 'lucide-react'
 import logo from '../assents/ismmalogo.png'
+import { useQuery } from '@tanstack/react-query'
+import { getStudentData } from '@/http/header'
 
 export const Header_Secondary = () => {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['header'],
+    queryFn: getStudentData,
+  })
+
+  if (isLoading)
+    return (
+      <header className="flex justify-center items-center h-32 bg-blue-500 text-white">
+        <p>Carregando...</p>
+      </header>
+    )
+  if (isError)
+    return (
+      <header className="flex justify-center items-center h-32 bg-blue-500 text-white">
+        <p>Ocorreu um erro ao carregar os dados.</p>
+      </header>
+    )
+
+  const student = data
+  const course = student?.Registration[0].course
+
   return (
     <header className="flex flex-col md:flex-row max-w-auto h-auto justify-between items-center p-3.5 bg-blue-500 text-white">
       <div className="flex items-center mb-4 md:mb-0">
@@ -19,21 +42,26 @@ export const Header_Secondary = () => {
           </p>
         </h1>
       </div>
-
       <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-3">
         <UserCircle className="w-16 h-16 md:w-20 md:h-20" />
         <div className="text-center md:text-right">
           <p>
-            <strong>Nome:</strong> Antonio Silvestre Banze
+            <strong>Nome: </strong> {student?.name}, {student?.surname}
           </p>
           <p>
-            <strong>Curso:</strong> Linc. Admin. Pub. e Aut.
+            <strong>Nº Estudante:</strong> {student?.id}
           </p>
           <p>
-            <strong>Nº Estudante:</strong> 20254567
-          </p>
-          <p>
-            <strong>Período:</strong> Laboral
+            <strong>Curso:</strong>{' '}
+            {course ? (
+              <>
+                {course?.levelCourse || 'Nível de curso não disponível'} <br />{' '}
+                {course?.courseName || 'Curso não disponível'} <br />{' '}
+                {course?.period || 'Período não disponível'}
+              </>
+            ) : (
+              'Nenhum curso encontrado.'
+            )}
           </p>
           <p>
             <strong>Ano:</strong> 2025

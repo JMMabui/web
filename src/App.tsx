@@ -8,25 +8,24 @@ import { PreInstituto } from './registration/pre_instituto'
 // Definição do tipo para o curso
 
 export function App() {
-    return (
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        {/* {header_primary()} */}
+  return (
+    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+      {/* {header_primary()} */}
 
-        <Router>
-          <Routes>
-            <Route path="/" element={<LoginForm />} />
-            <Route path="/registration" element={<PreInstituto />} />
-            <Route
-              path="/dashboard/dashboard-empty"
-              element={<Dashboard_Empty />}
-            />{' '}
-            {/* Página do dashboard */}
-          </Routes>
-        </Router>
-      </div>
-    )
-  }
-
+      <Router>
+        <Routes>
+          <Route path="/" element={<LoginForm />} />
+          <Route path="/registration" element={<PreInstituto />} />
+          <Route
+            path="/dashboard/dashboard-empty"
+            element={<Dashboard_Empty />}
+          />{' '}
+          {/* Página do dashboard */}
+        </Routes>
+      </Router>
+    </div>
+  )
+}
 
 function header_primary() {
   return (
