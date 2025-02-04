@@ -10,8 +10,6 @@ import { PreInstituto } from './registration/pre_instituto'
 export function App() {
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      {/* {header_primary()} */}
-
       <Router>
         <Routes>
           <Route path="/" element={<LoginForm />} />
@@ -20,7 +18,6 @@ export function App() {
             path="/dashboard/dashboard-empty"
             element={<Dashboard_Empty />}
           />{' '}
-          {/* Página do dashboard */}
         </Routes>
       </Router>
     </div>
