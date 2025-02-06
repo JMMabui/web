@@ -2,7 +2,7 @@ import logo from './assents/dark-logo.png'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { LoginForm } from './Login/loginForm'
 import { Dashboard_Empty } from './dashboard/dashboard-empty'
-import { PreInstituto } from './registration/pre_instituto'
+import { Signup } from './registration/signup'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -15,7 +15,7 @@ export function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginForm />} />
-          <Route path="/registration" element={<PreInstituto />} />
+          <Route path="/registration" element={<Signup />} />
           <Route
             path="/dashboard/dashboard-empty"
             element={<Dashboard_Empty />}

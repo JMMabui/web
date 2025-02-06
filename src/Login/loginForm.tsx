@@ -1,51 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
-
-type LoginData = {
-  email: string
-  password: string
-}
-
-type UserData = {
-  email: string
-  password: string
-  contact: string
-}
-
-async function loginRequest({ email, password }: LoginData) {
-  const response = await fetch('http://localhost:3333/auth/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.message || 'Erro ao fazer login')
-  }
-
-  return response.json()
-}
-
-async function signupRequest({ email, password, contact }: UserData) {
-  const response = await fetch('http://localhost:3333/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password, contact }),
-  })
-
-  if (!response.ok) {
-    const errorData = await response.json()
-    throw new Error(errorData.message || 'Erro ao registrar usuário')
-  }
-
-  return response.json()
-}
+import { signupRequest } from '@/http/signup/login-signup'
+import { loginRequest } from '@/http/signup/login'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -74,12 +31,18 @@ export function LoginForm() {
     onError: (error: Error) => {
       setMensagemErro(error.message)
     },
-    onSuccess: () => {
+    onSuccess: data => {
       setMensagemErro('')
+      // console.log('Data: ', data)
+      const login_id = data.login.id // Isso pode variar dependendo da resposta do seu backend
+      // console.log(login_id)
+      localStorage.setItem('login_id', login_id)
       navigate('/registration') // Redireciona para a página de sucesso após o signup
     },
   })
 
+  const id = localStorage.getItem('login_id')
+  console.log('Login id: ', id)
   // Função para alternar entre login e inscrição
   const handleSwitchToSignup = () => {
     setIsSignup(true)

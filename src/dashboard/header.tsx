@@ -1,7 +1,7 @@
 import { UserCircle } from 'lucide-react'
 import logo from '../assents/ismmalogo.png'
 import { useQuery } from '@tanstack/react-query'
-import { getStudentData } from '@/http/header'
+import { getStudentData } from '@/http/signup/header'
 
 export const Header_Secondary = () => {
   const { data, isLoading, isError } = useQuery({
