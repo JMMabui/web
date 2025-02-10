@@ -1,5 +1,5 @@
 import { UserCircle } from 'lucide-react'
-import logo from '../assents/ismmalogo.png'
+import logo from '../../assents/ismmalogo.png'
 import { useQuery } from '@tanstack/react-query'
 import { getStudentData } from '@/http/signup/header'
 

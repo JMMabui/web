@@ -73,5 +73,10 @@ export async function createStudentData({
   if (!response.ok) {
     throw new Error('Erro ao enviar dados')
   }
-  return response.json()
+  const jsonResponse = await response.json()
+  console.log('Resposta da API:', jsonResponse) // Verifique o que está sendo retornado
+  const studentId = jsonResponse.student.id
+  console.log('ID do estudante:', studentId) // Aqui você tem o id
+
+  return studentId
 }

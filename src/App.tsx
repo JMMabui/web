@@ -16,12 +16,12 @@ export function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Dashboard_cta />} />
-          {/* <Route path="/login" element={<LoginForm />} />
+          <Route path="/login" element={<LoginForm />} />
           <Route path="/registration" element={<Signup />} />
           <Route
             path="/dashboard/dashboard-empty"
             element={<Dashboard_Empty />}
-          />{' '} */}
+          />{' '}
           {/* Página do dashboard */}
         </Routes>
       </Router>

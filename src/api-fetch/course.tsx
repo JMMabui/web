@@ -1,3 +1,4 @@
+import { getCourses } from '@/http/courses'
 import { useQuery } from '@tanstack/react-query'
 
 type Course = {
@@ -25,15 +26,7 @@ type CourseResponse = {
 export function CourseData() {
   const { data, error, isLoading } = useQuery<CourseResponse>({
     queryKey: ['course_data'],
-    queryFn: async () => {
-      const response = await fetch('http://localhost:3333/course')
-      if (!response.ok) {
-        throw new Error('Erro ao buscar os dados')
-      }
-      const result = await response.json()
-      console.log('Resposta da API:', result) // Verificando o conteúdo da resposta
-      return result
-    },
+    queryFn: getCourses,
   })
 
   if (isLoading) return <div>Carregando cursos...</div>
@@ -43,6 +36,7 @@ export function CourseData() {
     return <div>Não há cursos disponíveis no momento.</div>
   }
 
+  data.course.length
   return (
     <div>
       <h1>Lista de Cursos</h1>

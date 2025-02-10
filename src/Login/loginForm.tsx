@@ -41,8 +41,9 @@ export function LoginForm() {
     },
   })
 
-  const id = localStorage.getItem('login_id')
-  console.log('Login id: ', id)
+  // const id = localStorage.getItem('login_id')
+  // console.log('Login id: ', id)
+
   // Função para alternar entre login e inscrição
   const handleSwitchToSignup = () => {
     setIsSignup(true)

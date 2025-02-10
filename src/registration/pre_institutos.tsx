@@ -1,9 +1,14 @@
 import { useState } from 'react'
-import { Education_Officer } from './education_officer'
-import { z } from 'zod'
+
 import { useForm } from 'react-hook-form'
+import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+import { createPreInstituto } from '@/http/signup/pre_instituto'
+
+import { Education_Officer } from './education_officer'
+
+// Validação com Zod
 const schema = z.object({
   schoolLevel: z.enum(['CLASSE_10', 'CLASSE_12', 'LICENCIATURA'], {
     errorMap: () => ({ message: 'Selecione o nivel academico' }),
@@ -29,31 +34,42 @@ const schema = z.object({
       }),
     }
   ),
-  //   student_id: z.string(),
 })
+
+type DataSchema = z.infer<typeof schema>
+
+// Função para obter o ID do estudante do localStorage
+const getStudentIdFromStorage = () => {
+  const studentId = localStorage.getItem('student_id')
+  if (!studentId) {
+    throw new Error('Estudante ID não encontrado no localStorage')
+  }
+  return studentId
+}
 
 export function Pre_Instituto() {
   const [nivelAcademico, setNivelAcademico] = useState('')
-
-  const isNivelAcademicoValid = () =>
-    nivelAcademico !== '' && nivelAcademico !== 'null'
+  const studentId = getStudentIdFromStorage()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<DataSchema>({
     resolver: zodResolver(schema), // Conecta o Zod com o React Hook Form
   })
 
-  const renderEncarregadoEducacao = () => (
-    <div>
-      <Education_Officer />
-    </div>
-  )
+  // Função para renderizar os campos do Encarregado de Educação
+  const renderEncarregadoEducacao = () => <Education_Officer />
 
-  function createPre(data: any) {
-    console.log(data)
+  // Função para submeter o formulário
+  const createPre = async (data: DataSchema) => {
+    await createPreInstituto({
+      schoolLevel: data.schoolLevel,
+      schoolName: data.schoolName,
+      schoolProvincy: data.schoolProvincy,
+      student_id: studentId,
+    })
   }
 
   return (
@@ -61,7 +77,7 @@ export function Pre_Instituto() {
       <h2 className="text-lg font-semibold mb-4">Pré-escola</h2>
       <form onSubmit={handleSubmit(createPre)}>
         <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-          {/* Campos do formulário de Pré-escola */}
+          {/* Nível Acadêmico */}
           <div className="sm:col-span-1">
             <label
               htmlFor="schoolLevel"
@@ -88,7 +104,7 @@ export function Pre_Instituto() {
             )}
           </div>
 
-          {/* Outros campos */}
+          {/* Nome da Escola */}
           <div className="sm:col-span-3">
             <label
               htmlFor="schoolName"
@@ -110,6 +126,7 @@ export function Pre_Instituto() {
             )}
           </div>
 
+          {/* Província */}
           <div className="sm:col-span-2">
             <label
               htmlFor="schoolProvincy"
@@ -135,27 +152,28 @@ export function Pre_Instituto() {
               <option value="CABO_DELGADO">Cabo Delgado</option>
               <option value="NIASSA">Niassa</option>
             </select>
-            {errors.school && (
+            {errors.schoolProvincy && (
               <p className="text-red-500 text-sm">
-                {errors.school?.message?.toString()}
+                {errors.schoolProvincy?.message?.toString()}
               </p>
             )}
           </div>
 
+          {/* Botão de submissão */}
           <div className="mt-5">
             <button
               type="submit"
               className="w-full bg-yellow-600 text-white py-2 rounded-md hover:bg-indigo-500"
               disabled={Object.keys(errors).length > 0}
             >
-              guardar
+              Guardar
             </button>
           </div>
         </div>
-      </form>
 
-      {/* Exibe a parte do Encarregado de Educação se o nível acadêmico for "10 Classe" */}
-      {nivelAcademico === 'CLASSE_10' && renderEncarregadoEducacao()}
+        {/* Exibe a parte do Encarregado de Educação se o nível acadêmico for "10 Classe" */}
+        {nivelAcademico === 'CLASSE_10' && renderEncarregadoEducacao()}
+      </form>
     </div>
   )
 }

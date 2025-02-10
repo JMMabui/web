@@ -57,10 +57,6 @@ const schema = z.object({
   motherName: z.string().min(1, { message: 'Nome da mãe é obrigatório' }),
 })
 
-const login_id_schema = z.object({
-  login_id: z.string().optional(),
-})
-
 const getLoginIdFromStorage = () => {
   const loginId = localStorage.getItem('login_id')
   if (!loginId) {
@@ -89,7 +85,8 @@ export function Personal_data() {
     try {
       console.log('Formulário enviado', data)
 
-      await createStudentData({
+      // Enviar dados para a API
+      const studentResponse = await createStudentData({
         surname: data.surname,
         name: data.name,
         dataOfBirth: new Date(data.data_birth),
@@ -108,11 +105,17 @@ export function Personal_data() {
         login_id: loginId, // Certifique-se de que loginId esteja disponível no seu escopo
       })
 
-      console.log('Dados enviados com sucesso')
+      console.log('Dados enviados com sucesso', studentResponse)
+
+      // Agora você pode armazenar o ID no localStorage ou fazer qualquer outra ação necessária
+      localStorage.setItem('student_id', studentResponse.toString())
     } catch (error) {
       console.error('Erro ao enviar os dados:', error)
     }
   }
+
+  // const studentId = localStorage.getItem('student_id')
+  // console.log('Student id: ', studentId)
 
   return (
     <div className="mt-10 sm:mx-auto mx-auto sm:w-full sm:max-w-2xl text-left border-b border-gray-900/10 pb-12">

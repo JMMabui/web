@@ -40,8 +40,6 @@ export function Signup() {
 
   const renderDadosPessoais = () => (
     <div>
-      {/* <h2 className="text-lg font-semibold">Formulário de Dados Pessoais</h2> */}
-      {/* Adicione os campos de Dados Pessoais aqui */}
       <Personal_data />
     </div>
   )
