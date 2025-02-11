@@ -1,4 +1,3 @@
-import logo from './assents/dark-logo.png'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { LoginForm } from './Login/loginForm'
 import { Dashboard_Empty } from './dashboard/students/dashboard-empty'

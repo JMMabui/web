@@ -7,7 +7,7 @@ import { Pre_Instituto } from './pre_institutos'
 export function Signup() {
   const [activeForm, setActiveForm] = useState('dadosPessoais')
 
-  const [formData, setFormData] = useState({
+  const [formData] = useState({
     dadosPessoais: {},
     preescola: {},
     encarregadoEducacao: {},
@@ -31,12 +31,12 @@ export function Signup() {
     }
   }
 
-  const updateFormData = (formName: string, data: any) => {
-    setFormData(prevData => ({
-      ...prevData,
-      [formName]: data,
-    }))
-  }
+  // const updateFormData = (formName: string, data: any) => {
+  //   setFormData(prevData => ({
+  //     ...prevData,
+  //     [formName]: data,
+  //   }))
+  // }
 
   const renderDadosPessoais = () => (
     <div>
