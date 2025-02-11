@@ -1,20 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+// biome-ignore lint/style/useNodejsImportProtocol: <explanation>
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  build: {
-    outDir: 'dist',
-  },
-  server: {
-    fs: {
-      strict: false, // Permite acessar arquivos fora da raiz do projeto
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
     },
-  },
-  preview: {
-    port: 4173,
-    strictPort: true,
   },
 })
