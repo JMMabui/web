@@ -9,7 +9,6 @@ import {
   FileTextIcon,
   Wallet,
   UserCircle,
-  SearchIcon,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'

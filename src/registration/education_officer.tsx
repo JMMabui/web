@@ -43,7 +43,7 @@ export function Education_Officer() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors },
   } = useForm<dataSchema>({
     resolver: zodResolver(schema), // Conecta o Zod com o React Hook Form
     mode: 'onBlur', // Validação ao sair do campo
