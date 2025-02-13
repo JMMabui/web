@@ -3,6 +3,9 @@ import { LoginForm } from './Login/loginForm'
 import { Dashboard_Empty } from './dashboard/students/dashboard-empty'
 import { Signup } from './registration/signup'
 import { Dashboard_cta } from './dashboard/CTA/dashboard'
+import { Pre_Instituto } from './registration/pre_institutos'
+import { Inscricao } from './registration/course'
+import { Invoice } from './registration/invoice'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -14,13 +17,19 @@ export function App() {
 
       <Router>
         <Routes>
-          <Route path="/" element={<Dashboard_cta />} />
-          <Route path="/login" element={<LoginForm />} />
+          <Route path="/" element={<LoginForm />} />
           <Route path="/registration" element={<Signup />} />
+          <Route
+            path="/registration/pre-instituto"
+            element={<Pre_Instituto />}
+          />
+          <Route path="/registration/course" element={<Inscricao />} />
+          <Route path="/registration/resume" element={<Invoice />} />
           <Route
             path="/dashboard/dashboard-empty"
             element={<Dashboard_Empty />}
           />{' '}
+          <Route path="/dashboard_cta" element={<Dashboard_cta />} />
           {/* Página do dashboard */}
         </Routes>
       </Router>

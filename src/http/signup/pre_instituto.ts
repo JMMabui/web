@@ -43,3 +43,13 @@ export async function createPreInstituto({
 
   return data.student
 }
+
+export async function getPreInstituto() {
+  const response = await fetch('http://localhost:3333/pre-instituto')
+  if (!response.ok) {
+    throw new Error('Erro ao buscar os dados')
+  }
+  const data = await response.json()
+  console.log('Resposta da API:', data)
+  return data
+}

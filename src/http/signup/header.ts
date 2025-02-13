@@ -16,8 +16,8 @@ type dataSchema = {
   }[]
 }
 
-export async function getStudentData(): Promise<dataSchema> {
-  const response = await fetch('http://localhost:3333/students-course/20255966')
+export async function getStudentData(id: string | null): Promise<dataSchema> {
+  const response = await fetch(`http://localhost:3333/students-course/${id}`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }

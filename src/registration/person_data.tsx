@@ -3,6 +3,9 @@ import dayjs from 'dayjs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createStudentData } from '@/http/signup/personal_data'
+import { useState } from 'react'
+import { Pre_Instituto } from './pre_institutos'
+import { useNavigate } from 'react-router-dom'
 
 const schema = z.object({
   surname: z.string().min(1, { message: 'Apelido é obrigatório' }),
@@ -65,11 +68,21 @@ const getLoginIdFromStorage = () => {
   return loginId
 }
 
+function SuccessModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div>
+      <Pre_Instituto />
+    </div>
+  )
+}
+
 export function Personal_data() {
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const navigate = useNavigate()
+
   type dataSchema = z.infer<typeof schema>
 
   const loginId = getLoginIdFromStorage()
-  console.log('login_id: ', loginId)
 
   const {
     register,
@@ -105,18 +118,15 @@ export function Personal_data() {
         login_id: loginId, // Certifique-se de que loginId esteja disponível no seu escopo
       })
 
-      console.log('Dados enviados com sucesso', studentResponse)
+      // console.log('Dados enviados com sucesso', studentResponse)
 
       // Agora você pode armazenar o ID no localStorage ou fazer qualquer outra ação necessária
       localStorage.setItem('student_id', studentResponse.toString())
+      navigate('/registration/pre-instituto')
     } catch (error) {
       console.error('Erro ao enviar os dados:', error)
     }
   }
-
-  // const studentId = localStorage.getItem('student_id')
-  // console.log('Student id: ', studentId)
-
   return (
     <div className="mt-10 sm:mx-auto mx-auto sm:w-full sm:max-w-2xl text-left border-b border-gray-900/10 pb-12">
       <form onSubmit={handleSubmit(handlerCreateStudent)}>
@@ -516,13 +526,16 @@ export function Personal_data() {
         <div className="mt-5">
           <button
             type="submit"
-            className="w-full bg-yellow-600 text-white py-2 rounded-md hover:bg-indigo-500"
+            className="w-40 bg-yellow-600 text-white py-2 rounded-md hover:bg-indigo-500"
             disabled={Object.keys(errors).length > 0}
           >
             Enviar
           </button>
         </div>
       </form>
+
+      {/* 🔹 Modal de Sucesso */}
+      {isModalOpen && <SuccessModal onClose={() => setIsModalOpen(false)} />}
     </div>
   )
 }

@@ -7,29 +7,29 @@ import { Pre_Instituto } from './pre_institutos'
 export function Signup() {
   const [activeForm, setActiveForm] = useState('dadosPessoais')
 
-  const [formData] = useState({
-    dadosPessoais: {},
-    preescola: {},
-    encarregadoEducacao: {},
-    curso: {},
-  })
+  // const [formData] = useState({
+  //   dadosPessoais: {},
+  //   preescola: {},
+  //   encarregadoEducacao: {},
+  //   curso: {},
+  // })
 
   // Função para verificar se o Nível Acadêmico foi selecionado
 
   // Função para passar para o próximo formulário
-  const goToNextForm = () => {
-    if (activeForm === 'dadosPessoais') {
-      setActiveForm('preescola')
-    } else if (activeForm === 'preescola') {
-      setActiveForm('curso')
-    } else if (activeForm === 'curso') {
-      setActiveForm('factura')
-    } else if (activeForm === 'factura') {
-      // Quando o formulário "Factura" for alcançado, podemos disparar uma ação de inscrição
-      alert('Inscrição realizada com sucesso!')
-      // Você pode adicionar aqui o redirecionamento ou outras ações
-    }
-  }
+  // const goToNextForm = () => {
+  //   if (activeForm === 'dadosPessoais') {
+  //     setActiveForm('preescola')
+  //   } else if (activeForm === 'preescola') {
+  //     setActiveForm('curso')
+  //   } else if (activeForm === 'curso') {
+  //     setActiveForm('factura')
+  //   } else if (activeForm === 'factura') {
+  //     // Quando o formulário "Factura" for alcançado, podemos disparar uma ação de inscrição
+  //     alert('Inscrição realizada com sucesso!')
+  //     // Você pode adicionar aqui o redirecionamento ou outras ações
+  //   }
+  // }
 
   // const updateFormData = (formName: string, data: any) => {
   //   setFormData(prevData => ({
@@ -52,7 +52,7 @@ export function Signup() {
 
   const renderFactura = () => (
     <div>
-      <Invoice formData={formData} />
+      <Invoice />
     </div>
   )
 
@@ -62,21 +62,21 @@ export function Signup() {
     </div>
   )
 
-  const renderContinuarButton = () => {
-    const buttonText = activeForm === 'factura' ? 'Inscrever' : 'Continuar'
+  // const renderContinuarButton = () => {
+  //   const buttonText = activeForm === 'factura' ? 'Inscrever' : 'Continuar'
 
-    return (
-      <div className="mt-8 text-right w-full max-w-6xl">
-        <button
-          className="bg-orange-500 text-white rounded-md py-2 px-6"
-          type="button"
-          onClick={goToNextForm} // Muda para o próximo formulário ou realiza a inscrição
-        >
-          {buttonText}
-        </button>
-      </div>
-    )
-  }
+  //   return (
+  //     <div className="mt-8 text-right w-full max-w-6xl">
+  //       <button
+  //         className="bg-orange-500 text-white rounded-md py-2 px-6"
+  //         type="button"
+  //         onClick={goToNextForm} // Muda para o próximo formulário ou realiza a inscrição
+  //       >
+  //         {buttonText}
+  //       </button>
+  //     </div>
+  //   )
+  // }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -124,7 +124,7 @@ export function Signup() {
           renderFactura()}
 
         {/* Exibir o botão "Continuar" ou "Inscrever" no final */}
-        {renderContinuarButton()}
+        {/* {renderContinuarButton()} */}
       </div>
     </div>
   )

@@ -4,9 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import { getStudentData } from '@/http/signup/header'
 
 export const Header_Secondary = () => {
+  const id = localStorage.getItem('student_login_id')
+  console.log('Header', id)
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['header'],
-    queryFn: getStudentData,
+    queryFn: () => getStudentData(id),
   })
 
   if (isLoading)
@@ -46,7 +49,18 @@ export const Header_Secondary = () => {
         <UserCircle className="w-16 h-16 md:w-20 md:h-20" />
         <div className="text-center md:text-right">
           <p>
-            <strong>Nome: </strong> {student?.name}, {student?.surname}
+            <strong>Nome: </strong>{' '}
+            {student?.name
+              .toLowerCase()
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ')}
+            ,{' '}
+            {student?.surname
+              .toLowerCase()
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ')}
           </p>
           <p>
             <strong>Nº Estudante:</strong> {student?.id}
@@ -55,9 +69,23 @@ export const Header_Secondary = () => {
             <strong>Curso:</strong>{' '}
             {course ? (
               <>
-                {course?.levelCourse || 'Nível de curso não disponível'} <br />{' '}
-                {course?.courseName || 'Curso não disponível'} <br />{' '}
-                {course?.period || 'Período não disponível'}
+                {course?.levelCourse
+                  .toLowerCase()
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ') || 'Nível de curso não disponível'}{' '}
+                <br />{' '}
+                {course?.courseName
+                  .toLowerCase()
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ') || 'Curso não disponível'}{' '}
+                <br />{' '}
+                {course?.period
+                  .toLowerCase()
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ') || 'Período não disponível'}
               </>
             ) : (
               'Nenhum curso encontrado.'

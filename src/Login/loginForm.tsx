@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { signupRequest } from '@/http/signup/login-signup'
 import { loginRequest } from '@/http/signup/login'
+import logo from '../assents/ismmalogo.png'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -12,176 +13,126 @@ export function LoginForm() {
   const [isSignup, setIsSignup] = useState(false)
   const navigate = useNavigate()
 
-  // Usando o useMutation do react-query para gerenciar o login
+  // Mutations
   const mutation = useMutation({
     mutationFn: loginRequest,
     onError: (error: Error) => {
-      setMensagemErro(error.message)
+      setMensagemErro(error.message || 'Ocorreu um erro inesperado.')
     },
     onSuccess: data => {
-      // Armazenar o token no localStorage
+      console.log('dados da api', data)
+      const student_id = data.student_id.id
+      console.log('id do estudante logado', student_id)
       localStorage.setItem('token', data.token)
+      localStorage.setItem('student_login_id', student_id)
       setMensagemErro('')
-      navigate('/dashboard/dashboard-empty') // Redireciona para o dashboard
+      navigate('/dashboard/dashboard-empty')
     },
   })
 
   const signupMutation = useMutation({
     mutationFn: signupRequest,
     onError: (error: Error) => {
-      setMensagemErro(error.message)
+      setMensagemErro(error.message || 'Ocorreu um erro inesperado.')
     },
     onSuccess: data => {
       setMensagemErro('')
-      // console.log('Data: ', data)
-      const login_id = data.login.id // Isso pode variar dependendo da resposta do seu backend
-      // console.log(login_id)
+      const login_id = data.login.id
       localStorage.setItem('login_id', login_id)
-      navigate('/registration') // Redireciona para a página de sucesso após o signup
+      navigate('/registration')
     },
   })
 
-  // const id = localStorage.getItem('login_id')
-  // console.log('Login id: ', id)
-
-  // Função para alternar entre login e inscrição
-  const handleSwitchToSignup = () => {
-    setIsSignup(true)
-  }
-
-  const handleSwitchToLogin = () => {
-    setIsSignup(false)
-  }
-
-  // Função de login
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!email || !password) {
-      setMensagemErro('Por favor, preencha todos os campos!')
-      return
-    }
-
-    // Chama o mutation para login
-    mutation.mutate({ email, password })
-  }
-
-  // Função de inscrição
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Validação de campos
-    if (!email || !password || !contact) {
-      setMensagemErro('Por favor, preencha todos os campos!')
-      return
-    }
-
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setMensagemErro('Por favor, insira um email válido.')
-      return
-    }
-
-    if (password.length < 6) {
-      setMensagemErro('A senha precisa ter no mínimo 6 caracteres.')
-      return
-    }
-
-    // Chama o mutation para inscrição
-    signupMutation.mutate({ email, password, contact })
-  }
+  const handleSwitchToSignup = () => setIsSignup(true)
+  const handleSwitchToLogin = () => setIsSignup(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (isSignup) {
-      handleSignup(e) // Chama a função de signup
+      handleSignup(e)
     } else {
-      handleLogin(e) // Chama a função de login
+      handleLogin(e)
     }
+  }
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password) {
+      setMensagemErro('Por favor, preencha todos os campos!')
+      return
+    }
+    mutation.mutate({ email, password })
+  }
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !password || !contact) {
+      setMensagemErro('Por favor, preencha todos os campos!')
+      return
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setMensagemErro('Por favor, insira um email válido.')
+      return
+    }
+    if (password.length < 6) {
+      setMensagemErro('A senha precisa ter no mínimo 6 caracteres.')
+      return
+    }
+    signupMutation.mutate({ email, password, contact })
   }
 
   return (
     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+        <img
+          className="bg-zinc-600 mx-auto w-auto"
+          src={logo}
+          alt="mma school"
+        />
+        <h1 className="mt-5 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
+          MMA SCHOOL
+        </h1>
+        <h2 className=" text-center text-xl font-semibold tracking-tight text-gray-500">
+          Sistema de Gestao Academico
+        </h2>
+      </div>
       {isSignup ? (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Formulário de Inscrição */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Email
-            </label>
-            <div className="mt-2">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
-              />
-            </div>
-          </div>
+          <InputField
+            label="Email"
+            value={email}
+            setValue={setEmail}
+            type="email"
+          />
+          <InputField
+            label="Senha"
+            value={password}
+            setValue={setPassword}
+            type="password"
+          />
+          <InputField
+            label="Contato"
+            value={contact}
+            setValue={setContact}
+            type="text"
+          />
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Senha
-            </label>
-            <div className="mt-2">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
-              />
-            </div>
-          </div>
+          {mensagemErro && (
+            <div className="text-red-500 text-sm">{mensagemErro}</div>
+          )}
 
-          <div>
-            <label
-              htmlFor="contact"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Contato
-            </label>
-            <div className="mt-2">
-              <input
-                id="contact"
-                name="contact"
-                type="text"
-                required
-                value={contact}
-                onChange={e => setContact(e.target.value)}
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
-              />
-            </div>
-          </div>
+          <button type="submit" className="w-full bg-amber-600 text-white">
+            Inscrever-se
+          </button>
 
-          <div>
-            <button
-              type="submit"
-              className="flex w-full justify-center rounded-md bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-amber-500 focus-visible:outline-2 focus-visible:outline-blue-600"
-            >
-              Inscrever-se
-            </button>
-          </div>
-
-          <p className="mt-10 text-center text-sm text-gray-500">
+          <p className="text-center text-sm">
             Já tem uma conta?{' '}
             <button
               type="button"
               onClick={handleSwitchToLogin}
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
+              className="text-blue-600"
             >
               Iniciar Sessão
             </button>
@@ -190,74 +141,71 @@ export function LoginForm() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Formulário de Login */}
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Email
-            </label>
-            <div className="mt-2">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
-              />
-            </div>
-          </div>
+          <InputField
+            label="Email"
+            value={email}
+            setValue={setEmail}
+            type="email"
+          />
+          <InputField
+            label="Senha"
+            value={password}
+            setValue={setPassword}
+            type="password"
+          />
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-900"
-            >
-              Senha
-            </label>
-            <div className="mt-2">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:outline-blue-600 sm:text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Exibir mensagem de erro */}
           {mensagemErro && (
             <div className="text-red-500 text-sm">{mensagemErro}</div>
           )}
 
-          <div>
-            <button
-              type="submit"
-              className="flex w-full justify-center rounded-md bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white shadow-xs hover:bg-amber-500 focus-visible:outline-2 focus-visible:outline-blue-600"
-            >
-              Entrar
-            </button>
-          </div>
+          <button type="submit" className="w-full bg-amber-600 text-white">
+            Entrar
+          </button>
 
-          <p className="mt-10 text-center text-sm text-gray-500">
+          <p className="text-center text-sm">
             Ainda não tem uma conta?{' '}
             <button
               type="button"
               onClick={handleSwitchToSignup}
-              className="font-semibold text-indigo-600 hover:text-indigo-500"
+              className="text-blue-600"
             >
               Iniciar Inscrição
             </button>
           </p>
         </form>
       )}
+    </div>
+  )
+}
+
+function InputField({
+  label,
+  value,
+  setValue,
+  type,
+}: {
+  label: string
+  value: string
+  setValue: React.Dispatch<React.SetStateAction<string>>
+  type: string
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={label}
+        className="block text-sm font-medium text-gray-900"
+      >
+        {label}
+      </label>
+      <input
+        id={label}
+        name={label}
+        type={type}
+        required
+        value={value}
+        onChange={e => setValue(e.target.value)}
+        className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-gray-300 placeholder:text-gray-400"
+      />
     </div>
   )
 }

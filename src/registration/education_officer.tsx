@@ -49,7 +49,7 @@ export function Education_Officer() {
     mode: 'onBlur', // Validação ao sair do campo
   })
 
-  const onSubmit = (data: dataSchema) => {
+  const onSubmitEducationOfficer = (data: dataSchema) => {
     console.log(data)
   }
 
@@ -59,7 +59,7 @@ export function Education_Officer() {
         Encarregado de Educação
       </h2>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmitEducationOfficer)}
         className="mt-5 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6"
       >
         {/* Campos para Encarregado de Educação */}
@@ -82,7 +82,7 @@ export function Education_Officer() {
           )}
         </div>
 
-        <div className="sm:col-span-3">
+        <div className="sm:col-span-2">
           <label
             htmlFor="profession"
             className="block text-sm font-medium text-gray-900"
@@ -101,7 +101,7 @@ export function Education_Officer() {
           )}
         </div>
 
-        <div className="sm:col-span-2">
+        <div className="sm:col-span-1">
           <label
             htmlFor="dataOfBirth"
             className="block text-sm font-medium text-gray-900"
@@ -204,7 +204,7 @@ export function Education_Officer() {
           )}
         </div>
 
-        <div className="sm:col-span-6">
+        {/* <div className="sm:col-span-6">
           <button
             type="button"
             className="w-40 bg-yellow-600 text-white py-2 rounded-md hover:bg-indigo-500"
@@ -212,7 +212,7 @@ export function Education_Officer() {
           >
             Guardar
           </button>
-        </div>
+        </div> */}
       </form>
     </div>
   )

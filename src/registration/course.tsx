@@ -1,6 +1,9 @@
 import { getCourses } from '@/http/courses'
+import { getRegistration, postRegistration } from '@/http/registration'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import { Invoice } from './invoice'
+import { useNavigate } from 'react-router-dom'
 
 type Course = {
   id: string
@@ -24,19 +27,40 @@ type CourseResponse = {
   course: Course[]
 }
 
+type Registration = {
+  course_id: string
+  student_id: string
+}
+
+type registrationResponse = {
+  registration: Registration[]
+}
+
+function SuccessModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div>
+      <Invoice />
+    </div>
+  )
+}
+
 export function Inscricao() {
-  const [selectedCourse, setSelectedCourse] = useState<string>('')
   const [selectedLevel, setSelectedLevel] = useState<string>('')
   const [selectedPeriod, setSelectedPeriod] = useState<string>('')
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [courses, setCourses] = useState<Course[]>([])
-  const [courseAvailability, setCourseAvailability] = useState<number | null>(
-    null
-  )
   const [coursesByLevel, setCoursesByLevel] = useState<
     Record<string, Course[]>
   >({})
+  const [message, setMessage] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
-  // 🛠 Busca os cursos da API
+  const navigate = useNavigate()
+
+  const studentId = localStorage.getItem('student_id')
+  console.log('Student id: ', studentId)
+
+  // 🔄 Busca os cursos da API
   const {
     data: dataCourses,
     error: coursesError,
@@ -46,13 +70,18 @@ export function Inscricao() {
     queryFn: getCourses,
   })
 
-  console.log('Cursos retornados da API:', dataCourses)
+  const {
+    data: dataRegistration,
+    error: RegistrationError,
+    isLoading: isLoadingRegistration,
+  } = useQuery<registrationResponse>({
+    queryKey: ['Registration_data'],
+    queryFn: getRegistration,
+  })
 
-  // 🔄 Atualiza os cursos por nível acadêmico assim que os dados são carregados
+  // 🔄 Agrupar cursos por nível acadêmico
   useEffect(() => {
     if (dataCourses?.course) {
-      console.log('Cursos brutos antes de agrupar:', dataCourses.course)
-
       const groupedCourses: Record<string, Course[]> = {}
 
       dataCourses.course.forEach(course => {
@@ -62,85 +91,121 @@ export function Inscricao() {
         groupedCourses[course.levelCourse].push(course)
       })
 
-      console.log('Cursos agrupados por nível:', groupedCourses)
-
       setCoursesByLevel(groupedCourses)
     }
   }, [dataCourses])
 
-  if (isLoadingCourse) return <div>carregando cursos...</div>
+  if (isLoadingCourse) return <div>Carregando cursos...</div>
   if (coursesError instanceof Error)
-    return <div>erro: {coursesError.message}</div>
+    return <div>Erro: {coursesError.message}</div>
 
   if (!dataCourses || !dataCourses.course || dataCourses.course.length === 0) {
-    return <div>não há cursos disponíveis no momento.</div>
+    return <div>Não há cursos disponíveis no momento.</div>
   }
 
+  if (isLoadingRegistration) return <div>Carregando cursos...</div>
+  if (RegistrationError instanceof Error)
+    return <div>Erro: {RegistrationError.message}</div>
+
+  // 🔄 Atualiza cursos ao mudar o nível
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const level = e.target.value
     setSelectedLevel(level)
-
-    console.log('Nível selecionado:', level) // 🛠 Verifica se o nível foi atualizado corretamente
-
-    if (coursesByLevel[level]) {
-      console.log('Cursos disponíveis para o nível:', coursesByLevel[level]) // 🛠 Verifica se os cursos desse nível existem
-      setCourses(coursesByLevel[level])
-    } else {
-      setCourses([])
-    }
-
-    setSelectedCourse('')
     setSelectedPeriod('')
-    setCourseAvailability(null)
+    setSelectedCourse(null)
+
+    setCourses(coursesByLevel[level] || [])
   }
 
+  // 🔄 Filtra cursos por período
   const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const period = e.target.value.toUpperCase() // 🔥 Converte para maiúsculas
+    const period = e.target.value.toUpperCase()
     setSelectedPeriod(period)
-
-    console.log('Período selecionado:', period)
+    setSelectedCourse(null)
 
     if (selectedLevel && coursesByLevel[selectedLevel]) {
-      const filteredCourses = coursesByLevel[selectedLevel].filter(
-        course => course.period === period
+      setCourses(
+        coursesByLevel[selectedLevel].filter(course => course.period === period)
       )
-
-      console.log('Cursos filtrados pelo período:', filteredCourses)
-      setCourses(filteredCourses)
     }
   }
 
-  // 🔄 Atualiza a disponibilidade do curso ao selecionar um curso
+  // 🔄 Atualiza curso selecionado
   const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const courseName = e.target.value
-    setSelectedCourse(courseName)
+    const course =
+      courses.find(course => course.courseName === courseName) || null
+    setSelectedCourse(course)
+  }
 
-    // 🛠 Corrigido: usando `courseName` em vez de `name`
-    const course = courses.find(course => course.courseName === courseName)
-    setCourseAvailability(course ? course.availableVacancies : null)
+  const handleInscription = async () => {
+    if (!selectedCourse || !studentId) {
+      setMessage('Erro: Selecione um curso e certifique-se de estar logado.')
+      return
+    }
+
+    // Verificar se o estudante já está inscrito em algum curso
+    if (dataRegistration?.registration) {
+      const existingRegistration = dataRegistration.registration.find(
+        reg => reg.student_id === studentId
+      )
+
+      if (existingRegistration) {
+        // Encontrar o nome do curso ao qual o estudante já está inscrito
+        const registeredCourse = dataCourses?.course.find(
+          course => course.id === existingRegistration.course_id
+        )
+
+        setMessage(
+          `Erro: Você já está registrado no curso "${registeredCourse?.levelCourse
+            .replace(/_/g, ' ') // Substitui _ por espaço
+            .toLowerCase() // Converte para minúsculas
+            .replace(/\b\w/g, char =>
+              char.toUpperCase()
+            )} em ${registeredCourse?.courseName} - ${registeredCourse?.period.toLowerCase() === 'laboral' ? 'Laboral' : 'Pós-laboral'}".`
+        )
+        return
+      }
+    }
+
+    try {
+      const response = await postRegistration({
+        course_id: selectedCourse.id,
+        student_id: studentId,
+      })
+
+      setMessage('Inscrição realizada com sucesso!')
+      console.log('Resposta da API:', response)
+      // setIsModalOpen(true)
+      navigate('/registration/resume')
+    } catch (error) {
+      setMessage('Erro ao realizar a inscrição.')
+      console.error(error)
+    }
   }
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h2 className="text-xl font-semibold">inscrição</h2>
+      <h2 className="text-xl font-semibold">Inscrição</h2>
       <p className="text-gray-600">
-        atenção, só poderá se inscrever apenas a cursos que são compatíveis com
-        o seu nível pré-escolar.
+        Atenção, só poderá se inscrever apenas a cursos compatíveis com seu
+        nível pré-escolar.
       </p>
 
       <div className="grid grid-cols-2 gap-4 mt-4">
         {/* Seleção de Nível Acadêmico */}
         <div>
-          <label className="block font-semibold">nível acadêmico</label>
+          <label className="block font-semibold">Nível Acadêmico</label>
           <select
             className="border p-2 rounded-md w-full mt-1"
             onChange={handleLevelChange}
             value={selectedLevel}
           >
-            <option value="">--escolha--</option>
+            <option value="">-- Escolha --</option>
             {Object.keys(coursesByLevel).map(level => (
               <option key={level} value={level}>
-                {level.replace('_', ' ')}
+                {level.replace('_', ' ').charAt(0).toUpperCase() +
+                  level.replace('_', ' ').slice(1).toLowerCase()}
               </option>
             ))}
           </select>
@@ -148,37 +213,41 @@ export function Inscricao() {
 
         {/* Seleção de Período */}
         <div>
-          <label className="block font-semibold">período</label>
+          <label className="block font-semibold">Período</label>
           <select
             className="border p-2 rounded-md w-full mt-1"
             onChange={handlePeriodChange}
             value={selectedPeriod}
             disabled={!selectedLevel}
           >
-            <option value="">--selecione o período--</option>
-            <option value="laboral">laboral</option>
-            <option value="pos_laboral">pós-laboral</option>
+            <option value="">-- Selecione o período --</option>
+            <option value="LABORAL">Laboral</option>
+            <option value="POS_LABORAL">Pós-laboral</option>
           </select>
         </div>
 
-        {/* Seleção de Cursos */}
+        {/* Seleção de Curso */}
         <div className="col-span-2">
           <label className="block font-semibold">
-            cursos{' '}
+            Cursos{' '}
             <span className="text-gray-500">
-              (selecione um dos cursos com base na disponibilidade)
+              (selecione um curso baseado na disponibilidade)
             </span>
           </label>
           <select
             className="border p-2 rounded-md w-full mt-1"
             onChange={handleCourseChange}
-            value={selectedCourse}
+            value={selectedCourse?.courseName || ''}
             disabled={!selectedLevel || !selectedPeriod}
           >
-            <option value="">--selecione o curso--</option>
+            <option value="">-- Selecione o curso --</option>
             {courses.map(course => (
               <option key={course.id} value={course.courseName}>
-                {course.courseName}
+                {course.courseName
+                  .toLowerCase()
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ')}
               </option>
             ))}
           </select>
@@ -186,24 +255,48 @@ export function Inscricao() {
       </div>
 
       {/* Exibição do Curso Selecionado */}
-      <h3 className="mt-6 font-semibold">selecionou</h3>
+      <h3 className="mt-6 font-semibold">Curso Selecionado</h3>
       <div className="bg-gray-200 p-4 mt-2 rounded-md">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b">
-              <th className="p-2">nome do curso</th>
-              <th className="p-2">vagas disponíveis</th>
+              {/* <th className="p-2">ID</th> */}
+              <th className="p-2">Nível Acadêmico</th>
+              <th className="p-2">Nome do Curso</th>
+              <th className="p-2">Período</th>
+              <th className="p-2">Vagas Disponíveis</th>
             </tr>
           </thead>
           <tbody>
-            {selectedCourse && courseAvailability !== null ? (
+            {selectedCourse ? (
               <tr>
-                <td className="p-2">{selectedCourse}</td>
-                <td className="p-2">{courseAvailability} vagas</td>
+                {/* <td className="p-2">{selectedCourse.id}</td> */}
+                <td className="p-2">
+                  {selectedCourse.levelCourse
+                    ? selectedCourse.levelCourse.charAt(0).toUpperCase() +
+                      selectedCourse.levelCourse.slice(1).toLowerCase()
+                    : ''}
+                </td>
+                <td className="p-2">
+                  {selectedCourse.courseName
+                    .toLowerCase()
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')}
+                </td>
+                <td className="p-2">
+                  {selectedCourse.period
+                    ? selectedCourse.period.charAt(0).toUpperCase() +
+                      selectedCourse.period.slice(1).toLowerCase()
+                    : ''}
+                </td>
+                <td className="p-2">
+                  {selectedCourse.availableVacancies} vagas
+                </td>
               </tr>
             ) : (
               <tr>
-                <td className="p-2 text-gray-500" colSpan={2}>
+                <td className="p-2 text-gray-500" colSpan={5}>
                   Nenhum curso selecionado
                 </td>
               </tr>
@@ -211,6 +304,19 @@ export function Inscricao() {
           </tbody>
         </table>
       </div>
+
+      {message && <p className="mt-4 text-center font-semibold">{message}</p>}
+
+      <button
+        type="button"
+        onClick={handleInscription}
+        className="bg-blue-500 text-white p-2 rounded-md mt-4"
+      >
+        Inscrever-se
+      </button>
+
+      {/* 🔹 Modal de Sucesso */}
+      {isModalOpen && <SuccessModal onClose={() => setIsModalOpen(false)} />}
     </div>
   )
 }
