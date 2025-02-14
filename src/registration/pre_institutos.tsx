@@ -4,11 +4,8 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   createPreInstituto,
-  getPreInstituto,
 } from '@/http/signup/pre_instituto'
 import { Education_Officer } from './education_officer'
-import { Inscricao } from './course'
-import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 
 // Validação com Zod
@@ -39,29 +36,29 @@ const schema = z.object({
   ),
 })
 
-type PreInstituto = {
-  student_id: string
-  id: string
-  createdAt: Date
-  updatedAt: Date
-  schoolLevel: 'CLASSE_10' | 'CLASSE_12' | 'LICENCIATURA'
-  schoolName: string
-  schoolProvincy:
-    | 'MAPUTO_CIDADE'
-    | 'MAPUTO_PROVINCIA'
-    | 'GAZA'
-    | 'INHAMBANE'
-    | 'MANICA'
-    | 'SOFALA'
-    | 'TETE'
-    | 'ZAMBEZIA'
-    | 'NAMPULA'
-    | 'CABO_DELGADO'
-    | 'NIASSA'
-}
-type PreInstitutoResponse = {
-  preInstituto: PreInstituto[]
-}
+// type PreInstituto = {
+//   student_id: string
+//   id: string
+//   createdAt: Date
+//   updatedAt: Date
+//   schoolLevel: 'CLASSE_10' | 'CLASSE_12' | 'LICENCIATURA'
+//   schoolName: string
+//   schoolProvincy:
+//     | 'MAPUTO_CIDADE'
+//     | 'MAPUTO_PROVINCIA'
+//     | 'GAZA'
+//     | 'INHAMBANE'
+//     | 'MANICA'
+//     | 'SOFALA'
+//     | 'TETE'
+//     | 'ZAMBEZIA'
+//     | 'NAMPULA'
+//     | 'CABO_DELGADO'
+//     | 'NIASSA'
+// }
+// type PreInstitutoResponse = {
+//   preInstituto: PreInstituto[]
+// }
 
 type DataSchema = z.infer<typeof schema>
 
@@ -74,19 +71,11 @@ const getStudentIdFromStorage = () => {
   return studentId
 }
 
-function SuccessModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div>
-      <Inscricao />
-    </div>
-  )
-}
 
 export function Pre_Instituto() {
   const [nivelAcademico, setNivelAcademico] = useState('')
   const [provincia, setProvincia] = useState('')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isStudentRegistered, setIsStudentRegistered] = useState(false)
+  const [isStudentRegistered] = useState(false)
 
   const navigate = useNavigate()
 
@@ -100,10 +89,6 @@ export function Pre_Instituto() {
     resolver: zodResolver(schema), // Conecta o Zod com o React Hook Form
   })
 
-  const { data: dataPreInstituto } = useQuery<PreInstitutoResponse>({
-    queryKey: ['preInstituto_data'],
-    queryFn: getPreInstituto,
-  })
 
   // Função para renderizar os campos de formulário
   const renderSelectField = (
@@ -244,8 +229,6 @@ export function Pre_Instituto() {
           </div>
         </div>
       </form>
-
-      {isModalOpen && <SuccessModal onClose={() => setIsModalOpen(false)} />}
     </div>
   )
 }

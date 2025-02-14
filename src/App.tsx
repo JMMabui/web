@@ -6,6 +6,7 @@ import { Dashboard_cta } from './dashboard/CTA/dashboard'
 import { Pre_Instituto } from './registration/pre_institutos'
 import { Inscricao } from './registration/course'
 import { Invoice } from './registration/invoice'
+import { Academic_Record } from './dashboard/CTA/academic_record/dashboard_academic_record'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -30,6 +31,7 @@ export function App() {
             element={<Dashboard_Empty />}
           />{' '}
           <Route path="/dashboard_cta" element={<Dashboard_cta />} />
+          <Route path='/academic_record' element={<Academic_Record/>} />
           {/* Página do dashboard */}
         </Routes>
       </Router>

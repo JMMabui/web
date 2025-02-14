@@ -2,7 +2,6 @@ import { getCourses } from '@/http/courses'
 import { getRegistration, postRegistration } from '@/http/registration'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
-import { Invoice } from './invoice'
 import { useNavigate } from 'react-router-dom'
 
 type Course = {
@@ -36,14 +35,6 @@ type registrationResponse = {
   registration: Registration[]
 }
 
-function SuccessModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div>
-      <Invoice />
-    </div>
-  )
-}
-
 export function Inscricao() {
   const [selectedLevel, setSelectedLevel] = useState<string>('')
   const [selectedPeriod, setSelectedPeriod] = useState<string>('')
@@ -53,7 +44,7 @@ export function Inscricao() {
     Record<string, Course[]>
   >({})
   const [message, setMessage] = useState<string | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+
 
   const navigate = useNavigate()
 
@@ -315,8 +306,6 @@ export function Inscricao() {
         Inscrever-se
       </button>
 
-      {/* 🔹 Modal de Sucesso */}
-      {isModalOpen && <SuccessModal onClose={() => setIsModalOpen(false)} />}
     </div>
   )
 }

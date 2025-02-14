@@ -3,8 +3,6 @@ import dayjs from 'dayjs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createStudentData } from '@/http/signup/personal_data'
-import { useState } from 'react'
-import { Pre_Instituto } from './pre_institutos'
 import { useNavigate } from 'react-router-dom'
 
 const schema = z.object({
@@ -68,16 +66,7 @@ const getLoginIdFromStorage = () => {
   return loginId
 }
 
-function SuccessModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div>
-      <Pre_Instituto />
-    </div>
-  )
-}
-
 export function Personal_data() {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const navigate = useNavigate()
 
   type dataSchema = z.infer<typeof schema>
@@ -534,8 +523,6 @@ export function Personal_data() {
         </div>
       </form>
 
-      {/* 🔹 Modal de Sucesso */}
-      {isModalOpen && <SuccessModal onClose={() => setIsModalOpen(false)} />}
     </div>
   )
 }

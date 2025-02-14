@@ -10,6 +10,8 @@ import { useQuery } from '@tanstack/react-query'
 import { getRegistration } from '@/http/registration'
 import { getCourses } from '@/http/courses'
 import { getStudents } from '@/http/students'
+import { useNavigate } from 'react-router-dom'
+
 
 type Course = {
   id: string
@@ -101,6 +103,7 @@ type registrationResponse = {
 }
 
 export function Academic_Record() {
+
   const [selectedCourse, setSelectedCourse] = useState('')
   const [selectedLevelCourse, setSelectedLevelCourse] = useState<
     | 'CURTA_DURACAO'
@@ -113,6 +116,9 @@ export function Academic_Record() {
   const [selectedPeriod, setSelectedPeriod] = useState<
     'LABORAL' | 'POS_LABORAL' | ''
   >('')
+
+  const navegate = useNavigate()
+  navegate('/academic_record')
 
   const {
     data: dataCourses,
