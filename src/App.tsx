@@ -6,7 +6,18 @@ import { Dashboard_cta } from './dashboard/CTA/dashboard'
 import { Pre_Instituto } from './registration/pre_institutos'
 import { Inscricao } from './registration/course'
 import { Invoice } from './registration/invoice'
-import { Academic_Record } from './dashboard/CTA/academic_record/dashboard_academic_record'
+import { DashboardLayout2 } from './dashboard/CTA/academic_record/dashboard'
+import { StudentProfile } from './dashboard/CTA/academic_record/student_profile'
+import { Dashboard_Human_Resourses } from './dashboard/CTA/human resources/dashboard_human_resourses'
+import { AddEmployee } from './dashboard/CTA/human resources/add_employee'
+import { EmployeeList } from './dashboard/CTA/human resources/list_employee'
+import { DashboardLayout } from './dashboard/CTA/human resources/dashboardLayout'
+import { AcademicRecord } from './dashboard/CTA/academic_record/dashboard_academic_record'
+import { CoursesDashboard } from './dashboard/CTA/academic_record/course_AR'
+import { Enrollment_Academic_Record } from './dashboard/CTA/academic_record/registration_academic_record'
+import { StudentsFiticios } from './dashboard/CTA/academic_record/student_ar'
+import { TeachersFiticios } from './dashboard/CTA/academic_record/teacherFiticios'
+import { Reports } from './dashboard/CTA/human resources/reports'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -31,24 +42,30 @@ export function App() {
             element={<Dashboard_Empty />}
           />{' '}
           <Route path="/dashboard_cta" element={<Dashboard_cta />} />
-          <Route path='/academic_record' element={<Academic_Record/>} />
+
+          {/* Pagina do dashboard para o departamento de registro academico */}
+          <Route path="/academic_record" element={<DashboardLayout2 />}>
+            <Route index element={<AcademicRecord />} />
+            <Route path="dashboard" element={<AcademicRecord />} />
+            <Route path="courses" element={<CoursesDashboard />} />
+            <Route path="students" element={<StudentsFiticios />} />
+            <Route path="enrollment" element={<Enrollment_Academic_Record />} />
+            <Route path="teachers" element={<TeachersFiticios />} />
+            <Route path="documents" element={<div>Emissão de Documentos Content</div>} />
+          </Route>
+          
+          <Route path="/student_profile/:id" element={<StudentProfile />} />
+          {/* Página do dashboard para o departamento de recursos humanos */}
+          <Route path="/human_resources" element={<DashboardLayout />}>
+            <Route index element={<Dashboard_Human_Resourses />} />
+            <Route path='dashboard' element={<Dashboard_Human_Resourses />} />
+            <Route path="employee" element={<EmployeeList />} />
+            <Route path="reports" element={<Reports  />} />
+            <Route path="add_employee" element={<AddEmployee />} />
+          </Route>
           {/* Página do dashboard */}
         </Routes>
       </Router>
     </div>
   )
 }
-
-// function header_primary() {
-//   return (
-//     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-//       <img className="mx-auto h-10 w-auto" src={logo} alt="mma school" />
-//       <h1 className="mt-5 text-center text-2xl/9 font-bold tracking-tight text-gray-900">
-//         MMA SCHOOL
-//       </h1>
-//       <h2 className=" text-center text-xl font-semibold tracking-tight text-gray-500">
-//         Sistema de Gestao Academico
-//       </h2>
-//     </div>
-//   )
-// }

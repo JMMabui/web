@@ -26,3 +26,4 @@ export async function getStudentData(id: string | null): Promise<dataSchema> {
 
   return data.student
 }
+

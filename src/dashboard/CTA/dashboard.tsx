@@ -13,9 +13,9 @@ import {
   ChevronUp,
 } from 'lucide-react'
 import logo from '../../assents/ismmalogo.png'
-import { Academic_Record } from './academic_record/dashboard_academic_record'
+import { AcademicRecord } from './academic_record/dashboard_academic_record'
 import { Finance } from './finance/dashboard_finance'
-import { Human_Resourses } from './human resources/dashboard_human_resourses'
+import { Dashboard_Human_Resourses} from './human resources/dashboard_human_resourses'
 import { Library_Departament } from './Library/dashboard_library'
 import { Enrollment_Academic_Record } from './academic_record/registration_academic_record'
 
@@ -62,11 +62,11 @@ export function Dashboard_cta() {
       case 'Financas':
         return <Finance />
       case 'Registro Academico':
-        return <Academic_Record />
+        return <AcademicRecord />
       case 'Turmas':
         return <div>Turmas Content</div>
       case 'Recursos Humanos':
-        return <Human_Resourses />
+        return <Dashboard_Human_Resourses />
       case 'Biblioteca':
         return <Library_Departament />
       case 'Relatórios':

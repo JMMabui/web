@@ -8,7 +8,7 @@ export async function getRegistration() {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
-  console.log('Resposta da API:', data)
+ // console.log('Resposta da API:', data)
   return data
 }
 
@@ -32,4 +32,14 @@ export async function postRegistration({ course_id, student_id }: dataSchema) {
   // console.log('ID do estudante:', studentId) // Aqui você tem o id
 
   return jsonResponse
+}
+
+export async function getRegistrationByid(id: string) {
+  const response = await fetch(`http://localhost:3333/registration/${id}`)
+  if (!response.ok) {
+    throw new Error('Erro ao buscar os dados')
+  }
+  const data = await response.json()
+  console.log('Resposta da API:', data)
+  return data
 }
