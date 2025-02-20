@@ -6,7 +6,7 @@ import { Dashboard_cta } from './dashboard/CTA/dashboard'
 import { Pre_Instituto } from './registration/pre_institutos'
 import { Inscricao } from './registration/course'
 import { Invoice } from './registration/invoice'
-import { DashboardLayout2 } from './dashboard/CTA/academic_record/dashboard'
+import { DashboardLayout2 } from './dashboard/CTA/academic_record/dashboardLayout'
 import { StudentProfile } from './dashboard/CTA/academic_record/student_profile'
 import { Dashboard_Human_Resourses } from './dashboard/CTA/human resources/dashboard_human_resourses'
 import { AddEmployee } from './dashboard/CTA/human resources/add_employee'
@@ -18,6 +18,8 @@ import { Enrollment_Academic_Record } from './dashboard/CTA/academic_record/regi
 import { StudentsFiticios } from './dashboard/CTA/academic_record/student_ar'
 import { TeachersFiticios } from './dashboard/CTA/academic_record/teacherFiticios'
 import { Reports } from './dashboard/CTA/human resources/reports'
+import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
+import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -48,7 +50,14 @@ export function App() {
             <Route index element={<AcademicRecord />} />
             <Route path="dashboard" element={<AcademicRecord />} />
             <Route path="courses" element={<CoursesDashboard />} />
-            <Route path="students" element={<StudentsFiticios />} />
+            <Route path="students" element={<StudentsFiticios />}>
+              <Route path=":id" element={<StudentProfile />} />
+              {/* <Route path="/academic_record/student_ar/add_student" element={<AddStudents />} /> */}
+
+            </Route>
+            <Route path="/academic_record/student_ar/add_student" element={<AddStudents />} /> 
+            <Route path='/academic_record/student_ar/add_student/addcourse/:id' element={<AddPreInstituto_addCourse />} />
+           
             <Route path="enrollment" element={<Enrollment_Academic_Record />} />
             <Route path="teachers" element={<TeachersFiticios />} />
             <Route path="documents" element={<div>Emissão de Documentos Content</div>} />

@@ -13,7 +13,7 @@ export async function getRegistration() {
 }
 
 export async function postRegistration({ course_id, student_id }: dataSchema) {
-  const response = await fetch('http://localhost:3333/registration', {
+  const response = await fetch('http://localhost:3333/registration-status-confirmation', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -42,4 +42,22 @@ export async function getRegistrationByid(id: string) {
   const data = await response.json()
   console.log('Resposta da API:', data)
   return data
+}
+
+export async function validateRegistration(student_id : string) {
+  const response = await fetch(`http://localhost:3333/registration-status/${student_id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      registrationStatus: 'CONFIRMADO', // Enviar o status "CONFIRMADO"
+    }),
+  })
+  if (!response.ok) {
+    throw new Error('Erro ao enviar dados')
+  }
+  const jsonResponse = await response.json()
+  console.log('Resposta da API:', jsonResponse) // Verifique o que está sendo retornado
+  return jsonResponse
 }
