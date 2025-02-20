@@ -31,7 +31,7 @@ export function App() {
 
       <Router>
         <Routes>
-          <Route path="/" element={<LoginForm />} />
+          <Route path="/" element={<DashboardLayout2 />} />
           <Route path="/registration" element={<Signup />} />
           <Route
             path="/registration/pre-instituto"
