@@ -22,6 +22,8 @@ type dataSchema = {
   updatedAt: Date
 }
 
+const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
+
 export async function createEducationOfficer({
   address,
   contact,
@@ -32,7 +34,7 @@ export async function createEducationOfficer({
   provincyAddress,
 }: dataSchema) {
   try {
-    const response = await fetch('https://localhost:3333/education_officer', {
+    const response = await fetch(`${base_URL}/education_officer`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

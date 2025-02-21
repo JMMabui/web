@@ -2,18 +2,21 @@ type dataSchema = {
   course_id: string
   student_id: string
 }
+
+const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
+
 export async function getRegistration() {
-  const response = await fetch('http://localhost:3333/registration')
+  const response = await fetch(`${base_URL}/registration`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
- // console.log('Resposta da API:', data)
+  // console.log('Resposta da API:', data)
   return data
 }
 
 export async function postRegistration({ course_id, student_id }: dataSchema) {
-  const response = await fetch('http://localhost:3333/registration-status-confirmation', {
+  const response = await fetch(`${base_URL}/registration-status-confirmation`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -35,7 +38,7 @@ export async function postRegistration({ course_id, student_id }: dataSchema) {
 }
 
 export async function getRegistrationByid(id: string) {
-  const response = await fetch(`http://localhost:3333/registration/${id}`)
+  const response = await fetch(`${base_URL}/registration/${id}`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }
@@ -44,16 +47,19 @@ export async function getRegistrationByid(id: string) {
   return data
 }
 
-export async function validateRegistration(student_id : string) {
-  const response = await fetch(`http://localhost:3333/registration-status/${student_id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      registrationStatus: 'CONFIRMADO', // Enviar o status "CONFIRMADO"
-    }),
-  })
+export async function validateRegistration(student_id: string) {
+  const response = await fetch(
+    `${base_URL}/registration-status/${student_id}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        registrationStatus: 'CONFIRMADO', // Enviar o status "CONFIRMADO"
+      }),
+    }
+  )
   if (!response.ok) {
     throw new Error('Erro ao enviar dados')
   }

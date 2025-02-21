@@ -25,6 +25,7 @@ import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPr
 // Definição do tipo para o curso
 
 export function App() {
+  console.log(import.meta.env.VITE_API_URL)
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       {/* {header_primary()} */}
@@ -44,7 +45,6 @@ export function App() {
             element={<Dashboard_Empty />}
           />{' '}
           <Route path="/dashboard_cta" element={<Dashboard_cta />} />
-
           {/* Pagina do dashboard para o departamento de registro academico */}
           <Route path="/academic_record" element={<DashboardLayout2 />}>
             <Route index element={<AcademicRecord />} />
@@ -53,23 +53,30 @@ export function App() {
             <Route path="students" element={<StudentsFiticios />}>
               <Route path=":id" element={<StudentProfile />} />
               {/* <Route path="/academic_record/student_ar/add_student" element={<AddStudents />} /> */}
-
             </Route>
-            <Route path="/academic_record/student_ar/add_student" element={<AddStudents />} /> 
-            <Route path='/academic_record/student_ar/add_student/addcourse/:id' element={<AddPreInstituto_addCourse />} />
-           
+            <Route
+              path="/academic_record/student_ar/add_student"
+              element={<AddStudents />}
+            />
+            <Route
+              path="/academic_record/student_ar/add_student/addcourse/:id"
+              element={<AddPreInstituto_addCourse />}
+            />
+
             <Route path="enrollment" element={<Enrollment_Academic_Record />} />
             <Route path="teachers" element={<TeachersFiticios />} />
-            <Route path="documents" element={<div>Emissão de Documentos Content</div>} />
+            <Route
+              path="documents"
+              element={<div>Emissão de Documentos Content</div>}
+            />
           </Route>
-          
           <Route path="/student_profile/:id" element={<StudentProfile />} />
           {/* Página do dashboard para o departamento de recursos humanos */}
           <Route path="/human_resources" element={<DashboardLayout />}>
             <Route index element={<Dashboard_Human_Resourses />} />
-            <Route path='dashboard' element={<Dashboard_Human_Resourses />} />
+            <Route path="dashboard" element={<Dashboard_Human_Resourses />} />
             <Route path="employee" element={<EmployeeList />} />
-            <Route path="reports" element={<Reports  />} />
+            <Route path="reports" element={<Reports />} />
             <Route path="add_employee" element={<AddEmployee />} />
           </Route>
           {/* Página do dashboard */}

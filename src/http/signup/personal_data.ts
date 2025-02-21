@@ -1,4 +1,3 @@
-
 type dataSchema = {
   surname: string
   name: string
@@ -26,7 +25,7 @@ type dataSchema = {
   documentIssuedAt: Date
   documentExpiredAt: Date
   nuit: number
-  login_id: string,
+  login_id: string
 }
 
 type dataSchemaWithLogin = {
@@ -56,10 +55,11 @@ type dataSchemaWithLogin = {
   documentIssuedAt: Date
   documentExpiredAt: Date
   nuit: number
-  email: string,
-  contact: string,
+  email: string
+  contact: string
 }
 
+const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 export async function createStudentData({
   address,
@@ -79,7 +79,7 @@ export async function createStudentData({
   provincyAddress,
   surname,
 }: dataSchema) {
-  const response = await fetch('http://localhost:3333/students', {
+  const response = await fetch(`${base_URL}/students`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -114,8 +114,6 @@ export async function createStudentData({
   return studentId
 }
 
-
-
 export async function addStudentData({
   address,
   dataOfBirth,
@@ -135,7 +133,7 @@ export async function addStudentData({
   email,
   contact,
 }: dataSchemaWithLogin) {
-  const response = await fetch('http://localhost:3333/login-students', {
+  const response = await fetch(`${base_URL}/login-students`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -170,5 +168,3 @@ export async function addStudentData({
 
   return jsonResponse.student
 }
-
-

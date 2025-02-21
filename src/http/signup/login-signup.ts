@@ -4,8 +4,10 @@ type UserData = {
   contact: string
 }
 
+const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
+
 export async function signupRequest({ email, password, contact }: UserData) {
-  const response = await fetch('http://localhost:3333/signup', {
+  const response = await fetch(`${base_URL}/signup`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -16,13 +16,15 @@ type dataSchema = {
   student_id: string
 }
 
+const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
+
 export async function createPreInstituto({
   schoolLevel,
   schoolName,
   schoolProvincy,
   student_id,
 }: dataSchema) {
-  const response = await fetch('http://localhost:3333/pre-instituto', {
+  const response = await fetch(`${base_URL}/pre-instituto`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -45,7 +47,7 @@ export async function createPreInstituto({
 }
 
 export async function getPreInstituto() {
-  const response = await fetch('http://localhost:3333/pre-instituto')
+  const response = await fetch(`${base_URL}/pre-instituto`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }
