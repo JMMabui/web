@@ -20,12 +20,13 @@ import { TeachersFiticios } from './dashboard/CTA/academic_record/teacherFiticio
 import { Reports } from './dashboard/CTA/human resources/reports'
 import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
 import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
+import { AddCourse } from './dashboard/CTA/academic_record/addCourse'
+import { AddSubject } from './dashboard/CTA/academic_record/addSubject'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
 
 export function App() {
-  console.log(import.meta.env.VITE_API_URL)
   return (
     <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
       {/* {header_primary()} */}
@@ -62,7 +63,14 @@ export function App() {
               path="/academic_record/student_ar/add_student/addcourse/:id"
               element={<AddPreInstituto_addCourse />}
             />
-
+            <Route
+              path="/academic_record/courses/add-course"
+              element={<AddCourse />}
+            />
+            <Route
+              path="/academic_record/courses/add-subject"
+              element={<AddSubject />}
+            />
             <Route path="enrollment" element={<Enrollment_Academic_Record />} />
             <Route path="teachers" element={<TeachersFiticios />} />
             <Route
