@@ -94,6 +94,15 @@ export function DashboardLayout2() {
                   >
                     Adicionar Disciplina
                   </button>
+                  <button
+                    type="button"
+                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
+                    onClick={() =>
+                      navigate('/academic_record/courses/enrollments-subjects')
+                    }
+                  >
+                    Alocar Disciplinas
+                  </button>
                 </div>
               )}
 

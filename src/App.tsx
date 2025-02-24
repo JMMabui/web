@@ -22,6 +22,7 @@ import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
 import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 import { AddCourse } from './dashboard/CTA/academic_record/addCourse'
 import { AddSubject } from './dashboard/CTA/academic_record/addSubject'
+import { EnrollmentsSubjects } from './dashboard/CTA/academic_record/enrollmentsSubjects'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -70,6 +71,10 @@ export function App() {
             <Route
               path="/academic_record/courses/add-subject"
               element={<AddSubject />}
+            />
+            <Route
+              path="/academic_record/courses/enrollments-subjects"
+              element={<EnrollmentsSubjects />}
             />
             <Route path="enrollment" element={<Enrollment_Academic_Record />} />
             <Route path="teachers" element={<TeachersFiticios />} />

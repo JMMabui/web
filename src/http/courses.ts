@@ -22,7 +22,7 @@ export async function getCourses() {
     throw new Error(`Erro ao buscar os dados: ${errorMessage}`)
   }
   const result = await response.json()
-  console.log('Resposta da API:', result)
+  // console.log('Resposta da API:', result)
   return result
 }
 
@@ -39,6 +39,6 @@ export async function addCourse(course: Course) {
     throw new Error(`Erro ao adicionar o curso: ${errorMessage}`)
   }
   const result = await response.json()
-  console.log('Resposta da API:', result)
+  // console.log('Resposta da API:', result)
   return result
 }

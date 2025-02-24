@@ -137,7 +137,7 @@ export function CoursesDashboard() {
         ))}
       </div>
 
-      <div className="mt-8 text-center">
+      {/* <div className="mt-8 text-center">
         <button
           type="button"
           onClick={() => setIsAddingCourse(true)}
@@ -146,9 +146,9 @@ export function CoursesDashboard() {
           <PlusCircle className="w-6 h-6" />
           <span>Adicionar Novo Curso</span>
         </button>
-      </div>
+      </div> */}
 
-      {isAddingCourse && (
+      {/* {isAddingCourse && (
         <div className="mt-8 p-6 bg-gray-100 rounded-lg shadow-lg">
           <h3 className="text-2xl font-semibold mb-4">Adicionar Curso</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -284,7 +284,7 @@ export function CoursesDashboard() {
             </div>
           </form>
         </div>
-      )}
+      )} */}
 
       {/* Tabela de Cursos */}
       <div className="mt-8">

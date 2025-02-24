@@ -19,8 +19,6 @@ type CourseFormData = {
 }
 
 export function AddCourse() {
-  const navigate = useNavigate()
-
   const {
     register,
     handleSubmit,
@@ -37,6 +35,7 @@ export function AddCourse() {
       return addCourse(courseData)
     },
     onSuccess: () => {
+      alert('Curso adicionado com sucesso!')
       reset()
     },
     onError: error => {
@@ -118,7 +117,7 @@ export function AddCourse() {
         {/* Course Duration */}
         <div className="flex flex-col">
           <label className="text-lg font-medium">
-            Duração do Curso (em Anos)
+            Duração do Curso (em Meses)
           </label>
           <input
             type="number"
