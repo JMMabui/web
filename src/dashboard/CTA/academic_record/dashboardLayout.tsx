@@ -15,25 +15,69 @@ import { Outlet, useNavigate } from 'react-router-dom'
 const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />
 
 export function DashboardLayout2() {
-  const [active, setActive] = useState('Dashboard')
+  const [active, setActive] = useState<string | null>('Dashboard')
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   const navigate = useNavigate()
 
   const menuItems = [
-    { name: 'Dashboard', icon: Home, route: '/academic_record/dashboard' },
-    { name: 'Cursos', icon: FileTextIcon, route: '/academic_record/courses' },
-    { name: 'Estudantes', icon: User2Icon, route: '/academic_record/students' },
+    {
+      name: 'Dashboard',
+      icon: Home,
+      route: '/academic_record/dashboard',
+      submenu: [], // Nenhum submenu para Dashboard
+    },
+    {
+      name: 'Cursos',
+      icon: FileTextIcon,
+      route: '/academic_record/courses',
+      submenu: [
+        {
+          name: 'Adicionar Curso',
+          route: '/academic_record/courses/add-course',
+        },
+        {
+          name: 'Adicionar Disciplina',
+          route: '/academic_record/courses/add-subject',
+        },
+        { name: 'Turmas', route: '/academic_record/courses/classes' },
+      ],
+    },
+    {
+      name: 'Estudantes',
+      icon: User2Icon,
+      route: '/academic_record/students',
+      submenu: [
+        {
+          name: 'Perfil do Estudante',
+          route: '/academic_record/student-profile',
+        },
+        { name: 'Novo Estudante', route: '/academic_record/new-student' },
+      ],
+    },
     {
       name: 'Inscrições',
       icon: FileTextIcon,
       route: '/academic_record/enrollment',
+      submenu: [],
     },
-    { name: 'Docentes', icon: Users, route: '/academic_record/teachers' },
+    {
+      name: 'Docentes',
+      icon: Users,
+      route: '/academic_record/teachers',
+      submenu: [
+        { name: 'Adicionar Docente', route: '/academic_record/add-teacher' },
+        { name: 'Alocar Disciplina', route: '/academic_record/assign-subject' },
+      ],
+    },
     {
       name: 'Emissão de Documentos',
       icon: FileTextIcon,
       route: '/academic_record/documents',
+      submenu: [
+        { name: 'Certificado', route: '/academic_record/certificate' },
+        { name: 'Diploma', route: '/academic_record/diploma' },
+      ],
     },
   ]
 
@@ -45,7 +89,7 @@ export function DashboardLayout2() {
           <img src={logo} alt="ISMMA LOGO" />
         </div>
         <nav className="flex-1">
-          {menuItems.map(({ name, icon: Icon, route }) => (
+          {menuItems.map(({ name, icon: Icon, route, submenu }) => (
             <div key={name}>
               {/* Item principal */}
               <button
@@ -63,103 +107,29 @@ export function DashboardLayout2() {
               >
                 <Icon className="w-5 h-5" />
                 {name}
-                {name === 'Cursos' ||
-                name === 'Estudantes' ||
-                name === 'Docentes' ||
-                name === 'Emissão de Documentos' ? (
+                {submenu.length > 0 && (
                   <ChevronDown
                     className={`ml-auto transform ${openDropdown === name ? 'rotate-180' : ''}`}
                   />
-                ) : null}
+                )}
               </button>
 
               {/* Dropdowns */}
-              {name === 'Cursos' && openDropdown === name && (
+              {submenu.length > 0 && openDropdown === name && (
                 <div className="pl-8 pt-2 space-y-2">
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    onClick={() =>
-                      navigate('/academic_record/courses/add-course')
-                    } // Substitua com a rota de adicionar curso
-                  >
-                    Adicionar Curso
-                  </button>
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    onClick={() =>
-                      navigate('/academic_record/courses/add-subject')
-                    } // Substitua com a rota de adicionar disciplina
-                  >
-                    Adicionar Disciplina
-                  </button>
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    onClick={() =>
-                      navigate('/academic_record/courses/enrollments-subjects')
-                    }
-                  >
-                    Alocar Disciplinas
-                  </button>
-                </div>
-              )}
-
-              {name === 'Estudantes' && openDropdown === name && (
-                <div className="pl-8 pt-2 space-y-2">
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    // onClick={() => navigate('/academic_record/student-profile')} // Substitua com a rota de perfil do estudante
-                  >
-                    Perfil do Estudante
-                  </button>
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    // onClick={() => navigate('/academic_record/new-student')} // Substitua com a rota de novo estudante
-                  >
-                    Novo Estudante
-                  </button>
-                </div>
-              )}
-
-              {name === 'Docentes' && openDropdown === name && (
-                <div className="pl-8 pt-2 space-y-2">
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    // onClick={() => navigate('/academic_record/add-teacher')} // Substitua com a rota de adicionar docente
-                  >
-                    Adicionar Docente
-                  </button>
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    // onClick={() => navigate('/academic_record/assign-subject')} // Substitua com a rota de alocar disciplina
-                  >
-                    Alocar Disciplina
-                  </button>
-                </div>
-              )}
-
-              {name === 'Emissão de Documentos' && openDropdown === name && (
-                <div className="pl-8 pt-2 space-y-2">
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    onClick={() => navigate('/academic_record/certificate')} // Substitua com a rota de certificado
-                  >
-                    Certificado
-                  </button>
-                  <button
-                    type="button"
-                    className="text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left"
-                    onClick={() => navigate('/academic_record/diploma')} // Substitua com a rota de diploma
-                  >
-                    Diploma
-                  </button>
+                  {submenu.map(({ name: subName, route: subRoute }) => (
+                    <button
+                      key={subName}
+                      type="button"
+                      className={`text-white hover:bg-yellow-700 w-full p-2 rounded-lg text-left ${active === subName ? 'bg-yellow-800' : ''}`}
+                      onClick={() => {
+                        setActive(subName)
+                        navigate(subRoute)
+                      }}
+                    >
+                      {subName}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

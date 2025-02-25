@@ -1,42 +1,41 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { PlusCircle, User, Search, Clipboard } from 'lucide-react';
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { PlusCircle, User } from 'lucide-react'
+import { getTeachers } from '@/http/teacher'
 
 type Teacher = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  profile: string;
-  discipline: string;
-  workload: number; // Carga horária
-};
+  id: string
+  type: 'COORDENADOR' | 'DOCENTE' | 'AUXILIAR'
+  email: string
+  contact: string
+  createdAt: Date
+  updatedAt: Date
+  fullName: string
+  profession: string
+}
 
 type TeacherFormData = {
-  name: string;
-  email: string;
-  phone: string;
-  profile: string;
-};
+  fullName: string
+  email: string
+  phone: string
+  profile: string
+}
 
-type TeacherResponse = {
-  teachers: Teacher[];
-};
-
-export function TeachersDashboard() {
-  const [isAddingTeacher, setIsAddingTeacher] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+export function Teachers_ar() {
+  const [isAddingTeacher, setIsAddingTeacher] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
 
   // Consulta para obter os docentes
-  const { data: teacherData, error, isLoading } = useQuery<TeacherResponse>({
+  const {
+    data: teacherData,
+    error: teacherError,
+    isLoading: teacherIsLoading,
+  } = useQuery<Teacher[]>({
     queryKey: ['teachers'],
-    queryFn: async () => {
-      // Aqui você colocaria a chamada de API para buscar os docentes
-      return { teachers: [] }; // Exemplo de dados
-    },
-  });
+    queryFn: getTeachers,
+  })
 
   // Mutação para adicionar docente
   const addTeacherMutation = useMutation({
@@ -44,30 +43,32 @@ export function TeachersDashboard() {
       // Chamada de API para adicionar docente
     },
     onSuccess: () => {
-      setIsAddingTeacher(false);
+      setIsAddingTeacher(false)
     },
-  });
+  })
 
   // Função de pesquisa
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
+    setSearchTerm(e.target.value)
+  }
 
   // Filtro dos docentes com base no nome
-  const filteredTeachers = teacherData?.teachers.filter((teacher) =>
-    teacher.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTeachers = teacherData?.filter(teacher =>
+    teacher.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  const { register, handleSubmit, reset } = useForm<TeacherFormData>();
+  const { register, handleSubmit, reset } = useForm<TeacherFormData>()
 
   const onSubmit = (data: TeacherFormData) => {
-    addTeacherMutation.mutate(data);
-    reset();
-  };
+    addTeacherMutation.mutate(data)
+    reset()
+  }
 
   return (
     <div className="p-6 w-full max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Gestão de Docentes</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+        Gestão de Docentes
+      </h2>
 
       {/* Pesquisa */}
       <div className="mb-6 flex justify-center">
@@ -80,31 +81,35 @@ export function TeachersDashboard() {
         />
       </div>
 
+      {/* Estado de Carregamento ou Erro */}
+      {teacherIsLoading && <p>Carregando docentes...</p>}
+      {teacherError && <p>Erro ao carregar docentes: {teacherError.message}</p>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Cards de docentes */}
-        {filteredTeachers?.map((teacher) => (
+        {filteredTeachers?.map(teacher => (
           <div
             key={teacher.id}
             className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
           >
             <User className="w-16 h-16 text-blue-600 mb-4" />
-            <h3 className="text-lg font-medium">{teacher.name}</h3>
+            <h3 className="text-lg font-medium">{teacher.fullName}</h3>
             <p className="text-sm text-gray-600">{teacher.email}</p>
-            <p className="text-sm text-gray-600">{teacher.phone}</p>
-            <p className="text-sm text-gray-600">{teacher.discipline}</p>
-            <p className="text-sm text-gray-600">Carga Horária: {teacher.workload} horas</p>
+            <p className="text-sm text-gray-600">{teacher.contact}</p>
 
             <div className="mt-4 flex space-x-2">
               <button
-                type='button'
+                type="button"
                 onClick={() => setSelectedTeacher(teacher)}
                 className="bg-blue-600 text-white py-2 px-4 rounded-lg"
               >
                 Ver Perfil
               </button>
               <button
-              type='button'
-                onClick={() => alert(`Alocar docente ${teacher.name} a disciplina`)}
+                type="button"
+                onClick={() =>
+                  alert(`Alocar docente ${teacher.fullName} a disciplina`)
+                }
                 className="bg-green-600 text-white py-2 px-4 rounded-lg"
               >
                 Alocar Disciplina
@@ -118,14 +123,17 @@ export function TeachersDashboard() {
       {selectedTeacher && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-8 max-w-sm">
-            <h3 className="text-2xl font-semibold mb-4">Perfil de {selectedTeacher.name}</h3>
-            <p><strong>Email:</strong> {selectedTeacher.email}</p>
-            <p><strong>Telefone:</strong> {selectedTeacher.phone}</p>
-            <p><strong>Disciplina:</strong> {selectedTeacher.discipline}</p>
-            <p><strong>Carga Horária:</strong> {selectedTeacher.workload} horas</p>
-            <p><strong>Perfil:</strong> {selectedTeacher.profile}</p>
+            <h3 className="text-2xl font-semibold mb-4">
+              Perfil de {selectedTeacher.fullName}
+            </h3>
+            <p>
+              <strong>Email:</strong> {selectedTeacher.email}
+            </p>
+            <p>
+              <strong>Telefone:</strong> {selectedTeacher.contact}
+            </p>
             <button
-            type='button'
+              type="button"
               onClick={() => setSelectedTeacher(null)}
               className="bg-red-600 text-white py-2 px-4 rounded-lg mt-4"
             >
@@ -156,7 +164,7 @@ export function TeachersDashboard() {
               <label className="block text-lg font-medium">Nome</label>
               <input
                 type="text"
-                {...register('name', { required: 'Nome é obrigatório' })}
+                {...register('fullName', { required: 'Nome é obrigatório' })}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
               />
             </div>
@@ -199,5 +207,5 @@ export function TeachersDashboard() {
         </div>
       )}
     </div>
-  );
+  )
 }

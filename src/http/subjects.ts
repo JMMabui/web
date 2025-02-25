@@ -65,6 +65,23 @@ export async function PostSubjects({
   }
 }
 
+export async function getSubjects() {
+  try {
+    const response = await fetch(`${base_URL}/subjects`)
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar os dados')
+    }
+
+    const data = await response.json()
+    console.log('Resposta da API:', data)
+    return data
+  } catch (error) {
+    console.error('Erro ao buscar os dados:', error)
+    throw error
+  }
+}
+
 export async function checkIfCodeExists(codigo: string): Promise<boolean> {
   try {
     // Realiza a consulta na API para verificar se o código já existe

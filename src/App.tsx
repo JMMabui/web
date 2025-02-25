@@ -15,14 +15,17 @@ import { DashboardLayout } from './dashboard/CTA/human resources/dashboardLayout
 import { AcademicRecord } from './dashboard/CTA/academic_record/dashboard_academic_record'
 import { CoursesDashboard } from './dashboard/CTA/academic_record/course_AR'
 import { Enrollment_Academic_Record } from './dashboard/CTA/academic_record/registration_academic_record'
-import { StudentsFiticios } from './dashboard/CTA/academic_record/student_ar'
-import { TeachersFiticios } from './dashboard/CTA/academic_record/teacherFiticios'
+import { Students_ar } from './dashboard/CTA/academic_record/student_ar'
 import { Reports } from './dashboard/CTA/human resources/reports'
 import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
 import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 import { AddCourse } from './dashboard/CTA/academic_record/addCourse'
 import { AddSubject } from './dashboard/CTA/academic_record/addSubject'
-import { EnrollmentsSubjects } from './dashboard/CTA/academic_record/enrollmentsSubjects'
+import { Classes } from './dashboard/CTA/academic_record/classes'
+import { Teachers_ar } from './dashboard/CTA/academic_record/teacher_AR'
+import { Assign_subject } from './dashboard/CTA/academic_record/assign_subject'
+import { Diploma } from './dashboard/CTA/academic_record/documents/diploma'
+import { Certificate } from './dashboard/CTA/academic_record/documents/certificado'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -35,6 +38,7 @@ export function App() {
       <Router>
         <Routes>
           <Route path="/" element={<DashboardLayout2 />} />
+          <Route path="/login" element={<LoginForm />} />
           <Route path="/registration" element={<Signup />} />
           <Route
             path="/registration/pre-instituto"
@@ -49,41 +53,19 @@ export function App() {
           <Route path="/dashboard_cta" element={<Dashboard_cta />} />
           {/* Pagina do dashboard para o departamento de registro academico */}
           <Route path="/academic_record" element={<DashboardLayout2 />}>
-            <Route index element={<AcademicRecord />} />
             <Route path="dashboard" element={<AcademicRecord />} />
             <Route path="courses" element={<CoursesDashboard />} />
-            <Route path="students" element={<StudentsFiticios />}>
-              <Route path=":id" element={<StudentProfile />} />
-              {/* <Route path="/academic_record/student_ar/add_student" element={<AddStudents />} /> */}
-            </Route>
-            <Route
-              path="/academic_record/student_ar/add_student"
-              element={<AddStudents />}
-            />
-            <Route
-              path="/academic_record/student_ar/add_student/addcourse/:id"
-              element={<AddPreInstituto_addCourse />}
-            />
-            <Route
-              path="/academic_record/courses/add-course"
-              element={<AddCourse />}
-            />
-            <Route
-              path="/academic_record/courses/add-subject"
-              element={<AddSubject />}
-            />
-            <Route
-              path="/academic_record/courses/enrollments-subjects"
-              element={<EnrollmentsSubjects />}
-            />
+            <Route path="courses/add-course" element={<AddCourse />} />
+            <Route path="courses/add-subject" element={<AddSubject />} />
+            <Route path="students" element={<Students_ar />} />
+            <Route path="students/new-student" element={<AddStudents />} />
+            <Route path="teachers" element={<Teachers_ar />} />
+            {/* <Route path="teachers/add-teacher" element={<AddTeacher />} /> */}
             <Route path="enrollment" element={<Enrollment_Academic_Record />} />
-            <Route path="teachers" element={<TeachersFiticios />} />
-            <Route
-              path="documents"
-              element={<div>Emissão de Documentos Content</div>}
-            />
+            {/* <Route path="documents" element={<Documents />} /> */}
+            <Route path="certificate" element={<Certificate />} />
+            <Route path="diploma" element={<Diploma />} />
           </Route>
-          <Route path="/student_profile/:id" element={<StudentProfile />} />
           {/* Página do dashboard para o departamento de recursos humanos */}
           <Route path="/human_resources" element={<DashboardLayout />}>
             <Route index element={<Dashboard_Human_Resourses />} />
