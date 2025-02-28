@@ -24,7 +24,8 @@
       "style": {
         "noNonNullAssertion": "off",
         "noVar": "off",
-        "noUselessElse": "off"
+        "noUselessElse": "off",
+        "noInferrableTypes": "off"
       },
       "a11y": {
         "useValidAnchor": "off",

@@ -85,38 +85,41 @@ export function Teachers_ar() {
       {teacherIsLoading && <p>Carregando docentes...</p>}
       {teacherError && <p>Erro ao carregar docentes: {teacherError.message}</p>}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Cards de docentes */}
-        {filteredTeachers?.map(teacher => (
-          <div
-            key={teacher.id}
-            className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
-          >
-            <User className="w-16 h-16 text-blue-600 mb-4" />
-            <h3 className="text-lg font-medium">{teacher.fullName}</h3>
-            <p className="text-sm text-gray-600">{teacher.email}</p>
-            <p className="text-sm text-gray-600">{teacher.contact}</p>
+      {/* Scroll para os cards de docentes */}
+      <div className="overflow-y-auto max-h-80 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Cards de docentes */}
+          {filteredTeachers?.map(teacher => (
+            <div
+              key={teacher.id}
+              className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
+            >
+              <User className="w-16 h-16 text-blue-600 mb-4" />
+              <h3 className="text-lg font-medium">{teacher.fullName}</h3>
+              <p className="text-sm text-gray-600">{teacher.email}</p>
+              <p className="text-sm text-gray-600">{teacher.contact}</p>
 
-            <div className="mt-4 flex space-x-2">
-              <button
-                type="button"
-                onClick={() => setSelectedTeacher(teacher)}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg"
-              >
-                Ver Perfil
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  alert(`Alocar docente ${teacher.fullName} a disciplina`)
-                }
-                className="bg-green-600 text-white py-2 px-4 rounded-lg"
-              >
-                Alocar Disciplina
-              </button>
+              <div className="mt-4 flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTeacher(teacher)}
+                  className="bg-blue-600 text-white py-2 px-4 rounded-lg"
+                >
+                  Ver Perfil
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    alert(`Alocar docente ${teacher.fullName} a disciplina`)
+                  }
+                  className="bg-green-600 text-white py-2 px-4 rounded-lg"
+                >
+                  Alocar Disciplina
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Modal para ver o perfil do docente */}

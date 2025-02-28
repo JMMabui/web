@@ -52,14 +52,22 @@ export function DashboardLayout2() {
           name: 'Perfil do Estudante',
           route: '/academic_record/student-profile',
         },
-        { name: 'Novo Estudante', route: '/academic_record/new-student' },
+        {
+          name: 'Novo Estudante',
+          route: '/academic_record/students/new-student',
+        },
       ],
     },
     {
       name: 'Inscrições',
       icon: FileTextIcon,
       route: '/academic_record/enrollment',
-      submenu: [],
+      submenu: [
+        {
+          name: 'Matriculas',
+          route: '/academic_record/enrollment/relation',
+        },
+      ],
     },
     {
       name: 'Docentes',

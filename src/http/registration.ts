@@ -67,3 +67,25 @@ export async function validateRegistration(student_id: string) {
   console.log('Resposta da API:', jsonResponse) // Verifique o que está sendo retornado
   return jsonResponse
 }
+
+export async function AddEnrollment({ course_id, student_id }: dataSchema) {
+  const response = await fetch(`${base_URL}/registration`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      course_id,
+      student_id,
+    }),
+  })
+  if (!response.ok) {
+    throw new Error('Erro ao enviar dados')
+  }
+  const jsonResponse = await response.json()
+  console.log('Resposta da API:', jsonResponse) // Verifique o que está sendo retornado
+  // const studentId = jsonResponse.student.id
+  // console.log('ID do estudante:', studentId) // Aqui você tem o id
+
+  return jsonResponse
+}

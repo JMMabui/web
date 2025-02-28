@@ -44,8 +44,10 @@ export function Enrollment_Academic_Record() {
   const [selectedCourse] = useState<string>('')
   const [studentId, setStudentId] = useState<string>('')
   const [studentData, setStudentData] = useState<any>()
-  const [isEnrollmentCompleted, setIsEnrollmentCompleted] = useState<boolean | null>(null)
-  const [filterLevel, setFilterLevel] = useState<string>('')  // Filtro de nível acadêmico
+  const [isEnrollmentCompleted, setIsEnrollmentCompleted] = useState<
+    boolean | null
+  >(null)
+  const [filterLevel, setFilterLevel] = useState<string>('') // Filtro de nível acadêmico
   const [filterStatus, setFilterStatus] = useState<string>('') // Filtro de status de matrícula
 
   // Consulta para buscar dados de matrícula
@@ -61,12 +63,16 @@ export function Enrollment_Academic_Record() {
   if (isLoadingRegistration) return <div>Carregando dados...</div>
   if (errorRegistration instanceof Error)
     return <div>Erro: {errorRegistration.message}</div>
-  if (!dataRegistration) return <div>Não há matrículas disponíveis no momento.</div>
+  if (!dataRegistration)
+    return <div>Não há matrículas disponíveis no momento.</div>
 
   const filteredStudents = dataRegistration.registration.filter(student => {
-    const matchesCourse = student.course.courseName === selectedCourse || !selectedCourse
-    const matchesLevel = student.course.levelCourse.includes(filterLevel) || !filterLevel
-    const matchesStatus = student.registrationStatus.includes(filterStatus) || !filterStatus
+    const matchesCourse =
+      student.course.courseName === selectedCourse || !selectedCourse
+    const matchesLevel =
+      student.course.levelCourse.includes(filterLevel) || !filterLevel
+    const matchesStatus =
+      student.registrationStatus.includes(filterStatus) || !filterStatus
     return matchesCourse && matchesLevel && matchesStatus
   })
 
@@ -74,10 +80,14 @@ export function Enrollment_Academic_Record() {
   const totalCompleted = dataRegistration.registration.filter(
     student => student.registrationStatus === 'CONFIRMADO'
   ).length
-  const totalPending = dataRegistration.registration.filter(student => student.registrationStatus === 'PENDENTE').length
+  const totalPending = dataRegistration.registration.filter(
+    student => student.registrationStatus === 'PENDENTE'
+  ).length
 
   const fetchStudentData = () => {
-    const student = dataRegistration.registration.find(student => student.student_id === studentId)
+    const student = dataRegistration.registration.find(
+      student => student.student_id === studentId
+    )
     if (student) {
       setStudentData(student)
       setIsEnrollmentCompleted(student.registrationStatus === 'CONFIRMADO')
@@ -88,11 +98,15 @@ export function Enrollment_Academic_Record() {
   }
 
   const validateEnrollment = async (studentId: string) => {
-    const student = dataRegistration.registration.find(student => student.student_id === studentId)
+    const student = dataRegistration.registration.find(
+      student => student.student_id === studentId
+    )
     if (student) {
       await validateRegistration(studentId)
       setIsEnrollmentCompleted(true)
-      alert(`Matrícula de ${student.student.name} ${student.student.surname} validada!`)
+      alert(
+        `Matrícula de ${student.student.name} ${student.student.surname} validada!`
+      )
     }
   }
 
@@ -102,7 +116,9 @@ export function Enrollment_Academic_Record() {
       <div className="flex justify-between items-center space-x-4">
         {/* Filtro de Status da Matrícula */}
         <div className="flex items-center space-x-2">
-          <label htmlFor="status" className="text-sm font-semibold">Status:</label>
+          <label htmlFor="status" className="text-sm font-semibold">
+            Status:
+          </label>
           <select
             id="status"
             className="border rounded p-2 text-sm"
@@ -118,7 +134,9 @@ export function Enrollment_Academic_Record() {
 
         {/* Filtro de Nível Acadêmico */}
         <div className="flex items-center space-x-2">
-          <label htmlFor="level" className="text-sm font-semibold">Nível:</label>
+          <label htmlFor="level" className="text-sm font-semibold">
+            Nível:
+          </label>
           <select
             id="level"
             className="border rounded p-2 text-sm"
@@ -136,7 +154,9 @@ export function Enrollment_Academic_Record() {
 
         {/* Pesquisa de Estudante */}
         <div className="flex items-center space-x-2">
-          <label htmlFor="studentId" className="text-sm font-semibold">Número:</label>
+          <label htmlFor="studentId" className="text-sm font-semibold">
+            Número:
+          </label>
           <input
             id="studentId"
             type="text"
@@ -171,8 +191,8 @@ export function Enrollment_Academic_Record() {
         </div>
       </div>
 
-      {/* Tabela de Alunos Matriculados */}
-      <div className="mt-6">
+      {/* Tabela de Alunos Matriculados com scroll */}
+      <div className="mt-6 overflow-y-auto max-h-96">
         <h3 className="text-xl font-semibold mb-4">Alunos Matriculados</h3>
         <table className="min-w-full mt-6 table-auto border-collapse border border-gray-300">
           <thead className="bg-gray-200">
@@ -186,11 +206,20 @@ export function Enrollment_Academic_Record() {
           <tbody>
             {filteredStudents.length > 0 ? (
               filteredStudents.map(student => (
-                <tr key={student.id} className="bg-white hover:bg-gray-100 transition">
-                  <td className="text-center border px-1 py-1 text-sm">{student.student_id}</td>
-                  <td className="text-center px-1 py-1 text-sm">{student.student.name} {student.student.surname}</td>
+                <tr
+                  key={student.id}
+                  className="bg-white hover:bg-gray-100 transition"
+                >
+                  <td className="text-center border px-1 py-1 text-sm">
+                    {student.student_id}
+                  </td>
                   <td className="text-center px-1 py-1 text-sm">
-                    {student.registrationStatus === 'CONFIRMADO' ? 'Completada' : 'Pendente'}
+                    {student.student.name} {student.student.surname}
+                  </td>
+                  <td className="text-center px-1 py-1 text-sm">
+                    {student.registrationStatus === 'CONFIRMADO'
+                      ? 'Completada'
+                      : 'Pendente'}
                   </td>
                   <td className="text-center px-1 py-1 text-sm">
                     {student.registrationStatus === 'PENDENTE' && (
@@ -207,23 +236,40 @@ export function Enrollment_Academic_Record() {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="text-center py-2 text-sm">Nenhum aluno encontrado.</td>
+                <td colSpan={4} className="text-center py-2 text-sm">
+                  Nenhum aluno encontrado.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Exibir dados do estudante */}
+      {/* Exibir dados do estudante com scroll */}
       {studentData && (
-        <div className="mt-6 p-6 border rounded-lg bg-gray-50">
+        <div className="mt-6 p-6 border rounded-lg bg-gray-50 overflow-y-auto max-h-80">
           <h3 className="text-xl font-semibold">Dados do Estudante</h3>
-          <p><strong>Nome:</strong> {studentData.student.name} {studentData.student.surname}</p>
-          <p><strong>Data de Nascimento:</strong> {studentData.student.dateOfBirth}</p>
-          <p><strong>Email:</strong> {studentData.student.email}</p>
-          <p><strong>Telefone:</strong> {studentData.student.phone}</p>
-          <p><strong>Curso:</strong> {studentData.course.courseName}</p>
-          <p><strong>Status da Matrícula:</strong> {isEnrollmentCompleted ? 'Completada' : 'Pendente'}</p>
+          <p>
+            <strong>Nome:</strong> {studentData.student.name}{' '}
+            {studentData.student.surname}
+          </p>
+          <p>
+            <strong>Data de Nascimento:</strong>{' '}
+            {studentData.student.dateOfBirth}
+          </p>
+          <p>
+            <strong>Email:</strong> {studentData.student.email}
+          </p>
+          <p>
+            <strong>Telefone:</strong> {studentData.student.phone}
+          </p>
+          <p>
+            <strong>Curso:</strong> {studentData.course.courseName}
+          </p>
+          <p>
+            <strong>Status da Matrícula:</strong>{' '}
+            {isEnrollmentCompleted ? 'Completada' : 'Pendente'}
+          </p>
 
           {/* Validar matrícula */}
           {!isEnrollmentCompleted && (

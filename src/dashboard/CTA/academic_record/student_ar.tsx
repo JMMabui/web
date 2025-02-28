@@ -78,24 +78,20 @@ export function Students_ar() {
     setSearchTerm(e.target.value)
   }
 
-  const filteredStudents = registrationData?.filter(student =>
-    student.student_id.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredStudents = registrationData?.filter(student => {
+    const searchTermLower = searchTerm.toLowerCase()
+    return (
+      student.student_id.toLowerCase().includes(searchTermLower) ||
+      student.student.name.toLowerCase().includes(searchTermLower) ||
+      student.student.surname.toLowerCase().includes(searchTermLower)
+    )
+  })
 
   return (
-    <div className="p-6 w-full max-w-6xl mx-auto">
+    <div className="p-6 w-full h-full max-w-6xl mx-auto">
       <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Gestão de Estudantes
       </h2>
-
-      <button
-        type="button"
-        onClick={() => navegate('/academic_record/student_ar/add_student')}
-        className="bg-green-600 text-white py-2 px-6 rounded-lg flex items-center justify-center space-x-2"
-      >
-        <PlusCircle className="w-6 h-6" />
-        <span>Adicionar Novo Estudante</span>
-      </button>
 
       <div className="mb-6 flex justify-end">
         <input
@@ -107,33 +103,49 @@ export function Students_ar() {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredStudents?.map(student => (
-          <div
-            key={student.id}
-            className="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center"
-          >
-            <User className="w-16 h-16 text-blue-600 mb-4" />
-            <h3 className="text-lg font-medium">
-              {student.student.name} {student.student.surname}
-            </h3>
-            <p className="text-sm text-gray-600">{student.student_id}</p>
-            <p className="text-sm text-gray-600">{student.course.courseName}</p>
-            <p className="text-sm text-gray-600">
-              {student.registrationStatus}
-            </p>
-            {/* <p className="text-sm text-gray-600">Média: {student.grade}</p> */}
-            <div className="mt-4 flex space-x-2">
-              <button
-                type="button"
-                onClick={() => setSelectedStudent(student)}
-                className="bg-blue-600 text-white py-2 px-4 rounded-lg"
-              >
-                Ver Perfil
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="overflow-x-auto max-h-full">
+        {' '}
+        {/* Define o scroll */}
+        <table className="min-w-full table-auto border-collapse">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 border-b text-left">Nome</th>
+              <th className="px-4 py-2 border-b text-left">
+                Número de Estudante
+              </th>
+              <th className="px-4 py-2 border-b text-left">Curso</th>
+              <th className="px-4 py-2 border-b text-left">
+                Estado da Matrícula
+              </th>
+              <th className="px-4 py-2 border-b text-left">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredStudents?.map(student => (
+              <tr key={student.id} className="hover:bg-gray-100">
+                <td className="px-4 py-2 border-b">
+                  {student.student.name} {student.student.surname}
+                </td>
+                <td className="px-4 py-2 border-b">{student.student_id}</td>
+                <td className="px-4 py-2 border-b">
+                  {student.course.courseName}
+                </td>
+                <td className="px-4 py-2 border-b">
+                  {student.registrationStatus}
+                </td>
+                <td className="px-4 py-2 border-b">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStudent(student)}
+                    className="bg-blue-600 text-white py-2 px-4 rounded-lg"
+                  >
+                    Ver Perfil
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {selectedStudent && (

@@ -44,7 +44,7 @@ type CourseResponse = {
 
 export function CoursesDashboard() {
   const [isAddingCourse, setIsAddingCourse] = useState(false)
-  const [coursesToShow, setCoursesToShow] = useState(5) // Para controlar a quantidade de cursos exibidos
+  const [coursesToShow, setCoursesToShow] = useState() // Para controlar a quantidade de cursos exibidos
 
   const {
     data: dataCourses,
@@ -102,10 +102,6 @@ export function CoursesDashboard() {
 
     console.log(courseData)
     addCourseMutation.mutate(courseData)
-  }
-
-  const loadMoreCourses = () => {
-    setCoursesToShow(prev => prev + 5) // Carregar mais 5 cursos
   }
 
   return (
@@ -289,67 +285,60 @@ export function CoursesDashboard() {
       {/* Tabela de Cursos */}
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4">Cursos Cadastrados</h3>
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b text-left">Nivel Academico</th>
-              <th className="py-2 px-4 border-b text-left">Nome do Curso</th>
-              <th className="py-2 px-4 border-b text-left">Periodo</th>
-              <th className="py-2 px-4 border-b text-left">Descrição</th>
-              <th className="py-2 px-4 border-b text-left">Vagas Totais</th>
-              <th className="py-2 px-4 border-b text-left">
-                Vagas Disponíveis
-              </th>
-              <th className="py-2 px-4 border-b text-left">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {displayedCourses?.map(course => (
-              <tr key={course.id}>
-                <td className="py-2 px-4 border-b">
-                  {course.levelCourse.charAt(0).toUpperCase() +
-                    course.levelCourse.slice(1).toLowerCase()}
-                </td>
-                <td className="py-2 px-4 border-b">
-                  {course.courseName.charAt(0).toUpperCase() +
-                    course.courseName.slice(1).toLowerCase()}
-                </td>
-                <td className="py-2 px-4 border-b">
-                  {course.period.charAt(0).toUpperCase() +
-                    course.period.slice(1).toLowerCase()}
-                </td>
-                <td className="py-2 px-4 border-b">
-                  {course.courseDescription}
-                </td>
-                <td className="py-2 px-4 border-b">{course.totalVacancies}</td>
-                <td className="py-2 px-4 border-b">
-                  {course.availableVacancies}
-                </td>
-                <td className="py-2 px-4 border-b">
-                  <button
-                    type="button"
-                    className="bg-blue-600 text-white py-1 px-4 rounded-lg"
-                  >
-                    Adicionar Disciplina
-                  </button>
-                </td>
+        <div className="overflow-auto max-h-80">
+          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b text-left">
+                  Nivel Academico
+                </th>
+                <th className="py-2 px-4 border-b text-left">Nome do Curso</th>
+                <th className="py-2 px-4 border-b text-left">Periodo</th>
+                <th className="py-2 px-4 border-b text-left">Descrição</th>
+                <th className="py-2 px-4 border-b text-left">Vagas Totais</th>
+                <th className="py-2 px-4 border-b text-left">
+                  Vagas Disponíveis
+                </th>
+                <th className="py-2 px-4 border-b text-left">Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Se houver mais cursos, permite carregar mais */}
-        {totalCourses > coursesToShow && (
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={loadMoreCourses}
-              className="bg-blue-600 text-white py-2 px-6 rounded-lg"
-            >
-              Carregar mais cursos
-            </button>
-          </div>
-        )}
+            </thead>
+            <tbody>
+              {displayedCourses?.map(course => (
+                <tr key={course.id}>
+                  <td className="py-2 px-4 border-b">
+                    {course.levelCourse.charAt(0).toUpperCase() +
+                      course.levelCourse.slice(1).toLowerCase()}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {course.courseName.charAt(0).toUpperCase() +
+                      course.courseName.slice(1).toLowerCase()}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {course.period.charAt(0).toUpperCase() +
+                      course.period.slice(1).toLowerCase()}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {course.courseDescription}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {course.totalVacancies}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    {course.availableVacancies}
+                  </td>
+                  <td className="py-2 px-4 border-b">
+                    <button
+                      type="button"
+                      className="bg-blue-600 text-white py-1 px-4 rounded-lg"
+                    >
+                      Adicionar Disciplina
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
