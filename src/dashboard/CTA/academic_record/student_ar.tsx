@@ -1,47 +1,14 @@
 import { useEffect, useState } from 'react'
-import { PlusCircle, User } from 'lucide-react'
 import { getRegistration } from '@/http/registration'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-
-type registrationSchema = {
-  course_id: string
-  student_id: string
-  id: string
-  registrationStatus:
-    | 'PENDENTE'
-    | 'CONFIRMADO'
-    | 'CANCELADO'
-    | 'TRANCADO'
-    | 'INSCRITO'
-    | 'NAO_INSCRITO'
-  student: {
-    surname: string
-    name: string
-  }
-  course: {
-    courseName: string
-    levelCourse:
-      | 'CURTA_DURACAO'
-      | 'TECNICO_MEDIO'
-      | 'LICENCIATURA'
-      | 'MESTRADO'
-      | 'RELIGIOSO'
-    period: 'LABORAL' | 'POS_LABORAL'
-  }
-  createdAt: Date
-  updatedAt: Date | null
-}
-
-type registrationResponse = {
-  registration: registrationSchema[]
-}
+import type { RegistrationSchema } from '../../../http/registration'
 
 export function Students_ar() {
   const [isAddingStudent] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStudent, setSelectedStudent] =
-    useState<registrationSchema | null>(null)
+    useState<RegistrationSchema | null>(null)
 
   const navegate = useNavigate()
 
@@ -49,7 +16,7 @@ export function Students_ar() {
     data: dataRegistration,
     error: RegistrationError,
     isLoading: isLoadingRegistration,
-  } = useQuery<registrationResponse>({
+  } = useQuery<RegistrationSchema[]>({
     queryKey: ['students_data'],
     queryFn: getRegistration,
   })
@@ -72,7 +39,7 @@ export function Students_ar() {
     )
   }
 
-  const registrationData = dataRegistration?.registration
+  const registrationData = dataRegistration
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)

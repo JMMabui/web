@@ -1,4 +1,4 @@
-type dataSchema = {
+export type SubjectsSchema = {
   codigo: string
   credits: number
   disciplineName: string
@@ -20,7 +20,7 @@ export async function PostSubjects({
   credits,
   courseId,
   hcs,
-}: dataSchema) {
+}: SubjectsSchema) {
   console.log(
     'Mandando para API:',
     codigo,

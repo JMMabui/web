@@ -1,4 +1,4 @@
-type Course = {
+export type CourseRequest = {
   courseName: string
   courseDescription: string
   courseDuration: number
@@ -11,6 +11,24 @@ type Course = {
   period: 'LABORAL' | 'POS_LABORAL'
   totalVacancies: number
   availableVacancies: number
+}
+
+export type CourseResponse = {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+  courseName: string
+  courseDescription: string | null
+  courseDuration: number
+  levelCourse:
+    | 'CURTA_DURACAO'
+    | 'TECNICO_MEDIO'
+    | 'LICENCIATURA'
+    | 'MESTRADO'
+    | 'RELIGIOSO'
+  period: 'LABORAL' | 'POS_LABORAL'
+  totalVacancies: number
+  availableVacancies: number | null
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
@@ -26,7 +44,7 @@ export async function getCourses() {
   return result
 }
 
-export async function addCourse(course: Course) {
+export async function addCourse(course: CourseRequest) {
   const response = await fetch(`${base_URL}/courses`, {
     method: 'POST',
     headers: {

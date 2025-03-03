@@ -1,6 +1,35 @@
-type dataSchema = {
+export type dataSchema = {
   course_id: string
   student_id: string
+}
+
+export type RegistrationSchema = {
+  course_id: string
+  student_id: string
+  id: string
+  registrationStatus:
+    | 'PENDENTE'
+    | 'CONFIRMADO'
+    | 'CANCELADO'
+    | 'TRANCADO'
+    | 'INSCRITO'
+    | 'NAO_INSCRITO'
+  student: {
+    surname: string
+    name: string
+  }
+  course: {
+    courseName: string
+    levelCourse:
+      | 'CURTA_DURACAO'
+      | 'TECNICO_MEDIO'
+      | 'LICENCIATURA'
+      | 'MESTRADO'
+      | 'RELIGIOSO'
+    period: 'LABORAL' | 'POS_LABORAL'
+  }
+  createdAt: Date
+  updatedAt: Date | null
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'

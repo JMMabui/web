@@ -1,11 +1,11 @@
-type LoginData = {
+export type LoginSchema = {
   email: string
   password: string
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
-export async function loginRequest({ email, password }: LoginData) {
+export async function loginRequest({ email, password }: LoginSchema) {
   const response = await fetch(`${base_URL}/auth/login`, {
     method: 'POST',
     headers: {

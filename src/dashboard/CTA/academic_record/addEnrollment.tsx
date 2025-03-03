@@ -1,5 +1,9 @@
 import { getCourses } from '@/http/courses'
-import { getRegistration, AddEnrollment } from '@/http/registration'
+import {
+  getRegistration,
+  AddEnrollment,
+  type RegistrationSchema,
+} from '@/http/registration'
 import { getStudents } from '@/http/students'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -60,39 +64,6 @@ type StudentsResponse = {
   students: StudentsSchema[]
 }
 
-type RegistrationSchema = {
-  course_id: string
-  student_id: string
-  id: string
-  registrationStatus:
-    | 'PENDENTE'
-    | 'CONFIRMADO'
-    | 'CANCELADO'
-    | 'TRANCADO'
-    | 'INSCRITO'
-    | 'NAO_INSCRITO'
-  student: {
-    surname: string
-    name: string
-  }
-  course: {
-    courseName: string
-    levelCourse:
-      | 'CURTA_DURACAO'
-      | 'TECNICO_MEDIO'
-      | 'LICENCIATURA'
-      | 'MESTRADO'
-      | 'RELIGIOSO'
-    period: 'LABORAL' | 'POS_LABORAL'
-  }
-  createdAt: Date
-  updatedAt: Date | null
-}
-
-type RegistrationResponse = {
-  registration: RegistrationSchema[]
-}
-
 export function AddEnrollments() {
   const [selectedStudent, setSelectedStudent] = useState<string>('') // ID do estudante selecionado
   const [selectedCourse, setSelectedCourse] = useState<string>('') // ID do curso selecionado
@@ -120,7 +91,7 @@ export function AddEnrollments() {
     data: dataRegistration,
     isLoading: isLoadingRegistration,
     refetch: refetchRegistration,
-  } = useQuery<RegistrationResponse>({
+  } = useQuery<RegistrationSchema[]>({
     queryKey: ['matricula'],
     queryFn: getRegistration,
   })
@@ -131,9 +102,7 @@ export function AddEnrollments() {
 
   // Obter todos os IDs dos estudantes que já têm matrícula
   const registeredStudentIds =
-    dataRegistration?.registration.map(
-      registration => registration.student_id
-    ) || []
+    dataRegistration?.map(registration => registration.student_id) || []
 
   // Filtrar os estudantes que ainda não têm matrícula
   const studentsWithoutCourses =

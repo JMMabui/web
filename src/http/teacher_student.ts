@@ -1,4 +1,4 @@
-type dataschema = {
+export type dataschema = {
   teacher_id: string
   disciplineId: string
 }

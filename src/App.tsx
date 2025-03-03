@@ -27,6 +27,7 @@ import { Assign_subject } from './dashboard/CTA/academic_record/assign_subject'
 import { Diploma } from './dashboard/CTA/academic_record/documents/diploma'
 import { Certificate } from './dashboard/CTA/academic_record/documents/certificado'
 import { AddEnrollments } from './dashboard/CTA/academic_record/addEnrollment'
+import { Teachers } from './dashboard/Teacher/dashboard'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -58,6 +59,7 @@ export function App() {
             <Route path="courses" element={<CoursesDashboard />} />
             <Route path="courses/add-course" element={<AddCourse />} />
             <Route path="courses/add-subject" element={<AddSubject />} />
+            <Route path="courses/classes" element={<Classes />} />
             <Route path="students" element={<Students_ar />} />
             <Route path="students/new-student" element={<AddStudents />} />
             <Route path="teachers" element={<Teachers_ar />} />
@@ -76,6 +78,7 @@ export function App() {
             <Route path="reports" element={<Reports />} />
             <Route path="add_employee" element={<AddEmployee />} />
           </Route>
+          <Route path="/teacher" element={<Teachers />} />
           {/* Página do dashboard */}
         </Routes>
       </Router>

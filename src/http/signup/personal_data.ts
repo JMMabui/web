@@ -1,4 +1,4 @@
-type dataSchema = {
+type PersonalDataSchema = {
   surname: string
   name: string
   dataOfBirth: Date
@@ -28,7 +28,7 @@ type dataSchema = {
   login_id: string
 }
 
-type dataSchemaWithLogin = {
+export type PersonaldataWithLoginSchema = {
   surname: string
   name: string
   dataOfBirth: Date
@@ -78,7 +78,7 @@ export async function createStudentData({
   placeOfBirth,
   provincyAddress,
   surname,
-}: dataSchema) {
+}: PersonalDataSchema) {
   const response = await fetch(`${base_URL}/students`, {
     method: 'POST',
     headers: {
@@ -132,7 +132,7 @@ export async function addStudentData({
   surname,
   email,
   contact,
-}: dataSchemaWithLogin) {
+}: PersonaldataWithLoginSchema) {
   const response = await fetch(`${base_URL}/login-students`, {
     method: 'POST',
     headers: {

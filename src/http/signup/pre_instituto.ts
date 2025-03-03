@@ -1,4 +1,4 @@
-type dataSchema = {
+export type PreInstitutoSchema = {
   schoolLevel: 'CLASSE_10' | 'CLASSE_12' | 'LICENCIATURA'
   schoolName: string
   schoolProvincy:
@@ -23,7 +23,7 @@ export async function createPreInstituto({
   schoolName,
   schoolProvincy,
   student_id,
-}: dataSchema) {
+}: PreInstitutoSchema) {
   const response = await fetch(`${base_URL}/pre-instituto`, {
     method: 'POST',
     headers: {

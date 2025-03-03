@@ -1,5 +1,5 @@
 // Definindo os tipos para os dados que você espera receber
-type Course = {
+export type CourseSchema = {
   courseName: string
   levelCourse:
     | 'CURTA_DURACAO'
@@ -14,7 +14,7 @@ type StudentData = {
   id: string
   surname: string
   name: string
-  Registration: Course[]
+  Registration: CourseSchema[]
 }
 
 // Usando o tipo na função

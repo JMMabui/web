@@ -1,4 +1,4 @@
-type UserData = {
+export type SignupSchema = {
   email: string
   password: string
   contact: string
@@ -6,7 +6,11 @@ type UserData = {
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
-export async function signupRequest({ email, password, contact }: UserData) {
+export async function signupRequest({
+  email,
+  password,
+  contact,
+}: SignupSchema) {
   const response = await fetch(`${base_URL}/signup`, {
     method: 'POST',
     headers: {

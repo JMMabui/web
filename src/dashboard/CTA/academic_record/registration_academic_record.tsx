@@ -36,14 +36,12 @@ type registrationSchema = {
   confirmationDate: Date | null
 }
 
-type registrationResponse = {
-  registration: registrationSchema[]
-}
-
 export function Enrollment_Academic_Record() {
-  const [selectedCourse] = useState<string>('')
+  const [selectedCourse, setSelectedCourse] = useState<string>('')
   const [studentId, setStudentId] = useState<string>('')
-  const [studentData, setStudentData] = useState<any>()
+  const [studentData, setStudentData] = useState<registrationSchema | null>(
+    null
+  )
   const [isEnrollmentCompleted, setIsEnrollmentCompleted] = useState<
     boolean | null
   >(null)
@@ -55,37 +53,49 @@ export function Enrollment_Academic_Record() {
     data: dataRegistration,
     error: errorRegistration,
     isLoading: isLoadingRegistration,
-  } = useQuery<registrationResponse>({
+  } = useQuery<registrationSchema[]>({
     queryKey: ['matricula'],
     queryFn: getRegistration,
   })
 
   if (isLoadingRegistration) return <div>Carregando dados...</div>
-  if (errorRegistration instanceof Error)
-    return <div>Erro: {errorRegistration.message}</div>
-  if (!dataRegistration)
+  if (errorRegistration)
+    return (
+      <div>
+        Erro:{' '}
+        {errorRegistration instanceof Error
+          ? errorRegistration.message
+          : 'Erro desconhecido'}
+      </div>
+    )
+  if (!dataRegistration || dataRegistration.length === 0)
     return <div>Não há matrículas disponíveis no momento.</div>
 
-  const filteredStudents = dataRegistration.registration.filter(student => {
+  const filteredStudents = dataRegistration.filter(student => {
+    console.log(student)
     const matchesCourse =
       student.course.courseName === selectedCourse || !selectedCourse
     const matchesLevel =
-      student.course.levelCourse.includes(filterLevel) || !filterLevel
+      student.course.levelCourse === filterLevel || !filterLevel
     const matchesStatus =
-      student.registrationStatus.includes(filterStatus) || !filterStatus
+      student.registrationStatus === filterStatus || !filterStatus
     return matchesCourse && matchesLevel && matchesStatus
   })
 
-  const totalEnrolled = dataRegistration.registration.length
-  const totalCompleted = dataRegistration.registration.filter(
+  const totalEnrolled = dataRegistration.length
+  const totalCompleted = dataRegistration.filter(
     student => student.registrationStatus === 'CONFIRMADO'
   ).length
-  const totalPending = dataRegistration.registration.filter(
+  const totalPending = dataRegistration.filter(
     student => student.registrationStatus === 'PENDENTE'
   ).length
 
   const fetchStudentData = () => {
-    const student = dataRegistration.registration.find(
+    if (!studentId) {
+      alert('Por favor, insira um ID de estudante.')
+      return
+    }
+    const student = dataRegistration.find(
       student => student.student_id === studentId
     )
     if (student) {
@@ -98,21 +108,27 @@ export function Enrollment_Academic_Record() {
   }
 
   const validateEnrollment = async (studentId: string) => {
-    const student = dataRegistration.registration.find(
+    const student = dataRegistration.find(
       student => student.student_id === studentId
     )
     if (student) {
+      if (student.registrationStatus === 'CONFIRMADO') {
+        alert('Esta matrícula já está confirmada!')
+        return
+      }
       await validateRegistration(studentId)
       setIsEnrollmentCompleted(true)
       alert(
         `Matrícula de ${student.student.name} ${student.student.surname} validada!`
       )
+    } else {
+      alert('Estudante não encontrado.')
     }
   }
 
   return (
     <div className="w-full p-6 space-y-6 bg-gray-50 rounded-lg shadow-md">
-      {/* Filtros e pesquisa no topo */}
+      {/* Filtros e pesquisa */}
       <div className="flex justify-between items-center space-x-4">
         {/* Filtro de Status da Matrícula */}
         <div className="flex items-center space-x-2">
@@ -152,6 +168,26 @@ export function Enrollment_Academic_Record() {
           </select>
         </div>
 
+        {/* Filtro de Curso */}
+        <div className="flex items-center space-x-2">
+          <label htmlFor="course" className="text-sm font-semibold">
+            Curso:
+          </label>
+          <select
+            id="course"
+            className="border rounded p-2 text-sm"
+            value={selectedCourse}
+            onChange={e => setSelectedCourse(e.target.value)}
+          >
+            <option value="">Todos</option>
+            {dataRegistration.map((student, index) => (
+              <option key={index} value={student.course.courseName}>
+                {student.course.courseName}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Pesquisa de Estudante */}
         <div className="flex items-center space-x-2">
           <label htmlFor="studentId" className="text-sm font-semibold">
@@ -175,7 +211,7 @@ export function Enrollment_Academic_Record() {
         </div>
       </div>
 
-      {/* Cartões de Estatísticas com tamanho menor */}
+      {/* Cartões de Estatísticas */}
       <div className="grid grid-cols-3 gap-4 mt-6">
         <div className="bg-yellow-600 text-white p-4 rounded-lg shadow-lg text-center">
           <h3 className="text-sm font-semibold">Total de Matriculados</h3>
@@ -191,7 +227,7 @@ export function Enrollment_Academic_Record() {
         </div>
       </div>
 
-      {/* Tabela de Alunos Matriculados com scroll */}
+      {/* Tabela de Alunos Matriculados */}
       <div className="mt-6 overflow-y-auto max-h-96">
         <h3 className="text-xl font-semibold mb-4">Alunos Matriculados</h3>
         <table className="min-w-full mt-6 table-auto border-collapse border border-gray-300">
@@ -236,8 +272,11 @@ export function Enrollment_Academic_Record() {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="text-center py-2 text-sm">
-                  Nenhum aluno encontrado.
+                <td
+                  colSpan={4}
+                  className="text-center py-2 text-sm text-gray-500"
+                >
+                  Nenhum aluno encontrado com os filtros aplicados.
                 </td>
               </tr>
             )}
@@ -245,7 +284,7 @@ export function Enrollment_Academic_Record() {
         </table>
       </div>
 
-      {/* Exibir dados do estudante com scroll */}
+      {/* Exibir dados do estudante */}
       {studentData && (
         <div className="mt-6 p-6 border rounded-lg bg-gray-50 overflow-y-auto max-h-80">
           <h3 className="text-xl font-semibold">Dados do Estudante</h3>
@@ -254,33 +293,15 @@ export function Enrollment_Academic_Record() {
             {studentData.student.surname}
           </p>
           <p>
-            <strong>Data de Nascimento:</strong>{' '}
-            {studentData.student.dateOfBirth}
-          </p>
-          <p>
             <strong>Email:</strong> {studentData.student.email}
           </p>
           <p>
             <strong>Telefone:</strong> {studentData.student.phone}
           </p>
           <p>
-            <strong>Curso:</strong> {studentData.course.courseName}
-          </p>
-          <p>
             <strong>Status da Matrícula:</strong>{' '}
-            {isEnrollmentCompleted ? 'Completada' : 'Pendente'}
+            {studentData.registrationStatus}
           </p>
-
-          {/* Validar matrícula */}
-          {!isEnrollmentCompleted && (
-            <button
-              type="button"
-              onClick={() => validateEnrollment(studentData.student_id)}
-              className="mt-4 bg-green-600 text-white p-2 rounded-lg hover:bg-green-700"
-            >
-              Validar Matrícula
-            </button>
-          )}
         </div>
       )}
     </div>

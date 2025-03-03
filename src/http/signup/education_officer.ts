@@ -1,4 +1,4 @@
-type dataSchema = {
+export type EducationOfficerSchema = {
   fullName: string
   profession: string
   dataOfBirth: Date
@@ -32,7 +32,7 @@ export async function createEducationOfficer({
   fullName,
   profession,
   provincyAddress,
-}: dataSchema) {
+}: EducationOfficerSchema) {
   try {
     const response = await fetch(`${base_URL}/education_officer`, {
       method: 'POST',

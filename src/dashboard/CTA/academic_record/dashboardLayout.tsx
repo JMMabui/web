@@ -40,7 +40,10 @@ export function DashboardLayout2() {
           name: 'Adicionar Disciplina',
           route: '/academic_record/courses/add-subject',
         },
-        { name: 'Turmas', route: '/academic_record/courses/classes' },
+        {
+          name: 'Turmas',
+          route: '/academic_record/courses/classes',
+        },
       ],
     },
     {

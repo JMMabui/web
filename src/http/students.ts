@@ -1,3 +1,33 @@
+export type StudentsSchema = {
+  id: string
+  surname: string
+  name: string
+  dataOfBirth: Date
+  placeOfBirth: string
+  gender: 'MASCULINO' | 'FEMININO'
+  maritalStatus: 'SOLTEIRO' | 'CASADO' | 'DIVORCIADO' | 'VIUVO'
+  provincyAddress:
+    | 'MAPUTO_CIDADE'
+    | 'MAPUTO_PROVINCIA'
+    | 'GAZA'
+    | 'INHAMBANE'
+    | 'MANICA'
+    | 'SOFALA'
+    | 'TETE'
+    | 'ZAMBEZIA'
+    | 'NAMPULA'
+    | 'CABO_DELGADO'
+    | 'NIASSA'
+  address: string
+  fatherName: string
+  motherName: string
+  documentType: 'BI' | 'PASSAPORTE'
+  documentNumber: string
+  documentIssuedAt: Date
+  documentExpiredAt: Date
+  nuit: number
+}
+
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 export async function getStudents() {
