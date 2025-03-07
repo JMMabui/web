@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { getRegistration } from '@/http/registration'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import type { RegistrationSchema } from '../../../http/registration'
+import type { RegistrationResponse } from '../../../http/registration'
 
 export function Students_ar() {
   const [isAddingStudent] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStudent, setSelectedStudent] =
-    useState<RegistrationSchema | null>(null)
+    useState<RegistrationResponse | null>(null)
 
   const navegate = useNavigate()
 
@@ -16,7 +16,7 @@ export function Students_ar() {
     data: dataRegistration,
     error: RegistrationError,
     isLoading: isLoadingRegistration,
-  } = useQuery<RegistrationSchema[]>({
+  } = useQuery<RegistrationResponse[]>({
     queryKey: ['students_data'],
     queryFn: getRegistration,
   })
@@ -48,7 +48,7 @@ export function Students_ar() {
   const filteredStudents = registrationData?.filter(student => {
     const searchTermLower = searchTerm.toLowerCase()
     return (
-      student.student_id.toLowerCase().includes(searchTermLower) ||
+      student.student_id.includes(searchTermLower) ||
       student.student.name.toLowerCase().includes(searchTermLower) ||
       student.student.surname.toLowerCase().includes(searchTermLower)
     )

@@ -1,4 +1,4 @@
-export type StudentsSchema = {
+export type StudentsResponse = {
   id: string
   surname: string
   name: string

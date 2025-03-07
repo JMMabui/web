@@ -7,7 +7,6 @@ import { Pre_Instituto } from './registration/pre_institutos'
 import { Inscricao } from './registration/course'
 import { Invoice } from './registration/invoice'
 import { DashboardLayout2 } from './dashboard/CTA/academic_record/dashboardLayout'
-import { StudentProfile } from './dashboard/CTA/academic_record/student_profile'
 import { Dashboard_Human_Resourses } from './dashboard/CTA/human resources/dashboard_human_resourses'
 import { AddEmployee } from './dashboard/CTA/human resources/add_employee'
 import { EmployeeList } from './dashboard/CTA/human resources/list_employee'
@@ -18,16 +17,18 @@ import { Enrollment_Academic_Record } from './dashboard/CTA/academic_record/regi
 import { Students_ar } from './dashboard/CTA/academic_record/student_ar'
 import { Reports } from './dashboard/CTA/human resources/reports'
 import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
-import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 import { AddCourse } from './dashboard/CTA/academic_record/addCourse'
 import { AddSubject } from './dashboard/CTA/academic_record/addSubject'
 import { Classes } from './dashboard/CTA/academic_record/classes'
 import { Teachers_ar } from './dashboard/CTA/academic_record/teacher_AR'
-import { Assign_subject } from './dashboard/CTA/academic_record/assign_subject'
 import { Diploma } from './dashboard/CTA/academic_record/documents/diploma'
 import { Certificate } from './dashboard/CTA/academic_record/documents/certificado'
 import { AddEnrollments } from './dashboard/CTA/academic_record/addEnrollment'
 import { Teachers } from './dashboard/Teacher/dashboard'
+import { DashboardLayoutFinances } from './dashboard/CTA/finance/layout'
+import { DashboardFinances } from './dashboard/CTA/finance/dashboard'
+import { InvoicesFinances } from './dashboard/CTA/finance/invoices'
+import { PaymentsFinances } from './dashboard/CTA/finance/payments'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -58,7 +59,7 @@ export function App() {
             <Route path="dashboard" element={<AcademicRecord />} />
             <Route path="courses" element={<CoursesDashboard />} />
             <Route path="courses/add-course" element={<AddCourse />} />
-            <Route path="courses/add-subject" element={<AddSubject />} />
+            <Route path="courses/add-subject/:id?" element={<AddSubject />} />
             <Route path="courses/classes" element={<Classes />} />
             <Route path="students" element={<Students_ar />} />
             <Route path="students/new-student" element={<AddStudents />} />
@@ -80,6 +81,12 @@ export function App() {
           </Route>
           <Route path="/teacher" element={<Teachers />} />
           {/* Página do dashboard */}
+          {/* Pagina do dashboard para o departamento de finanças */}
+          <Route path="/finances" element={<DashboardLayoutFinances />}>
+            <Route path="dashboard" element={<DashboardFinances />} />
+            <Route path="invoices" element={<InvoicesFinances />} />
+            <Route path="payments" element={<PaymentsFinances />} />
+          </Route>
         </Routes>
       </Router>
     </div>

@@ -161,12 +161,6 @@ export function DashboardLayout2() {
       <div className="flex-1 flex flex-col">
         {/* Top Navigation */}
         <header className="flex items-center justify-between bg-white p-4 shadow">
-          <input
-            type="text"
-            placeholder="Search"
-            className="border rounded px-3 py-1 w-1/3"
-          />
-
           <div className="flex items-center gap-4">
             <Bell className="w-6 h-6 text-gray-600 cursor-pointer" />
             <div className="flex items-center gap-2 cursor-pointer">
@@ -175,7 +169,8 @@ export function DashboardLayout2() {
               ) : (
                 <DefaultAvatar />
               )}
-              <span className="font-medium">Almeida Tomas</span>
+              <span className="font-medium">Justino Mabui</span>
+              <span className="font-medium">- Tecnico de Informatica</span>
             </div>
           </div>
         </header>

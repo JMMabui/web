@@ -1,4 +1,4 @@
-export type SubjectsSchema = {
+export type SubjectsRequest = {
   codigo: string
   credits: number
   disciplineName: string
@@ -7,6 +7,18 @@ export type SubjectsSchema = {
   semester: 'PRIMEIRO_SEMESTRE' | 'SEGUNDO_SEMESTRE' // Corrigido para tipo literal
   year_study: 'PRIMEIRO_ANO' | 'SEGUNDO_ANO' | 'TERCEIRO_ANO' | 'QUARTO_ANO' // Corrigido para tipo literal
   courseId: string
+}
+export type subjectResponse = {
+  codigo: string
+  credits: number
+  disciplineName: string
+  disciplineType: 'NUCLEAR' | 'COMPLEMENTAR'
+  hcs: number
+  semester: 'PRIMEIRO_SEMESTRE' | 'SEGUNDO_SEMESTRE'
+  year_study: 'PRIMEIRO_ANO' | 'SEGUNDO_ANO' | 'TERCEIRO_ANO' | 'QUARTO_ANO'
+  courseId: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
@@ -20,7 +32,7 @@ export async function PostSubjects({
   credits,
   courseId,
   hcs,
-}: SubjectsSchema) {
+}: SubjectsRequest) {
   console.log(
     'Mandando para API:',
     codigo,

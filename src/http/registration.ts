@@ -1,9 +1,9 @@
-export type dataSchema = {
+export type RegistrationRequest = {
   course_id: string
   student_id: string
 }
 
-export type RegistrationSchema = {
+export type RegistrationResponse = {
   course_id: string
   student_id: string
   id: string
@@ -44,7 +44,10 @@ export async function getRegistration() {
   return data
 }
 
-export async function postRegistration({ course_id, student_id }: dataSchema) {
+export async function postRegistration({
+  course_id,
+  student_id,
+}: RegistrationRequest) {
   const response = await fetch(`${base_URL}/registration-status-confirmation`, {
     method: 'POST',
     headers: {
@@ -97,7 +100,10 @@ export async function validateRegistration(student_id: string) {
   return jsonResponse
 }
 
-export async function AddEnrollment({ course_id, student_id }: dataSchema) {
+export async function AddEnrollment({
+  course_id,
+  student_id,
+}: RegistrationRequest) {
   const response = await fetch(`${base_URL}/registration`, {
     method: 'POST',
     headers: {

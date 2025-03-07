@@ -1,7 +1,6 @@
 import { addCourse } from '@/http/courses'
 import { useMutation } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
 
 type CourseFormData = {
   courseName: string

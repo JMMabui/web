@@ -1,68 +1,12 @@
-import { getCourses } from '@/http/courses'
+import { type CourseResponse, getCourses } from '@/http/courses'
 import {
   getRegistration,
   AddEnrollment,
-  type RegistrationSchema,
+  type RegistrationResponse,
 } from '@/http/registration'
-import { getStudents } from '@/http/students'
+import { getStudents, type StudentsResponse } from '@/http/students'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-
-type Course = {
-  id: string
-  createdAt: Date
-  updatedAt: Date
-  courseName: string
-  courseDescription: string | null
-  courseDuration: number
-  levelCourse:
-    | 'CURTA_DURACAO'
-    | 'TECNICO_MEDIO'
-    | 'LICENCIATURA'
-    | 'MESTRADO'
-    | 'RELIGIOSO'
-  period: 'LABORAL' | 'POS_LABORAL'
-  totalVacancies: number
-  availableVacancies: number | null
-}
-
-type CourseResponse = {
-  course: Course[]
-}
-
-type StudentsSchema = {
-  id: string
-  surname: string
-  name: string
-  dataOfBirth: Date
-  placeOfBirth: string
-  gender: 'MASCULINO' | 'FEMININO'
-  maritalStatus: 'SOLTEIRO' | 'CASADO' | 'DIVORCIADO' | 'VIUVO'
-  provincyAddress:
-    | 'MAPUTO_CIDADE'
-    | 'MAPUTO_PROVINCIA'
-    | 'GAZA'
-    | 'INHAMBANE'
-    | 'MANICA'
-    | 'SOFALA'
-    | 'TETE'
-    | 'ZAMBEZIA'
-    | 'NAMPULA'
-    | 'CABO_DELGADO'
-    | 'NIASSA'
-  address: string
-  fatherName: string
-  motherName: string
-  documentType: 'BI' | 'PASSAPORTE'
-  documentNumber: string
-  documentIssuedAt: Date
-  documentExpiredAt: Date
-  nuit: number
-}
-
-type StudentsResponse = {
-  students: StudentsSchema[]
-}
 
 export function AddEnrollments() {
   const [selectedStudent, setSelectedStudent] = useState<string>('') // ID do estudante selecionado
@@ -75,23 +19,24 @@ export function AddEnrollments() {
     data: dataStudents,
     isLoading: isLoadingStudents,
     refetch: refetchStudents,
-  } = useQuery<StudentsResponse>({
+  } = useQuery<StudentsResponse[]>({
     queryKey: ['students_data'],
     queryFn: getStudents,
   })
 
   // Carregar os dados dos cursos
-  const { data: dataCourses, isLoading: isLoadingCourse } =
-    useQuery<CourseResponse>({
-      queryKey: ['course_data'],
-      queryFn: getCourses,
-    })
+  const { data: dataCourses, isLoading: isLoadingCourse } = useQuery<
+    CourseResponse[]
+  >({
+    queryKey: ['course_data'],
+    queryFn: getCourses,
+  })
 
   const {
     data: dataRegistration,
     isLoading: isLoadingRegistration,
     refetch: refetchRegistration,
-  } = useQuery<RegistrationSchema[]>({
+  } = useQuery<RegistrationResponse[]>({
     queryKey: ['matricula'],
     queryFn: getRegistration,
   })
@@ -106,7 +51,7 @@ export function AddEnrollments() {
 
   // Filtrar os estudantes que ainda não têm matrícula
   const studentsWithoutCourses =
-    dataStudents?.students.filter(
+    dataStudents?.filter(
       student => !registeredStudentIds.includes(student.id)
     ) || []
 
@@ -186,7 +131,7 @@ export function AddEnrollments() {
             className="w-full p-2 border border-gray-300 rounded-lg"
           >
             <option value="">Selecione um Curso</option>
-            {dataCourses?.course.map(course => (
+            {dataCourses?.map(course => (
               <option key={course.id} value={course.id}>
                 {course.levelCourse &&
                   course.levelCourse.charAt(0).toUpperCase() +

@@ -14,10 +14,10 @@ import {
 } from 'lucide-react'
 import logo from '../../assents/ismmalogo.png'
 import { AcademicRecord } from './academic_record/dashboard_academic_record'
-import { Finance } from './finance/dashboard_finance'
-import { Dashboard_Human_Resourses} from './human resources/dashboard_human_resourses'
+import { Dashboard_Human_Resourses } from './human resources/dashboard_human_resourses'
 import { Library_Departament } from './Library/dashboard_library'
 import { Enrollment_Academic_Record } from './academic_record/registration_academic_record'
+import { DashboardLayoutFinances } from './finance/layout'
 
 const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />
 
@@ -60,7 +60,7 @@ export function Dashboard_cta() {
       case 'Dashboard':
         return <div>Dashboard Content</div>
       case 'Financas':
-        return <Finance />
+        return <DashboardLayoutFinances />
       case 'Registro Academico':
         return <AcademicRecord />
       case 'Turmas':
