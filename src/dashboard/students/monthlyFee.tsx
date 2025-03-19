@@ -1,199 +1,328 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Button from '@/component/Button'
 
-export const MonthlyFee = () => {
-  // Dados simulados da mensalidade
-  const mensalidadeBase = 4500 // Valor base da mensalidade
-  const dataVencimento = '10/02/2025' // Data de vencimento da mensalidade
-
-  // Histórico de Pagamentos
-  const pagamentos = [
+export function MonthlyFee() {
+  const [showForm, setShowForm] = useState(false)
+  const [newInvoice, setNewInvoice] = useState<{
+    number: string
+    months: string[]
+    date: string
+    status: string
+  }>({
+    number: '',
+    months: [],
+    date: '',
+    status: 'Não Pago',
+  })
+  const [invoices, setInvoices] = useState([
     {
-      data: '01/01/2025',
-      valor: mensalidadeBase,
+      number: '001',
+      month: 'Abril',
+      date: '25/03/2025',
       status: 'Pago',
-      multa: false,
     },
     {
-      data: '01/02/2025',
-      valor: mensalidadeBase,
-      status: 'Pendente',
-      multa: true,
+      number: '002',
+      month: 'Maio',
+      date: '30/04/2025',
+      status: 'Não Pago',
     },
     {
-      data: '01/03/2025',
-      valor: mensalidadeBase,
+      number: '003',
+      month: 'Junho',
+      date: '01/06/2025',
       status: 'Pago',
-      multa: false,
     },
-  ]
+    {
+      number: '004',
+      month: 'Julho',
+      date: '15/07/2025',
+      status: 'Não Pago',
+    },
+    {
+      number: '005',
+      month: 'Agosto',
+      date: '20/08/2025',
+      status: 'Pago',
+    },
+    {
+      number: '006',
+      month: 'Setembro',
+      date: '30/09/2025',
+      status: 'Não Pago',
+    },
+  ])
 
-  // Definindo os meses
-  const meses = [
-    { mes: 'Janeiro', data: '01/01/2025' },
-    { mes: 'Fevereiro', data: '01/02/2025' },
-    { mes: 'Março', data: '01/03/2025' },
-    { mes: 'Abril', data: '01/04/2025' },
-    { mes: 'Maio', data: '01/05/2025' },
-    { mes: 'Junho', data: '01/06/2025' },
-    { mes: 'Julho', data: '01/07/2025' },
-    { mes: 'Agosto', data: '01/08/2025' },
-    { mes: 'Setembro', data: '01/09/2025' },
-    { mes: 'Outubro', data: '01/10/2025' },
-    { mes: 'Novembro', data: '01/11/2025' },
-    { mes: 'Dezembro', data: '01/12/2025' },
-  ]
+  // Função para calcular a data final (dia 5 do mês selecionado)
+  const getDueDate = (month: string): string => {
+    const currentYear = new Date().getFullYear()
+    const monthIndex = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ].indexOf(month)
 
-  const [mesesSelecionados, setMesesSelecionados] = useState<string[]>([])
-  const [valorTotal, setValorTotal] = useState(0)
-  const [mesSelecionado, setMesSelecionado] = useState<string | null>(null)
+    const dueDate = new Date(currentYear, monthIndex, 5) // Define o dia 5 para o mês escolhido
+    return dueDate.toISOString().split('T')[0] // Retorna no formato YYYY-MM-DD
+  }
 
-  // Função para calcular o total de pagamentos com base nos meses selecionados
-  const calcularTotalPagamento = () => {
-    let total = 0
-    let mesesComMulta = 0
+  // Função para obter o mês mais recente selecionado
+  const getMostRecentMonth = (months: string[]): string => {
+    const monthOrder = [
+      'Janeiro',
+      'Fevereiro',
+      'Março',
+      'Abril',
+      'Maio',
+      'Junho',
+      'Julho',
+      'Agosto',
+      'Setembro',
+      'Outubro',
+      'Novembro',
+      'Dezembro',
+    ]
 
-    // Contar quantos meses têm multa
-    mesesSelecionados.forEach(mes => {
-      const pagamento = pagamentos.find(pagamento =>
-        pagamento.data.includes(mes)
+    // Ordena os meses selecionados com base no índice do array
+    const sortedMonths = months.sort(
+      (a, b) => monthOrder.indexOf(b) - monthOrder.indexOf(a)
+    )
+    return sortedMonths[0] // Retorna o mês mais recente
+  }
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target
+    if (name === 'months') {
+      // Caso o campo seja meses, lidamos de forma diferente
+      const selectedMonths = Array.from(
+        (e.target as HTMLSelectElement).selectedOptions,
+        option => option.value
       )
-      if (pagamento) {
-        if (pagamento.multa) {
-          mesesComMulta++
-        }
 
-        // Se o status for 'Pendente', aplicamos a multa
-        const valorComMulta =
-          pagamento.status === 'Pendente'
-            ? mensalidadeBase * 1.5 // Multa de 50% se estiver pendente
-            : mensalidadeBase
-        total += valorComMulta
-      }
-    })
-
-    // Aplicando a regra de desconto com base no número de meses selecionados com multa
-    if (mesesSelecionados.length >= 3) {
-      // Desconto de multa para 3 meses ou mais
-      total -= mesesComMulta * (mensalidadeBase * 0.5) // Desconto de 50% para os meses com multa
-    }
-
-    setValorTotal(total)
-  }
-
-  // Função para adicionar ou remover meses da seleção
-  const handleSelectMonth = (mes: string) => {
-    setMesSelecionado(mes) // Atualiza o mês selecionado
-
-    // Verifica se o mês já foi selecionado
-    setMesesSelecionados(prevState => {
-      const isSelected = prevState.includes(mes)
-      if (isSelected) {
-        return prevState.filter(month => month !== mes)
+      // Se houver múltiplos meses selecionados, atualiza a data de vencimento para o mês mais recente
+      if (selectedMonths.length > 0) {
+        const mostRecentMonth = getMostRecentMonth(selectedMonths)
+        setNewInvoice(prevInvoice => ({
+          ...prevInvoice,
+          months: selectedMonths,
+          date: getDueDate(mostRecentMonth), // Calcula a data para o mês mais recente
+        }))
       } else {
-        return [...prevState, mes]
+        setNewInvoice(prevInvoice => ({
+          ...prevInvoice,
+          months: [],
+          date: '', // Limpa a data se nenhum mês for selecionado
+        }))
       }
-    })
+    } else {
+      setNewInvoice(prevInvoice => ({
+        ...prevInvoice,
+        [name]: value,
+      }))
+    }
   }
 
-  // Função para aplicar as regras de pagamento quando os meses selecionados mudam
-  useEffect(() => {
-    if (mesesSelecionados.length > 0) {
-      calcularTotalPagamento()
-    }
-  }, [mesesSelecionados])
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    console.log('Nova fatura criada:', newInvoice)
+
+    // Adiciona a nova fatura à lista de faturas
+    setInvoices(prevInvoices => [
+      ...prevInvoices,
+      ...newInvoice.months.map((month, index) => ({
+        number: (prevInvoices.length + index + 1).toString().padStart(3, '0'), // Gera um número único para cada nova fatura
+        month,
+        date: newInvoice.date,
+        status: newInvoice.status,
+      })),
+    ])
+
+    // Fechar o formulário após o envio
+    setShowForm(false)
+    // Limpar os campos do formulário
+    setNewInvoice({
+      number: '',
+      months: [],
+      date: '',
+      status: 'Não Pago',
+    })
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-yellow-200 text-gray-800 rounded-md">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-semibold mb-2">Gestão de Mensalidade</h1>
-        <p className="text-lg">
-          Acompanhe a sua mensalidade e selecione as mensalidades que deseja
-          pagar.
-        </p>
-      </div>
-
-      {/* Seleção de Meses */}
-      <div className="bg-yellow-300 p-4 rounded-lg shadow-md mb-6">
-        <h3 className="text-xl font-semibold mb-2">
-          Selecione os Meses para Pagamento
-        </h3>
-        <div className="grid grid-cols-3 gap-4">
-          {meses.map((mes, index) => (
-            <button
-              type="button"
-              key={index}
-              className={`p-2 rounded-md ${mesesSelecionados.includes(mes.mes) ? 'bg-green-600 text-white' : 'bg-gray-300'}`}
-              onClick={() => handleSelectMonth(mes.mes)}
-            >
-              {mes.mes}
-            </button>
-          ))}
+    <div className="flex w-full justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl">
+        {/* Lista de faturas */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            Facturas
+          </h2>
+          <div
+            className="space-y-4 overflow-y-auto"
+            style={{ maxHeight: '400px' }} // Limita a altura e ativa o scroll
+          >
+            {invoices.map((invoice, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center bg-gray-50 p-4 rounded-lg shadow-sm"
+              >
+                <div>
+                  <h3 className="font-bold text-lg text-gray-800">
+                    Mensalidade Nº {invoice.number}
+                  </h3>
+                  <p className="text-gray-600">Mes: {invoice.month}</p>
+                  <p className="text-gray-600">Data: {invoice.date}</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <span
+                    className={`text-xl font-semibold ${
+                      invoice.status === 'Pago'
+                        ? 'text-green-500'
+                        : 'text-red-500'
+                    }`}
+                  >
+                    {invoice.status}
+                  </span>
+                  <Button variant="secondary">Detalhe</Button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Detalhes do Mês Selecionado */}
-      {mesSelecionado && (
-        <div className="bg-yellow-300 p-4 rounded-lg shadow-md mb-6">
-          <h3 className="text-xl font-semibold mb-2">
-            Detalhes do Mês Selecionado
-          </h3>
-          <p>
-            <strong>Mês:</strong> {mesSelecionado}
-          </p>
-          <p>
-            <strong>Data de Vencimento:</strong> {dataVencimento}
-          </p>
-          <p>
-            <strong>Status:</strong>{' '}
-            {
-              pagamentos.find(pagamento =>
-                pagamento.data.includes(mesSelecionado)
-              )?.status
-            }
-          </p>
-          <p>
-            <strong>Multa:</strong>{' '}
-            {pagamentos.find(pagamento =>
-              pagamento.data.includes(mesSelecionado)
-            )?.multa
-              ? 'Sim'
-              : 'Não'}
-          </p>
-          <p>
-            <strong>Total a Pagar:</strong>{' '}
-            {mensalidadeBase +
-              (pagamentos.find(pagamento =>
-                pagamento.data.includes(mesSelecionado)
-              )?.multa
-                ? mensalidadeBase * 0.5
-                : 0)}{' '}
-            MZN
-          </p>
+        {/* Botão para adicionar nova fatura */}
+        <div className="mt-6 text-center">
+          <Button
+            className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+            onClick={() => setShowForm(true)}
+          >
+            Gerar nova fatura
+          </Button>
         </div>
-      )}
 
-      {/* Valor Total a Pagar */}
-      <div className="bg-yellow-300 p-4 rounded-lg shadow-md mb-6">
-        <h3 className="text-xl font-semibold mb-2">Valor Total a Pagar</h3>
-        <p>
-          <strong>Total:</strong> {valorTotal.toFixed(2)} MZN
-        </p>
-        <p>
-          {mesesSelecionados.length >= 3
-            ? 'Ao pagar 3 meses, você está isento de multas em dois meses.'
-            : 'Se pagar apenas um mês, a multa será aplicada se houver atraso.'}
-        </p>
-      </div>
-
-      {/* Botão de pagamento */}
-      <div className="text-center">
-        <button
-          type="button"
-          className="w-full bg-green-600 text-white p-3 rounded-md hover:bg-green-700"
-        >
-          Pagar Mensalidades Selecionadas
-        </button>
+        {/* Formulário de criação de fatura */}
+        {showForm && (
+          <div className="mt-8 bg-gray-50 p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Criar Nova Fatura
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="number"
+                  className="block text-sm font-semibold text-gray-700"
+                >
+                  Número de Meses
+                </label>
+                <input
+                  type="number"
+                  id="number"
+                  name="number"
+                  min="1"
+                  value={newInvoice.number}
+                  onChange={handleInputChange}
+                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="months"
+                  className="block text-sm font-semibold text-gray-700"
+                >
+                  Selecione os Meses
+                </label>
+                <select
+                  id="months"
+                  name="months"
+                  multiple
+                  value={newInvoice.months}
+                  onChange={handleInputChange}
+                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  {[
+                    'Janeiro',
+                    'Fevereiro',
+                    'Março',
+                    'Abril',
+                    'Maio',
+                    'Junho',
+                    'Julho',
+                    'Agosto',
+                    'Setembro',
+                    'Outubro',
+                    'Novembro',
+                    'Dezembro',
+                  ].map(month => (
+                    <option key={month} value={month}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="date"
+                  className="block text-sm font-semibold text-gray-700"
+                >
+                  Data de Vencimento
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={newInvoice.date}
+                  onChange={handleInputChange}
+                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-semibold text-gray-700"
+                >
+                  Status
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={newInvoice.status}
+                  onChange={handleInputChange}
+                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="Pago">Pago</option>
+                  <option value="Não Pago">Não Pago</option>
+                </select>
+              </div>
+              <div className="mt-4 flex justify-end space-x-4">
+                <Button
+                  className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition duration-300"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancelar
+                </Button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+                >
+                  Criar Fatura
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   )

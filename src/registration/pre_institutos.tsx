@@ -80,6 +80,7 @@ export function Pre_Instituto() {
   const navigate = useNavigate()
 
   const studentId = getStudentIdFromStorage()
+  console.log("student id", studentId)
 
   const {
     register,

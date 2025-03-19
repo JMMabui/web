@@ -34,6 +34,8 @@ export function AcademicRecord() {
     queryFn: getCourses,
   })
 
+  console.log(dataCourses)
+
   const {
     data: dataStudents,
     error: studentError,
@@ -52,53 +54,52 @@ export function AcademicRecord() {
     queryFn: getRegistration,
   })
 
+  // Verificação de carregamento e erro
   if (isLoadingCourse || isLoadingStudents || isLoadingRegistration) {
     return <div>Carregando...</div>
   }
 
-  if (
-    coursesError instanceof Error ||
-    studentError instanceof Error ||
-    errorRegistration instanceof Error
-  ) {
-    return (
-      <div>
-        Erro:{' '}
-        {coursesError?.message ||
-          studentError?.message ||
-          errorRegistration?.message}
-      </div>
-    )
+  const errors = [coursesError, studentError, errorRegistration]
+    .filter((err) => err instanceof Error)
+    .map((err) => err?.message)
+    .join(', ')
+
+  if (errors) {
+    return <div>Erro: {errors}</div>
   }
 
-  const totalStudents =
-    dataStudents && Array.isArray(dataStudents) ? dataStudents.length : 0
-
+  // Cálculos
+  const totalStudents = dataStudents?.length ?? 0
   const studentsRegistered =
     dataRegistration?.filter(
-      student => student.registrationStatus === 'CONFIRMADO'
-    ).length || 0
+      (student) => student.registrationStatus === 'CONFIRMADO'
+    ).length ?? 0
   const studentsPending =
     dataRegistration?.filter(
-      student => student.registrationStatus === 'PENDENTE'
-    ).length || 0
-  const totalCourses = dataCourses?.length || 0
+      (student) => student.registrationStatus === 'PENDENTE'
+    ).length ?? 0
+  const totalCourses = dataCourses?.length ?? 0
 
   const totalAvailableSlots =
-    dataCourses?.reduce((acc, course) => acc + course.totalVacancies, 0) || 0
+  Array.isArray(dataCourses) 
+    ? dataCourses.reduce((acc, course) => acc + course.totalVacancies, 0) 
+    : 0; 
 
   const totalEnrolledSlots =
-    dataRegistration?.filter(student => student.registrationStatus).length || 0
+    dataRegistration?.filter(
+      (student) => student.registrationStatus === 'CONFIRMADO'
+    ).length ?? 0
 
   const availableSlots = totalAvailableSlots - totalEnrolledSlots
 
+  // Filtragem de cursos
   const filteredCourses = dataCourses?.filter(
-    course =>
-      (selectedLevelCourse
-        ? course.levelCourse === selectedLevelCourse
-        : true) && (selectedPeriod ? course.period === selectedPeriod : true)
+    (course) =>
+      (selectedLevelCourse ? course.levelCourse === selectedLevelCourse : true) &&
+      (selectedPeriod ? course.period === selectedPeriod : true)
   )
 
+  // Agrupamento de alunos por curso
   const groupedByCourse = dataRegistration?.reduce<
     Record<string, RegistrationResponse[]>
   >((acc, student) => {
@@ -165,7 +166,7 @@ export function AcademicRecord() {
             <select
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
               value={selectedLevelCourse}
-              onChange={e => setSelectedLevelCourse(e.target.value as any)}
+              onChange={(e) => setSelectedLevelCourse(e.target.value as any)}
             >
               <option value="">Selecione o Nível</option>
               <option value="LICENCIATURA">Licenciatura</option>
@@ -181,7 +182,7 @@ export function AcademicRecord() {
             <select
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
               value={selectedPeriod}
-              onChange={e => setSelectedPeriod(e.target.value as any)}
+              onChange={(e) => setSelectedPeriod(e.target.value as any)}
             >
               <option value="">Selecione o Período</option>
               <option value="LABORAL">Laboral</option>
@@ -197,11 +198,11 @@ export function AcademicRecord() {
         <select
           className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
           value={selectedCourse}
-          onChange={e => setSelectedCourse(e.target.value)}
+          onChange={(e) => setSelectedCourse(e.target.value)}
         >
           <option value="">Selecione um curso</option>
           {filteredCourses?.length ? (
-            filteredCourses.map(course => (
+            filteredCourses.map((course) => (
               <option key={course.id} value={course.courseName}>
                 {course.levelCourse} em {course.courseName} - {course.period}
               </option>

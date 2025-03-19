@@ -9,7 +9,7 @@ import {
   User2Icon,
   ChevronDown,
 } from 'lucide-react'
-import logo from '../../../assents/ismmalogo.png'
+import logo from '../../../assets/ismmalogo.png'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />

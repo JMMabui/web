@@ -9,10 +9,9 @@ import {
   UserCircle,
   ChevronDown,
 } from 'lucide-react'
-import logo from '../../../assents/ismmalogo.png'
+import logo from '../../../assets/ismmalogo.png'
 import { Outlet, useNavigate } from 'react-router-dom'
 
-const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />
 
 export function DashboardLayoutFinances() {
   const [active, setActive] = useState('Dashboard')
@@ -111,11 +110,6 @@ export function DashboardLayoutFinances() {
       <div className="flex-1 flex flex-col">
         {/* Top Navigation */}
         <header className="flex items-center justify-between bg-white p-4 shadow-md">
-          {/* <input
-            type="text"
-            placeholder="Buscar..."
-            className="border rounded px-3 py-1 w-1/3 focus:outline-none focus:ring focus:border-blue-300"
-          /> */}
           <div className="flex items-center gap-4">
             <Bell className="w-6 h-6 text-gray-600 cursor-pointer hover:text-gray-800" />
             <div className="flex items-center gap-2 cursor-pointer">

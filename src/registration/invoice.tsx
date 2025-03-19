@@ -1,7 +1,7 @@
 import { getRegistration } from '@/http/registration';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import logo from '../assents/ismmalogo.png';
+import logo from '../assets/ismmalogo.png';
 import jsPDF from 'jspdf';
 
 type Registration = {
@@ -172,7 +172,7 @@ export function Invoice() {
         </div>
       </div>
 
-      <button className="mt-4 p-2 bg-blue-600 text-white rounded-md" onClick={downloadInvoice}>Baixar Resumo</button>
+      <button type="button" className="mt-4 p-2 bg-blue-600 text-white rounded-md" onClick={downloadInvoice}>Baixar Resumo</button>
     </div>
   );
 }

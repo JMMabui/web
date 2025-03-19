@@ -26,7 +26,7 @@ export const Header_Secondary = () => {
     )
 
   const student = data
-  const course = student?.Registration[0].course
+  const course = student?.Registration[0]?.course
 
   return (
     <header className="flex flex-col md:flex-row max-w-auto h-auto justify-between items-center p-3.5 bg-blue-500 text-white">
@@ -94,6 +94,10 @@ export const Header_Secondary = () => {
           <p>
             <strong>Ano:</strong> 2025
           </p>
+        </div>
+
+        <div>
+          <h2>Cadeiras Actuais</h2>
         </div>
       </div>
     </header>

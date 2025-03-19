@@ -1,178 +1,173 @@
+import { getAssessmentResultByStudentId } from '@/http/assessment'
+import { getStudentsSubjectsById } from '@/http/students-subjects'
+import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-export const Assessments = () => {
-  const [cadeiraSelecionada, setCadeiraSelecionada] = useState<string>('')
-  const [avaliacoes, setAvaliacoes] = useState<Array<any>>([])
-  const [frequencia, setFrequencia] = useState<any>({})
+export function Assessments() {
+  // Estado para a disciplina selecionada e seu código
+  const [selectedSubject, setSelectedSubject] = useState<string>('')
+  const [selectedSubjectCode, setSelectedSubjectCode] = useState<string>('') // Adicionando estado para armazenar o código da disciplina
+  const id = localStorage.getItem('student_login_id')
 
-  // Dados simulados das avaliações
-  const avaliacoesPorCadeira: Record<string, Array<any>> = {
-    'Matemática 1': [
-      { data: '01/12/2024', tipo: 'Prova', nota: 17, peso: 40 },
-      { data: '15/12/2024', tipo: 'Trabalho', nota: 18, peso: 60 },
-    ],
-    'Física 1': [
-      { data: '10/12/2024', tipo: 'Prova', nota: 14, peso: 50 },
-      { data: '20/12/2024', tipo: 'Experimento', nota: 16, peso: 50 },
-    ],
-    'Cultura 1': [
-      { data: '10/12/2024', tipo: 'Prova', nota: 10, peso: 50 },
-      { data: '20/12/2024', tipo: 'Experimento', nota: 10, peso: 50 },
-    ],
+  // Obtendo os dados das disciplinas
+  const {
+    data: dataSubjects,
+    isLoading: isLoadingSubjects,
+    error: errorSubjects,
+  } = useQuery({
+    queryKey: ['subject'],
+    queryFn: () => getStudentsSubjectsById(id),
+  })
+
+  // console.log('Disciplinas:', dataSubjects)
+
+  // Obtendo os resultados de avaliação de todos os estudantes
+  const {
+    data: dataAssessmentResultById,
+    isLoading: isLoadingAssessmentResult,
+    error: errorAssessmentResult,
+  } = useQuery({
+    queryKey: ['assessmentstudent'],
+    queryFn: () => getAssessmentResultByStudentId(id),
+  })
+
+  // console.log('Resultados de avaliação:', dataAssessmentResultById)
+
+  if (isLoadingSubjects || isLoadingAssessmentResult) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg text-gray-600">Carregando...</div>
+      </div>
+    )
   }
 
-  // Dados simulados de frequência
-  const frequenciasPorCadeira: Record<string, any> = {
-    'Matemática 1': {
-      docente: 'Prof. João Silva',
-      media: 12,
-      situacao: 'Admitido',
-      notaExame: 16,
-    },
-    'Física 1': {
-      docente: 'Prof. Maria Souza',
-      media: 9,
-      situacao: 'Excluído',
-      notaExame: 0,
-    },
-    'Cultura 1': {
-      docente: 'Prof. Alberto',
-      media: 10,
-      situacao: 'Admitido',
-      notaExame: 5,
-    },
+  if (errorSubjects) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg text-red-600">
+          Erro ao carregar as disciplinas
+        </div>
+      </div>
+    )
   }
 
-  // Função para lidar com a seleção da cadeira
-  const handleSelectCadeira = (cadeira: string) => {
-    setCadeiraSelecionada(cadeira)
-    setAvaliacoes(avaliacoesPorCadeira[cadeira] || [])
-    setFrequencia(frequenciasPorCadeira[cadeira] || {})
+  if (errorAssessmentResult) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-lg text-red-600">
+          Erro ao carregar os resultados da avaliação
+        </div>
+      </div>
+    )
   }
 
-  // Função para verificar a situação do exame
-  const verificarSituacaoExame = (notaExame: number) => {
-    const notaMinima = 10
-    if (notaExame < notaMinima) {
-      return 'Exame de Recorrência'
+  // Função para selecionar uma disciplina e atualizar o código da disciplina
+  const handleSelectSubject = (subjectId: string, subjectCode: string) => {
+    setSelectedSubject(subjectId)
+    setSelectedSubjectCode(subjectCode) // Atualizando o código da disciplina
+  }
+
+  // console.log('selectedSubject:', selectedSubject)
+  // console.log('selectedSubjectCode:', selectedSubjectCode) // Verificando o código da disciplina
+  const filteredSubjects = dataSubjects?.filter(
+    subjects =>
+      subjects.status === 'INSCRITO' && subjects.result === 'REPROVADO'
+  )
+  console.log('Filtered subjects:', filteredSubjects)
+
+  // Filtrando os resultados de avaliação para a disciplina selecionada
+  const filteredAssessmentResults = dataAssessmentResultById?.filter(
+    assessmentResult => {
+      return assessmentResult.assessment.subjectId === selectedSubjectCode
     }
-    return 'Aprovado'
-  }
+  )
 
-  // Função para verificar a situação final
-  const verificarSituacaoFinal = (
-    mediaFrequencia: number,
-    notaExame: number
-  ) => {
-    const notaMinima = 10
-    if (mediaFrequencia >= 10 && notaExame >= notaMinima) {
-      return 'Aprovado'
-    }
-    if (notaExame >= notaMinima) {
-      return 'Aprovado após Recorrência'
-    }
-    return 'Reprovado'
-  }
+  // console.log('Resultados filtrados:', filteredAssessmentResults)
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-yellow-200 text-black rounded-md">
-      <h2 className="text-2xl font-semibold mb-4">
-        Selecione uma Cadeira para Ver as Avaliações
-      </h2>
+    <div className="w-full mx-auto p-6 bg-white shadow-md rounded-lg">
+      <h1 className="text-3xl font-bold text-center text-amber-600 mb-6">
+        Avaliações
+      </h1>
 
-      <div className="mb-4">
-        <label htmlFor="cadeira" className="block text-lg font-medium mb-2">
-          Cadeira:
-        </label>
+      {/* Lista de disciplinas */}
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">
+          Escolha uma disciplina
+        </h2>
         <select
-          id="cadeira"
-          value={cadeiraSelecionada}
-          onChange={e => handleSelectCadeira(e.target.value)}
-          className="w-full p-2 rounded-md bg-yellow-300 text-black"
+          onChange={e => {
+            const selectedSubjectId = e.target.value
+            const selectedSubjectData = dataSubjects?.find(
+              subject => subject.id === selectedSubjectId
+            )
+            if (selectedSubjectData) {
+              handleSelectSubject(
+                selectedSubjectId,
+                selectedSubjectData.disciplineId
+              ) // Passando o código da disciplina
+            }
+          }}
+          value={selectedSubject}
+          className="w-full text-gray-700 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">Selecione a cadeira</option>
-          {Object.keys(avaliacoesPorCadeira).map(cadeira => (
-            <option key={cadeira} value={cadeira}>
-              {cadeira}
+          <option value="">Selecione uma disciplina</option>
+          {filteredSubjects?.map(subject => (
+            <option key={subject.id} value={subject.id}>
+              {subject.disciplineId} - {subject.discipline.disciplineName}
             </option>
           ))}
         </select>
       </div>
 
-      {cadeiraSelecionada && (
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold">
-            Avaliações para {cadeiraSelecionada}:
-          </h3>
-          <table className="min-w-full mt-4 border-collapse border border-yellow-500">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 border bg-yellow-300">Data</th>
-                <th className="px-4 py-2 border bg-yellow-300">
-                  Tipo de Avaliação
-                </th>
-                <th className="px-4 py-2 border bg-yellow-300">Nota (0-20)</th>
-                <th className="px-4 py-2 border bg-yellow-300">Peso (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {avaliacoes.length > 0 ? (
-                avaliacoes.map((avaliacao, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-2 border">{avaliacao.data}</td>
-                    <td className="px-4 py-2 border">{avaliacao.tipo}</td>
-                    <td className="px-4 py-2 border">{avaliacao.nota}</td>
-                    <td className="px-4 py-2 border">{avaliacao.peso}%</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="px-4 py-2 text-center border">
-                    Nenhuma avaliação disponível.
+      {/* Exibindo o código da disciplina selecionada */}
+      {selectedSubject && selectedSubjectCode && (
+        <div className="mb-6 text-lg text-gray-700">
+          <strong>Código da Disciplina:</strong> {selectedSubjectCode}
+        </div>
+      )}
+
+      {/* Tabela de resultados da avaliação */}
+      <div className="overflow-x-auto">
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">
+          Resultados da Avaliação
+        </h2>
+        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+          <thead className="bg-amber-500 text-white">
+            <tr>
+              <th className="p-3 border-b">Disciplina</th>
+              <th className="p-3 border-b">Nota</th>
+              <th className="p-3 border-b">Data da Avaliação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Exibindo os resultados filtrados */}
+            {Array.isArray(filteredAssessmentResults) &&
+              filteredAssessmentResults.length > 0 &&
+              filteredAssessmentResults.map(assessmentResult => (
+                <tr key={assessmentResult.id}>
+                  <td className="p-3 border-b text-gray-700">
+                    {assessmentResult.assessment.name}
+                  </td>
+                  <td className="p-3 border-b text-gray-700">
+                    {assessmentResult.grade}
+                  </td>
+                  <td className="p-3 border-b text-gray-700">
+                    {new Date(assessmentResult.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {cadeiraSelecionada && frequencia && (
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold">
-            Frequência para {cadeiraSelecionada}:
-          </h3>
-          <p>
-            <strong>Docente:</strong> {frequencia.docente}
-          </p>
-          <p>
-            <strong>Média de Frequência:</strong> {frequencia.media}
-          </p>
-          <p>
-            <strong>Situação:</strong>{' '}
-            {frequencia.situacao === 'Admitido' ? 'Admitido' : 'Excluído'}
-          </p>
-
-          {(frequencia.situacao === 'Admitido' ||
-            frequencia.situacao === 'Exame de Recorrência') &&
-            frequencia.notaExame !== undefined && (
-              <>
-                <p>
-                  <strong>Nota do Exame:</strong> {frequencia.notaExame}
-                </p>
-                <p>
-                  <strong>Situação do Exame:</strong>{' '}
-                  {verificarSituacaoExame(frequencia.notaExame)}
-                </p>
-              </>
+              ))}
+            {/* Caso não haja resultados para a disciplina selecionada */}
+            {filteredAssessmentResults?.length === 0 && (
+              <tr>
+                <td colSpan={3} className="p-3 text-center text-gray-700">
+                  Nenhum resultado encontrado para esta disciplina.
+                </td>
+              </tr>
             )}
-
-          <p>
-            <strong>Situação Final:</strong>{' '}
-            {verificarSituacaoFinal(frequencia.media, frequencia.notaExame)}
-          </p>
-        </div>
-      )}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

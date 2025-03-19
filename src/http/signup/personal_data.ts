@@ -79,6 +79,8 @@ export async function createStudentData({
   provincyAddress,
   surname,
 }: PersonalDataSchema) {
+  console.log("enviando para api", login_id)
+
   const response = await fetch(`${base_URL}/students`, {
     method: 'POST',
     headers: {
@@ -103,15 +105,16 @@ export async function createStudentData({
       surname,
     }),
   })
+
   if (!response.ok) {
-    throw new Error('Erro ao enviar dados')
+    // throw new Error('Erro ao enviar dados')
+    const errorData = await response.json();
+    console.error('Error:', errorData);
   }
   const jsonResponse = await response.json()
   console.log('Resposta da API:', jsonResponse) // Verifique o que está sendo retornado
-  const studentId = jsonResponse.student.id
-  console.log('ID do estudante:', studentId) // Aqui você tem o id
 
-  return studentId
+  return jsonResponse.students
 }
 
 export async function addStudentData({
@@ -163,8 +166,6 @@ export async function addStudentData({
   }
   const jsonResponse = await response.json()
   console.log('Resposta da API:', jsonResponse) // Verifique o que está sendo retornado
-  const studentId = jsonResponse.student.id
-  console.log('ID do estudante:', studentId) // Aqui você tem o id
 
-  return jsonResponse.student
+  return jsonResponse
 }

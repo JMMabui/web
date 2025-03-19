@@ -12,7 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-import logo from '../../assents/ismmalogo.png'
+import logo from '../../assets/ismmalogo.png'
 import { AcademicRecord } from './academic_record/dashboard_academic_record'
 import { Dashboard_Human_Resourses } from './human resources/dashboard_human_resourses'
 import { Library_Departament } from './Library/dashboard_library'

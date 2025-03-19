@@ -72,6 +72,7 @@ export function Personal_data() {
   type dataSchema = z.infer<typeof schema>
 
   const loginId = getLoginIdFromStorage()
+  console.log('login id:', loginId)
 
   const {
     register,
@@ -107,10 +108,10 @@ export function Personal_data() {
         login_id: loginId, // Certifique-se de que loginId esteja disponível no seu escopo
       })
 
-      // console.log('Dados enviados com sucesso', studentResponse)
+      console.log('Dados enviados com sucesso', studentResponse)
 
       // Agora você pode armazenar o ID no localStorage ou fazer qualquer outra ação necessária
-      localStorage.setItem('student_id', studentResponse.toString())
+      localStorage.setItem('student_id', studentResponse.id)
       navigate('/registration/pre-instituto')
     } catch (error) {
       console.error('Erro ao enviar os dados:', error)
@@ -522,7 +523,6 @@ export function Personal_data() {
           </button>
         </div>
       </form>
-
     </div>
   )
 }

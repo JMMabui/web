@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { signupRequest } from '@/http/signup/login-signup'
 import { loginRequest } from '@/http/signup/login'
-import logo from '../assents/ismmalogo.png'
+import logo from '../assets/ismmalogo.png'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
@@ -26,7 +26,7 @@ export function LoginForm() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('student_login_id', student_id)
       setMensagemErro('')
-      navigate('/dashboard/dashboard-empty')
+      navigate('/student/dashboard')
     },
   })
 

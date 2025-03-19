@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Users, FileText, PlusCircle, LogOut, Home, Bell, UserCircle } from 'lucide-react';
-import logo from '../../../assents/ismmalogo.png';
+import logo from '../../../assets/ismmalogo.png';
 import type { LucideProps } from 'lucide-react';
 
 const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />;

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { LoginForm } from './Login/loginForm'
-import { Dashboard_Empty } from './dashboard/students/dashboard-empty'
+import { LayoutStudents } from './dashboard/students/layoutStudent'
 import { Signup } from './registration/signup'
 import { Dashboard_cta } from './dashboard/CTA/dashboard'
 import { Pre_Instituto } from './registration/pre_institutos'
@@ -29,6 +29,11 @@ import { DashboardLayoutFinances } from './dashboard/CTA/finance/layout'
 import { DashboardFinances } from './dashboard/CTA/finance/dashboard'
 import { InvoicesFinances } from './dashboard/CTA/finance/invoices'
 import { PaymentsFinances } from './dashboard/CTA/finance/payments'
+import { DashboardStudents } from './dashboard/students/dashboard'
+import { Assessments } from './dashboard/students/assessments'
+import { MonthlyFee } from './dashboard/students/monthlyFee'
+import { Enrollments } from './dashboard/students/enrollments'
+import { LandingPage } from './website/landingPage'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -40,7 +45,7 @@ export function App() {
 
       <Router>
         <Routes>
-          <Route path="/" element={<DashboardLayout2 />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/registration" element={<Signup />} />
           <Route
@@ -49,10 +54,12 @@ export function App() {
           />
           <Route path="/registration/course" element={<Inscricao />} />
           <Route path="/registration/resume" element={<Invoice />} />
-          <Route
-            path="/dashboard/dashboard-empty"
-            element={<Dashboard_Empty />}
-          />{' '}
+          <Route path="/student" element={<LayoutStudents />}>
+            <Route path="dashboard" element={<DashboardStudents />} />
+            <Route path="assentiments" element={<Assessments />} />
+            <Route path="monthly-fee" element={<MonthlyFee />} />
+            <Route path="enrollment" element={<Enrollments />} />
+          </Route>
           <Route path="/dashboard_cta" element={<Dashboard_cta />} />
           {/* Pagina do dashboard para o departamento de registro academico */}
           <Route path="/academic_record" element={<DashboardLayout2 />}>

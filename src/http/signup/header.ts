@@ -1,20 +1,10 @@
-// Definindo os tipos para os dados que você espera receber
-export type CourseSchema = {
-  courseName: string
-  levelCourse:
-    | 'CURTA_DURACAO'
-    | 'TECNICO_MEDIO'
-    | 'LICENCIATURA'
-    | 'MESTRADO'
-    | 'RELIGIOSO'
-  period: 'LABORAL' | 'POS_LABORAL'
-}
+import type { RegistrationResponse } from '../registration'
 
 type StudentData = {
   id: string
   surname: string
   name: string
-  Registration: CourseSchema[]
+  Registration: RegistrationResponse[]
 }
 
 // Usando o tipo na função
@@ -25,7 +15,7 @@ export async function getStudentData(id: string | null): Promise<StudentData> {
     throw new Error('ID do estudante não pode ser nulo')
   }
 
-  const response = await fetch(`${base_URL}/students-course/${id}`)
+  const response = await fetch(`${base_URL}/student-course/${id}`)
 
   // Verificando a resposta da API
   if (!response.ok) {
@@ -33,7 +23,7 @@ export async function getStudentData(id: string | null): Promise<StudentData> {
   }
 
   const data = await response.json()
-  console.log('Resposta da API:', data)
+  // console.log('Resposta da API:', data)
 
   // Verificando a estrutura da resposta
   if (data?.student) {
