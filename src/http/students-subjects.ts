@@ -16,7 +16,7 @@ export type StudentsSubjectsResponse = {
     | 'TRANCADO'
     | 'INSCRITO'
     | 'NAO_INSCRITO'
-  result: 'APROVADO' | 'REPROVADO'
+  result: 'APROVADO' | 'REPROVADO ' | 'EM_ANDAMENTO'
   createdAt: Date
   updatedAt: Date | null
 }
@@ -26,7 +26,7 @@ export type StudentsSubjectsWithExtraDataResponse = {
 } & {
   student_id: string
   disciplineId: string
-  result: 'APROVADO' | 'REPROVADO'
+  result: 'APROVADO' | 'REPROVADO' | 'EM_ANDAMENTO'
   id: string
   status:
     | 'PENDENTE'
@@ -81,17 +81,19 @@ export async function createStudentsSubjects({
   }
 }
 
-export async function getStudentsSubjects() {
+export async function getStudentsSubjects(): Promise<
+  StudentsSubjectsResponse[]
+> {
   const response = await fetch(`${base_URL}/students_subjects`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
   console.log('Resposta da API:', data)
-  return data
+  return data as StudentsSubjectsResponse[]
 }
 
-export async function getStudentsSubjectsById(
+export async function getStudentsSubjectsByStudentId(
   id: string | null
 ): Promise<StudentsSubjectsWithExtraDataResponse[]> {
   try {
@@ -109,7 +111,7 @@ export async function getStudentsSubjectsById(
     const data = await response.json()
 
     // Exibindo os dados para depuração
-    // console.log('Subjects API response:', data)
+    console.log('Subjects API response:', data)
 
     // Verificando se a resposta contém dados válidos
     if (!data || !Array.isArray(data)) {

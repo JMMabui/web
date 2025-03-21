@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  createPreInstituto,
-} from '@/http/signup/pre_instituto'
+import { createPreInstituto } from '@/http/signup/pre_instituto'
 import { Education_Officer } from './education_officer'
 import { useNavigate } from 'react-router-dom'
 
@@ -35,31 +33,6 @@ const schema = z.object({
     }
   ),
 })
-
-// type PreInstituto = {
-//   student_id: string
-//   id: string
-//   createdAt: Date
-//   updatedAt: Date
-//   schoolLevel: 'CLASSE_10' | 'CLASSE_12' | 'LICENCIATURA'
-//   schoolName: string
-//   schoolProvincy:
-//     | 'MAPUTO_CIDADE'
-//     | 'MAPUTO_PROVINCIA'
-//     | 'GAZA'
-//     | 'INHAMBANE'
-//     | 'MANICA'
-//     | 'SOFALA'
-//     | 'TETE'
-//     | 'ZAMBEZIA'
-//     | 'NAMPULA'
-//     | 'CABO_DELGADO'
-//     | 'NIASSA'
-// }
-// type PreInstitutoResponse = {
-//   preInstituto: PreInstituto[]
-// }
-
 type DataSchema = z.infer<typeof schema>
 
 // Função para obter o ID do estudante do localStorage
@@ -71,7 +44,6 @@ const getStudentIdFromStorage = () => {
   return studentId
 }
 
-
 export function Pre_Instituto() {
   const [nivelAcademico, setNivelAcademico] = useState('')
   const [provincia, setProvincia] = useState('')
@@ -80,7 +52,7 @@ export function Pre_Instituto() {
   const navigate = useNavigate()
 
   const studentId = getStudentIdFromStorage()
-  console.log("student id", studentId)
+  console.log('student id', studentId)
 
   const {
     register,
@@ -89,7 +61,6 @@ export function Pre_Instituto() {
   } = useForm<DataSchema>({
     resolver: zodResolver(schema), // Conecta o Zod com o React Hook Form
   })
-
 
   // Função para renderizar os campos de formulário
   const renderSelectField = (

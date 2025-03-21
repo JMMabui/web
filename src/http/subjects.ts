@@ -77,7 +77,7 @@ export async function PostSubjects({
   }
 }
 
-export async function getSubjects() {
+export async function getSubjects(): Promise<subjectResponse[]> {
   try {
     const response = await fetch(`${base_URL}/subjects`)
 
@@ -87,7 +87,7 @@ export async function getSubjects() {
 
     const data = await response.json()
     console.log('Resposta da API:', data)
-    return data
+    return data as subjectResponse[]
   } catch (error) {
     console.error('Erro ao buscar os dados:', error)
     throw error

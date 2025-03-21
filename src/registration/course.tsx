@@ -1,30 +1,8 @@
-import { getCourses } from '@/http/courses'
+import { type CourseResponse, getCourses } from '@/http/courses'
 import { getRegistration, postRegistration } from '@/http/registration'
 import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-
-type Course = {
-  id: string
-  createdAt: Date
-  updatedAt: Date
-  courseName: string
-  courseDescription: string | null
-  courseDuration: number
-  levelCourse:
-    | 'CURTA_DURACAO'
-    | 'TECNICO_MEDIO'
-    | 'LICENCIATURA'
-    | 'MESTRADO'
-    | 'RELIGIOSO'
-  period: 'LABORAL' | 'POS_LABORAL'
-  totalVacancies: number
-  availableVacancies: number | null
-}
-
-type CourseResponse = {
-  course: Course[]
-}
 
 type Registration = {
   course_id: string
@@ -38,13 +16,14 @@ type registrationResponse = {
 export function Inscricao() {
   const [selectedLevel, setSelectedLevel] = useState<string>('')
   const [selectedPeriod, setSelectedPeriod] = useState<string>('')
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
-  const [courses, setCourses] = useState<Course[]>([])
+  const [selectedCourse, setSelectedCourse] = useState<CourseResponse | null>(
+    null
+  )
+  const [courses, setCourses] = useState<CourseResponse[]>([])
   const [coursesByLevel, setCoursesByLevel] = useState<
-    Record<string, Course[]>
+    Record<string, CourseResponse[]>
   >({})
   const [message, setMessage] = useState<string | null>(null)
-
 
   const navigate = useNavigate()
 
@@ -56,10 +35,12 @@ export function Inscricao() {
     data: dataCourses,
     error: coursesError,
     isLoading: isLoadingCourse,
-  } = useQuery<CourseResponse>({
+  } = useQuery<CourseResponse[]>({
     queryKey: ['course_data'],
     queryFn: getCourses,
   })
+
+  console.log('Data courses:', dataCourses)
 
   const {
     data: dataRegistration,
@@ -72,10 +53,10 @@ export function Inscricao() {
 
   // 🔄 Agrupar cursos por nível acadêmico
   useEffect(() => {
-    if (dataCourses?.course) {
-      const groupedCourses: Record<string, Course[]> = {}
+    if (dataCourses) {
+      const groupedCourses: Record<string, CourseResponse[]> = {}
 
-      dataCourses.course.forEach(course => {
+      dataCourses.forEach(course => {
         if (!groupedCourses[course.levelCourse]) {
           groupedCourses[course.levelCourse] = []
         }
@@ -90,7 +71,7 @@ export function Inscricao() {
   if (coursesError instanceof Error)
     return <div>Erro: {coursesError.message}</div>
 
-  if (!dataCourses || !dataCourses.course || dataCourses.course.length === 0) {
+  if (!dataCourses || dataCourses.length === 0) {
     return <div>Não há cursos disponíveis no momento.</div>
   }
 
@@ -143,7 +124,7 @@ export function Inscricao() {
 
       if (existingRegistration) {
         // Encontrar o nome do curso ao qual o estudante já está inscrito
-        const registeredCourse = dataCourses?.course.find(
+        const registeredCourse = dataCourses?.find(
           course => course.id === existingRegistration.course_id
         )
 
@@ -305,7 +286,6 @@ export function Inscricao() {
       >
         Inscrever-se
       </button>
-
     </div>
   )
 }

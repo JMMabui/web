@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getStudentData } from '@/http/signup/header'
 import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { getStudentsSubjectsById } from '@/http/students-subjects'
+import { getStudentsSubjectsByStudentId } from '@/http/students-subjects'
 
 const NavbarLink = ({
   section,
@@ -38,21 +38,20 @@ export function LayoutStudents() {
       id ? getStudentData(id) : Promise.reject('ID não encontrado'),
     enabled: !!id, // Só executa a query se o ID existir
   })
+  console.log('Data:', data)
 
-  const {
-    data: dataSubject,
-    isLoading: isLoadingSubjects,
-    isError: isErrorSubjects,
-  } = useQuery({
+  const { data: dataSubject } = useQuery({
     queryKey: ['student_subjects', id],
     queryFn: () =>
-      id ? getStudentsSubjectsById(id) : Promise.reject('ID não encontrado'),
+      id
+        ? getStudentsSubjectsByStudentId(id)
+        : Promise.reject('ID não encontrado'),
     enabled: !!id, // Só executa a query se o ID existir
   })
 
   console.log('Data subjects:', dataSubject)
 
-  if (isLoading || isLoadingSubjects) {
+  if (isLoading) {
     return (
       <header className="flex justify-center items-center h-32 bg-gray-200 text-gray-700">
         <p>Carregando...</p>
@@ -60,7 +59,7 @@ export function LayoutStudents() {
     )
   }
 
-  if (isError || isErrorSubjects) {
+  if (isError) {
     return (
       <header className="flex justify-center items-center h-32 bg-gray-200 text-gray-700">
         <p>Ocorreu um erro ao carregar os dados.</p>
@@ -70,7 +69,7 @@ export function LayoutStudents() {
 
   const filteredSubjects = dataSubject?.filter(
     subjects =>
-      subjects.status === 'INSCRITO' && subjects.result === 'REPROVADO'
+      subjects.status === 'INSCRITO' && subjects.result === 'EM_ANDAMENTO'
   )
   console.log('Filtered subjects:', filteredSubjects)
 
@@ -166,18 +165,27 @@ export function LayoutStudents() {
           <h2 className="text-start font-semibold text-gray-800 mb-4">
             Cadeiras A Fazer
           </h2>
-          {Array.isArray(filteredSubjects) &&
-            filteredSubjects.length > 0 &&
-            filteredSubjects.map(assessmentResult => (
-              <tr key={assessmentResult.id}>
-                <td className="p-3 border-b text-gray-700">
-                  {assessmentResult.disciplineId}
-                </td>
-                <td className="p-3 border-b text-gray-700">
-                  {assessmentResult.discipline.disciplineName}
-                </td>
-              </tr>
-            ))}
+
+          {Array.isArray(filteredSubjects) && filteredSubjects.length > 0 ? (
+            <table className="min-w-full">
+              <tbody>
+                {filteredSubjects.map(assessmentResult => (
+                  <tr key={assessmentResult.id}>
+                    <td className="p-3 border-b text-gray-700">
+                      {assessmentResult.disciplineId}
+                    </td>
+                    <td className="p-3 border-b text-gray-700">
+                      {assessmentResult.discipline.disciplineName}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="text-center text-gray-500">
+              Nenhuma cadeira Inscrito.
+            </p>
+          )}
         </div>
       </div>
 

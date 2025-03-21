@@ -1,5 +1,5 @@
 import { getAssessmentResultByStudentId } from '@/http/assessment'
-import { getStudentsSubjectsById } from '@/http/students-subjects'
+import { getStudentsSubjectsByStudentId } from '@/http/students-subjects'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
@@ -16,7 +16,7 @@ export function Assessments() {
     error: errorSubjects,
   } = useQuery({
     queryKey: ['subject'],
-    queryFn: () => getStudentsSubjectsById(id),
+    queryFn: () => getStudentsSubjectsByStudentId(id),
   })
 
   // console.log('Disciplinas:', dataSubjects)
@@ -95,29 +95,36 @@ export function Assessments() {
         <h2 className="text-xl font-semibold text-gray-700 mb-3">
           Escolha uma disciplina
         </h2>
-        <select
-          onChange={e => {
-            const selectedSubjectId = e.target.value
-            const selectedSubjectData = dataSubjects?.find(
-              subject => subject.id === selectedSubjectId
-            )
-            if (selectedSubjectData) {
-              handleSelectSubject(
-                selectedSubjectId,
-                selectedSubjectData.disciplineId
-              ) // Passando o código da disciplina
-            }
-          }}
-          value={selectedSubject}
-          className="w-full text-gray-700 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Selecione uma disciplina</option>
-          {filteredSubjects?.map(subject => (
-            <option key={subject.id} value={subject.id}>
-              {subject.disciplineId} - {subject.discipline.disciplineName}
-            </option>
-          ))}
-        </select>
+        {Array.isArray(filteredSubjects) && filteredSubjects.length > 0 ? (
+          <select
+            onChange={e => {
+              const selectedSubjectId = e.target.value
+              const selectedSubjectData = dataSubjects?.find(
+                subject => subject.id === selectedSubjectId
+              )
+              if (selectedSubjectData) {
+                handleSelectSubject(
+                  selectedSubjectId,
+                  selectedSubjectData.disciplineId
+                ) // Passando o código da disciplina
+              }
+            }}
+            value={selectedSubject}
+            className="w-full text-gray-700 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Selecione uma disciplina</option>
+            {filteredSubjects?.map(subject => (
+              <option key={subject.id} value={subject.id}>
+                {subject.disciplineId} - {subject.discipline.disciplineName}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <p className="text-center text-gray-500">
+            Nenhuma disciplina disponível. Caso não tenha disciplinas
+            disponíveis, verifique se você está inscrito em alguma disciplina.
+          </p>
+        )}
       </div>
 
       {/* Exibindo o código da disciplina selecionada */}
@@ -132,19 +139,18 @@ export function Assessments() {
         <h2 className="text-xl font-semibold text-gray-700 mb-3">
           Resultados da Avaliação
         </h2>
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg">
-          <thead className="bg-amber-500 text-white">
-            <tr>
-              <th className="p-3 border-b">Disciplina</th>
-              <th className="p-3 border-b">Nota</th>
-              <th className="p-3 border-b">Data da Avaliação</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Exibindo os resultados filtrados */}
-            {Array.isArray(filteredAssessmentResults) &&
-              filteredAssessmentResults.length > 0 &&
-              filteredAssessmentResults.map(assessmentResult => (
+        {Array.isArray(filteredAssessmentResults) &&
+        filteredAssessmentResults.length > 0 ? (
+          <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+            <thead className="bg-amber-500 text-white">
+              <tr>
+                <th className="p-3 border-b">Disciplina</th>
+                <th className="p-3 border-b">Nota</th>
+                <th className="p-3 border-b">Data da Avaliação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredAssessmentResults.map(assessmentResult => (
                 <tr key={assessmentResult.id}>
                   <td className="p-3 border-b text-gray-700">
                     {assessmentResult.assessment.name}
@@ -157,16 +163,13 @@ export function Assessments() {
                   </td>
                 </tr>
               ))}
-            {/* Caso não haja resultados para a disciplina selecionada */}
-            {filteredAssessmentResults?.length === 0 && (
-              <tr>
-                <td colSpan={3} className="p-3 text-center text-gray-700">
-                  Nenhum resultado encontrado para esta disciplina.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-center text-gray-500">
+            Nenhum resultado encontrado para a disciplina selecionada.
+          </p>
+        )}
       </div>
     </div>
   )

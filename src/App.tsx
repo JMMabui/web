@@ -52,6 +52,7 @@ export function App() {
             path="/registration/pre-instituto"
             element={<Pre_Instituto />}
           />
+
           <Route path="/registration/course" element={<Inscricao />} />
           <Route path="/registration/resume" element={<Invoice />} />
           <Route path="/student" element={<LayoutStudents />}>
