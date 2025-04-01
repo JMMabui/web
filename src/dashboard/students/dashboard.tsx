@@ -1,43 +1,9 @@
 // Note: Dashboard Students Component
 // URL: /students/dashboard
 
-import { getStudentsSubjects } from '@/http/students-subjects'
-import { getSubjects, type subjectResponse } from '@/http/subjects'
-import { useQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
 
-const {
-  data: dataSubjects,
-  isLoading: isLoadingSubjects,
-  isError: isErrorSubjects,
-} = useQuery<subjectResponse[]>({
-  queryKey: ['subjects'],
-  queryFn: getSubjects,
-})
-
-const {
-  data: dataSubjectsStudents,
-  isLoading: isLoadingSubjectsStudents,
-  isError: isErrorSubjectsStudents,
-} = useQuery({
-  queryKey: ['subjects_students'],
-  queryFn: getStudentsSubjects,
-})
-
 export function DashboardStudents() {
-  if (isLoadingSubjects || isLoadingSubjectsStudents) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-gray-600">Carregando...</div>
-      </div>
-    )
-  }
-
-  const totalSubjects = dataSubjects?.length || 0
-  const totalSubjectsDone = dataSubjectsStudents?.filter(
-    subject => subject.result === 'APROVADO'
-  ).length
-
   return (
     <div className="flex flex-col h-screen overflow-y-auto y">
       <div className="flex justify-between items-center w-full p-4 bg-white shadow-md">
@@ -66,9 +32,7 @@ export function DashboardStudents() {
                 <h3 className="text-lg font-semibold text-gray-700">
                   Total de Disciplinas
                 </h3>
-                <p className="text-3xl font-bold text-blue-500">
-                  {totalSubjects}
-                </p>
+                <p className="text-3xl font-bold text-blue-500">20</p>
               </div>
             </div>
           </div>

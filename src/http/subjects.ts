@@ -1,3 +1,6 @@
+import type { CourseResponse } from './courses'
+import type { StudentsSubjectsResponse } from './students-subjects'
+
 export type SubjectsRequest = {
   codigo: string
   credits: number
@@ -9,6 +12,9 @@ export type SubjectsRequest = {
   courseId: string
 }
 export type subjectResponse = {
+  Course: CourseResponse | null
+  StudentDiscipline: StudentsSubjectsResponse[]
+} & {
   codigo: string
   credits: number
   disciplineName: string
@@ -80,6 +86,23 @@ export async function PostSubjects({
 export async function getSubjects(): Promise<subjectResponse[]> {
   try {
     const response = await fetch(`${base_URL}/subjects`)
+
+    if (!response.ok) {
+      throw new Error('Erro ao buscar os dados')
+    }
+
+    const data = await response.json()
+    console.log('Resposta da API:', data)
+    return data as subjectResponse[]
+  } catch (error) {
+    console.error('Erro ao buscar os dados:', error)
+    throw error
+  }
+}
+
+export async function getSubjectsByCourseId(courseId: string | null) {
+  try {
+    const response = await fetch(`${base_URL}/subjects/course/${courseId}`)
 
     if (!response.ok) {
       throw new Error('Erro ao buscar os dados')

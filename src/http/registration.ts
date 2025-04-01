@@ -34,14 +34,14 @@ export type RegistrationResponse = {
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
-export async function getRegistration() {
+export async function getRegistration(): Promise<RegistrationResponse[]> {
   const response = await fetch(`${base_URL}/registration`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
   // console.log('Resposta da API:', data)
-  return data
+  return data as RegistrationResponse[]
 }
 
 export async function postRegistration({

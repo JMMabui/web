@@ -24,7 +24,7 @@ import { Teachers_ar } from './dashboard/CTA/academic_record/teacher_AR'
 import { Diploma } from './dashboard/CTA/academic_record/documents/diploma'
 import { Certificate } from './dashboard/CTA/academic_record/documents/certificado'
 import { AddEnrollments } from './dashboard/CTA/academic_record/addEnrollment'
-import { Teachers } from './dashboard/Teacher/dashboard'
+import { LayoutTeachers } from './dashboard/Teacher/layoutTeacher'
 import { DashboardLayoutFinances } from './dashboard/CTA/finance/layout'
 import { DashboardFinances } from './dashboard/CTA/finance/dashboard'
 import { InvoicesFinances } from './dashboard/CTA/finance/invoices'
@@ -34,6 +34,10 @@ import { Assessments } from './dashboard/students/assessments'
 import { MonthlyFee } from './dashboard/students/monthlyFee'
 import { Enrollments } from './dashboard/students/enrollments'
 import { LandingPage } from './website/landingPage'
+import { DashboardTeachers } from './dashboard/Teacher/dashboard'
+import { ClassManagement } from './dashboard/Teacher/classManagement'
+import { Evaluations } from './dashboard/Teacher/evaluations'
+import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 // import ConfirmationPage from './ConfirmationPage'; // Sua página de confirmação ou qualquer outra
 
 // Definição do tipo para o curso
@@ -71,6 +75,10 @@ export function App() {
             <Route path="courses/classes" element={<Classes />} />
             <Route path="students" element={<Students_ar />} />
             <Route path="students/new-student" element={<AddStudents />} />
+            <Route
+              path="student_ar/add_student/addcourse/:id"
+              element={<AddPreInstituto_addCourse />}
+            />
             <Route path="teachers" element={<Teachers_ar />} />
             {/* <Route path="teachers/add-teacher" element={<AddTeacher />} /> */}
             <Route path="enrollment" element={<Enrollment_Academic_Record />} />
@@ -87,13 +95,19 @@ export function App() {
             <Route path="reports" element={<Reports />} />
             <Route path="add_employee" element={<AddEmployee />} />
           </Route>
-          <Route path="/teacher" element={<Teachers />} />
+          {/* <Route path="/teacher" element={<Teachers />} /> */}
           {/* Página do dashboard */}
           {/* Pagina do dashboard para o departamento de finanças */}
           <Route path="/finances" element={<DashboardLayoutFinances />}>
             <Route path="dashboard" element={<DashboardFinances />} />
             <Route path="invoices" element={<InvoicesFinances />} />
             <Route path="payments" element={<PaymentsFinances />} />
+          </Route>
+
+          <Route path="/Teacher" element={<LayoutTeachers />}>
+            <Route path="dashboard" element={<DashboardTeachers />} />
+            <Route path="evaluations" element={<Evaluations />} />
+            <Route path="class-management" element={<ClassManagement />} />
           </Route>
         </Routes>
       </Router>

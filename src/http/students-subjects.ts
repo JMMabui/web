@@ -1,3 +1,4 @@
+import type { StudentsResponse } from './students'
 import type { subjectResponse } from './subjects'
 
 export type StudentsSubjectsRequest = {
@@ -23,6 +24,7 @@ export type StudentsSubjectsResponse = {
 
 export type StudentsSubjectsWithExtraDataResponse = {
   discipline: subjectResponse
+  student: StudentsResponse
 } & {
   student_id: string
   disciplineId: string
@@ -82,15 +84,15 @@ export async function createStudentsSubjects({
 }
 
 export async function getStudentsSubjects(): Promise<
-  StudentsSubjectsResponse[]
+  StudentsSubjectsWithExtraDataResponse[]
 > {
   const response = await fetch(`${base_URL}/students_subjects`)
   if (!response.ok) {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
-  console.log('Resposta da API:', data)
-  return data as StudentsSubjectsResponse[]
+  // console.log('Resposta da API:', data)
+  return data as StudentsSubjectsWithExtraDataResponse[]
 }
 
 export async function getStudentsSubjectsByStudentId(
@@ -112,6 +114,43 @@ export async function getStudentsSubjectsByStudentId(
 
     // Exibindo os dados para depuração
     console.log('Subjects API response:', data)
+
+    // Verificando se a resposta contém dados válidos
+    if (!data || !Array.isArray(data)) {
+      throw new Error(
+        'No subjects data returned or the data format is incorrect.'
+      )
+    }
+
+    return data as StudentsSubjectsWithExtraDataResponse[] // Retorna os dados dos assuntos
+  } catch (error) {
+    // Exibindo um erro geral
+    console.error('Error fetching student subjects:', error)
+    throw error // Re-lançando o erro para ser tratado por quem chamar a função
+  }
+}
+
+export async function getStudentsSubjectsBySubjectId(
+  subjectId: string | null
+): Promise<StudentsSubjectsWithExtraDataResponse[]> {
+  try {
+    // Verificando a URL para garantir que o endpoint está correto
+    const response = await fetch(
+      `${base_URL}/students_subjects/subject/${subjectId}`
+    )
+
+    // Verificando se a resposta da API foi bem-sucedida
+    if (!response.ok) {
+      const errorMessage = `Failed to fetch subjects for student with ID: ${subjectId}. Status: ${response.status} - ${response.statusText}`
+      console.error(errorMessage)
+      throw new Error(errorMessage) // Lançando o erro com uma mensagem mais detalhada
+    }
+
+    // Tentando obter os dados em formato JSON
+    const data = await response.json()
+
+    // Exibindo os dados para depuração
+    // console.log('Subjects API response:', data)
 
     // Verificando se a resposta contém dados válidos
     if (!data || !Array.isArray(data)) {
