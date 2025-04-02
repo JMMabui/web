@@ -1,5 +1,11 @@
 import type { assessmentResponse } from './assessment'
 
+export type assessmentResultRequest = {
+  assessmentId: string
+  studentId: string
+  grade: number
+}
+
 export type assessmentResultResponse = {
   assessment: assessmentResponse
 } & {
@@ -12,6 +18,34 @@ export type assessmentResultResponse = {
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
+
+export async function createAssessmentResult({
+  assessmentId,
+  studentId,
+  grade,
+}: assessmentResultRequest): Promise<assessmentResultResponse> {
+  const response = await fetch(`${base_URL}/assessment-result`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      assessmentId,
+      studentId,
+      grade,
+    }),
+  })
+
+  if (!response.ok) {
+    const errorMessage = await response.text()
+    throw new Error(`Erro ao criar a avaliação: ${errorMessage}`)
+  }
+
+  const result = await response.json()
+
+  // Retorna a resposta no formato assessmentResponse
+  return result
+}
 
 export async function getAllAssessmentsResult(): Promise<
   assessmentResultResponse[]

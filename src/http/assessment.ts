@@ -8,7 +8,7 @@ export type assessmentResponse = {
   type: string
   dateApplied: Date
   subjectId: string
-  weight: number
+  weight: number | null
   id: string
 }
 
@@ -60,6 +60,37 @@ export async function createAssessment({
   // Retorna a resposta no formato assessmentResponse
   return result.data
 }
+
+// export async function createExame({
+//   name,
+//   type,
+//   dateApplied,
+//   subjectId,
+// }: assessmentRequest) {
+//   const response = await fetch(`${base_URL}/assessment`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({
+//       name,
+//       type,
+//       dateApplied,
+//       weight: 100,
+//       subjectId,
+//     }),
+//   })
+
+//   if (!response.ok) {
+//     const errorMessage = await response.text()
+//     throw new Error(`Erro ao criar a avaliação: ${errorMessage}`)
+//   }
+
+//   const result = await response.json()
+
+//   // Retorna a resposta no formato assessmentResponse
+//   return result.data
+// }
 
 export async function getAssessments(): Promise<assessmentResponse[]> {
   const response = await fetch(`${base_URL}/assessment`)
