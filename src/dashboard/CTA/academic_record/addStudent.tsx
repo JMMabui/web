@@ -99,10 +99,13 @@ export function AddStudents() {
         contact: data.contact,
       })
 
-      console.log('Resposta da API de Dados Submetidos:', studentResponse.id)
+      console.log(
+        'Resposta da API de Dados Submetidos:',
+        studentResponse.student.id
+      )
       // Redirecionar para a próxima etapa
       navigate(
-        `/academic_record/student_ar/add_student/addcourse/${studentResponse.id}`
+        `/academic_record/student_ar/add_student/addcourse/${studentResponse.student.id}`
       )
     } catch (error) {
       console.error('Erro ao criar estudante:', error)

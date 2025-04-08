@@ -5,6 +5,7 @@ interface ButtonProps {
   children: React.ReactNode // Conteúdo dentro do botão (texto ou ícones)
   className?: string // Permite passar classes adicionais do Tailwind CSS
   variant?: 'primary' | 'secondary' | 'danger' // Definir o tipo do botão
+  type?: 'button' | 'submit' | 'reset' // Add the 'type' property
   disabled?: boolean // Definir se o botão está desabilitado
 }
 

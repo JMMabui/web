@@ -1,4 +1,4 @@
-import { getAssessmentResultByStudentId } from '@/http/assessment'
+import { getAssessmentResultByStudentId } from '@/http/assessmentResult'
 import { getStudentsSubjectsByStudentId } from '@/http/students-subjects'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'

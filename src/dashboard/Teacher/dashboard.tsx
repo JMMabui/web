@@ -1,203 +1,165 @@
+// src/components/Dashboard.jsx
+import { useState } from 'react' // Importar useState
+import { getStudentsSubjects } from '@/http/students-subjects'
+import {
+  getTeacherSubjectByTeacherId,
+  type teacherSubjectResponse,
+} from '@/http/teacherSubjects'
 import { useQuery } from '@tanstack/react-query'
-import { useState, useEffect } from 'react'
-import { getCourses, type CourseResponse } from '@/http/courses'
-import { getSubjects, type SubjectsSchema } from '@/http/subjects'
 
-type CourseSchema = {
-  course: CourseResponse[]
-}
+export function DashboardTeachers() {
+  // Estado para armazenar a disciplina selecionada
+  const [selectedSubject, setSelectedSubject] =
+    useState<teacherSubjectResponse | null>(null)
 
-type SubjectSchema = {
-  discipline: SubjectsSchema[]
-}
-
-export function Teachers() {
-  const [teacherName, setTeacherName] = useState('')
-  const [selectedCourses, setSelectedCourses] = useState<string[]>([])
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
-  const [teacherStatus, setTeacherStatus] = useState<string>('')
-
-  // Carregar cursos
+  // Busca os dados das disciplinas do professor
   const {
-    data: dataCourses,
-    isLoading: isLoadingCourses,
-    isError: isErrorCourses,
-  } = useQuery<CourseSchema>({
-    queryKey: ['datacourses'],
-    queryFn: getCourses,
+    data: dataTeacherSubjects,
+    isLoading: isLoadingTeacherSubject,
+    error: errorTeacherSubject,
+  } = useQuery({
+    queryKey: ['teacherSubjects'],
+    queryFn: () =>
+      getTeacherSubjectByTeacherId('cc6bb5df-bc97-429a-95cd-9fa4a8dc5454'),
   })
 
-  // Carregar disciplinas
+  // Busca os dados dos alunos das disciplinas
   const {
-    data: dataSubjects,
-    isLoading: isLoadingSubjects,
-    isError: isErrorSubjects,
-  } = useQuery<SubjectSchema>({
-    queryKey: ['dataSubjects'],
-    queryFn: getSubjects,
+    data: studentsSubjects,
+    isLoading: isLoadingStudentsSubjects,
+    error: errorStudentsSubjects,
+  } = useQuery({
+    queryKey: ['studentsSubjects'],
+    queryFn: getStudentsSubjects,
   })
 
-  // Carregar docentes
-  //   const {
-  //     data: dataTeachers,
-  //     isLoading: isLoadingTeachers,
-  //     isError: isErrorTeachers,
-  //   } = useQuery<TeacherSchema[]>({
-  //     queryKey: ['dataTeachers'],
-  //     queryFn: getTeachers,
-  //   })
-
-  useEffect(() => {
-    if (isErrorCourses || isErrorSubjects) {
-      console.error('Erro ao carregar os dados.')
-    }
-  }, [isErrorCourses, isErrorSubjects])
-
-  if (isLoadingCourses || isLoadingSubjects) {
-    return <div className="text-center">Carregando os dados ...</div>
+  // Verifica se está carregando os dados
+  if (isLoadingTeacherSubject || isLoadingStudentsSubjects) {
+    return <div>Carregando...</div>
   }
 
-  // Lógica para criar docente
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const data = {
-      teacherName,
-      courses: selectedCourses,
-      subjects: selectedSubjects,
-      status: teacherStatus,
-    }
+  // Verifica se ocorreu um erro ao buscar os dados
+  if (errorTeacherSubject || errorStudentsSubjects) {
+    return <div>Erro ao carregar os dados </div>
+  }
 
-    console.log('Dados do Docente: ', data)
+  // Converte os dados para o tipo teacher
+  const teacherSubjects = dataTeacherSubjects as teacherSubjectResponse[]
+
+  // Para cada disciplina do professor, filtra os alunos correspondentes
+  const getTotalAlunos = (disciplineId: string) => {
+    return studentsSubjects?.filter(
+      student => student.disciplineId === disciplineId
+    )
+  }
+
+  // Função para lidar com o clique no card e exibir o resumo
+  const handleCardClick = (subject: teacherSubjectResponse) => {
+    setSelectedSubject(subject)
+  }
+
+  // Função para formatar o semestre e o ano de estudo
+  const formatPeriodo = (yearStudy: string, semester: string) => {
+    const semestreFormatado = formSemester(semester)
+    const anoFormatado = formatYear(yearStudy)
+    return `${anoFormatado} - ${semestreFormatado}`
+  }
+
+  const formSemester = (semester: string) => {
+    switch (semester) {
+      case 'PRIMEIRO_SEMESTRE':
+        return '1º Semestre'
+      case 'SEGUNDO_SEMESTRE':
+        return '2º Semestre'
+      default:
+        return semester // Caso o semestre não esteja mapeado, retorna o valor original
+    }
+  }
+
+  // Função para formatar o ano de estudo
+  const formatYear = (yearStudy: string) => {
+    switch (yearStudy) {
+      case 'PRIMEIRO_ANO':
+        return '1º Ano'
+      case 'SEGUNDO_ANO':
+        return '2º Ano'
+      case 'TERCEIRO_ANO':
+        return '3º Ano'
+      case 'QUARTO_ANO':
+        return '4º Ano'
+      default:
+        return yearStudy // Caso o ano não esteja mapeado, retorna o valor original
+    }
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold text-center mb-6">Cadastrar Docente</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Nome do Docente */}
-        <div>
-          <label
-            htmlFor="teacherName"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Nome do Docente:
-          </label>
-          <input
-            id="teacherName"
-            type="text"
-            placeholder="Nome completo do docente"
-            value={teacherName}
-            onChange={e => setTeacherName(e.target.value)}
-            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
-        {/* Cursos atribuídos ao docente */}
-        <div>
-          <label
-            htmlFor="courses"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Cursos atribuídos:
-          </label>
-          <select
-            multiple
-            id="courses"
-            value={selectedCourses}
-            onChange={e =>
-              setSelectedCourses(
-                Array.from(e.target.selectedOptions, option => option.value)
+    <div className="p-8 w-full bg-gray-50 min-h-screen">
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Cards das turmas */}
+          {teacherSubjects
+            .sort((a, b) =>
+              a.discipline.disciplineName.localeCompare(
+                b.discipline.disciplineName
               )
-            }
-            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            {dataCourses?.course.map(course => (
-              <option key={course.id} value={course.id}>
-                {course.courseName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Disciplinas atribuídas ao docente */}
-        <div>
-          <label
-            htmlFor="subjects"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Disciplinas atribuídas:
-          </label>
-          <select
-            multiple
-            id="subjects"
-            value={selectedSubjects}
-            onChange={e =>
-              setSelectedSubjects(
-                Array.from(e.target.selectedOptions, option => option.value)
+            )
+            .map((subject, index) => {
+              const totalAlunos = getTotalAlunos(subject.discipline.codigo) // Filtra e conta os alunos dessa disciplina
+              return (
+                <div
+                  key={index}
+                  className="p-6 bg-blue-200 rounded-md shadow-md hover:bg-blue-300 transition-colors cursor-pointer"
+                  onClick={() => handleCardClick(subject)} // Lida com o clique no card
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleCardClick(subject)
+                    }
+                  }}
+                >
+                  <h3 className="text-xl font-medium mb-2">
+                    {subject.discipline.disciplineName}
+                  </h3>
+                  <p className="text-sm text-gray-700">
+                    Estado:{' '}
+                    {subject.status.charAt(0).toUpperCase() +
+                      subject.status.slice(1).toLocaleLowerCase()}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    Total de Alunos: {totalAlunos?.length}
+                  </p>
+                </div>
               )
-            }
-            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            {/* {dataSubjects?.discipline.map(subject => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))} */}
-          </select>
+            })}
         </div>
 
-        {/* Status do Docente */}
-        <div>
-          <label
-            htmlFor="teacherStatus"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Status:
-          </label>
-          <select
-            id="teacherStatus"
-            value={teacherStatus}
-            onChange={e => setTeacherStatus(e.target.value)}
-            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          >
-            <option value="">Selecione o Status...</option>
-            <option value="ATIVO">Ativo</option>
-            <option value="INATIVO">Inativo</option>
-          </select>
-        </div>
-
-        {/* Botão para salvar */}
-        <div className="text-center mt-6">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            Cadastrar Docente
-          </button>
-        </div>
-      </form>
-
-      {/* Exibição de Docentes */}
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Docentes Cadastrados
-        </h2>
-        {/* <ul className="mt-4">
-          {dataTeachers?.map(teacher => (
-            <li key={teacher.id} className="p-4 border-b border-gray-300">
-              <div className="font-semibold">{teacher.name}</div>
-              <div className="text-sm text-gray-600">
-                Cursos: {teacher.courses.join(', ')}
-              </div>
-              <div className="text-sm text-gray-600">
-                Disciplinas: {teacher.subjects.join(', ')}
-              </div>
-              <div className="text-sm text-gray-600">
-                Status: {teacher.status}
-              </div>
-            </li>
-          ))}
-        </ul> */}
+        {/* Exibir resumo da turma selecionada */}
+        {selectedSubject && (
+          <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold mb-4">
+              {selectedSubject.discipline.disciplineName}
+            </h2>
+            <p className="text-lg mb-2">
+              <strong>Código: </strong>
+              {selectedSubject.discipline.codigo}
+            </p>
+            <p className="text-lg mb-2">
+              <strong>Estado:</strong>{' '}
+              {selectedSubject.status.charAt(0).toUpperCase() +
+                selectedSubject.status.slice(1).toLocaleLowerCase()}
+            </p>
+            <p className="text-lg mb-2">
+              <strong>Total de Alunos:</strong>{' '}
+              {getTotalAlunos(selectedSubject?.discipline.codigo)?.length}
+            </p>
+            <p className="text-lg mb-2">
+              <strong>Período:</strong>{' '}
+              {formatPeriodo(
+                selectedSubject.discipline.year_study,
+                selectedSubject.discipline.semester
+              )}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

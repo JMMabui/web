@@ -1,9 +1,14 @@
 import Button from '@/component/Button'
+import { getRegistration } from '@/http/registration'
 import {
   createStudentsSubjects,
   getStudentsSubjectsByStudentId,
 } from '@/http/students-subjects'
-import { getSubjects, type subjectResponse } from '@/http/subjects'
+import {
+  getSubjects,
+  getSubjectsByCourseId,
+  type subjectResponse,
+} from '@/http/subjects'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
@@ -31,7 +36,35 @@ export function Enrollments() {
   const [subjectCodes, setSubjectCodes] = useState<string[]>([])
 
   const studentId = localStorage.getItem('student_login_id')
+
+  if (!studentId) {
+    return (
+      <div className="text-center text-red-500">
+        ID de estudante não encontrado.
+      </div>
+    )
+  }
   console.log('Header', studentId)
+
+  const { data: dataRegistration } = useQuery({
+    queryKey: ['courses'],
+    queryFn: getRegistration,
+  })
+
+  console.log('data registration: ', dataRegistration)
+
+  const findCourseId = dataRegistration?.find(
+    course => course.student_id === studentId
+  )
+
+  console.log('filterted course', findCourseId)
+
+  const courseId = findCourseId?.course_id
+  if (!courseId) {
+    return <div className="text-center text-red-500">Curso não encontrado.</div>
+  }
+
+  console.log('course id: ', courseId)
 
   const {
     data: dataSubjects,
@@ -44,6 +77,12 @@ export function Enrollments() {
   })
 
   console.log('Disciplinas do curso:', dataSubjects)
+
+  const filteredSubjectsByCourse = dataSubjects?.filter(
+    subjects => subjects.courseId === courseId
+  )
+
+  console.log('filtered subjects: ', filteredSubjectsByCourse)
 
   const {
     data: dataSubjectsStudent,
@@ -60,16 +99,21 @@ export function Enrollments() {
 
   console.log('Disciplinas:', dataSubjectsStudent)
 
-  const filteredSubjects = dataSubjects?.filter(subject => {
+  const filteredSubjects = filteredSubjectsByCourse?.filter(subject => {
+    if (!year || !semester) {
+      return (
+        <div className="text-center text-lg">Selecione ano e semestre.</div>
+      )
+    }
     return subject.year_study === year && subject.semester === semester
   })
-  const filteredSubjectsAdd = dataSubjects?.filter(subject => {
+  const filteredSubjectsAdd = filteredSubjectsByCourse?.filter(subject => {
     return subject.year_study === yearAdd && subject.semester === semesterAdd
   })
-  const filteredSubjectsAdd2 = dataSubjects?.filter(subject => {
+  const filteredSubjectsAdd2 = filteredSubjectsByCourse?.filter(subject => {
     return subject.year_study === yearAdd2 && subject.semester === semesterAdd2
   })
-  const filteredSubjectsAdd3 = dataSubjects?.filter(subject => {
+  const filteredSubjectsAdd3 = filteredSubjectsByCourse?.filter(subject => {
     return subject.year_study === yearAdd3 && subject.semester === semesterAdd3
   })
 

@@ -7,12 +7,14 @@ import municipioMaputoLogo from '../assets/municipio de maputo.png'
 import pucprLogo from '../assets/puc-pr-logo.png'
 import padresImg from '../assets/padres-ismma.jpg'
 import Button from '@/component/Button'
+import { useNavigate } from 'react-router-dom'
 
 const navigation = [
   { name: 'ISMMA', href: '#' },
   { name: 'Cursos', href: '#' },
   { name: 'Sobre', href: '#sobre' },
   { name: 'Contato', href: '#contato' },
+  { name: 'Parceiros', href: '#parceiros' },
 ]
 
 const images = [
@@ -44,6 +46,8 @@ const images = [
 export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  const navegate = useNavigate()
 
   // Função para avançar o carrossel
   const goToNext = () => {
@@ -111,6 +115,14 @@ export function LandingPage() {
                 {item.name}
               </a>
             ))}
+
+            <button
+              type="button"
+              onClick={() => navegate('/login')}
+              className="ml-4 text-white"
+            >
+              Login
+            </button>
           </div>
         </nav>
       </header>
