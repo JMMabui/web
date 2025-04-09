@@ -40,8 +40,8 @@ export async function getCourses() {
     throw new Error(`Erro ao buscar os dados: ${errorMessage}`)
   }
   const result = await response.json()
-  // console.log('Resposta da API:', result)
-  return result
+  console.log('Resposta da API dos cursos:', result)
+  return result.data
 }
 
 export async function addCourse(course: CourseRequest) {

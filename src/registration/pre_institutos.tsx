@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -36,22 +36,27 @@ const schema = z.object({
 type DataSchema = z.infer<typeof schema>
 
 // Função para obter o ID do estudante do localStorage
-const getStudentIdFromStorage = () => {
-  const studentId = localStorage.getItem('student_id')
-  if (!studentId) {
-    throw new Error('Estudante ID não encontrado no localStorage')
-  }
-  return studentId
-}
+// const getStudentIdFromStorage = () => {
+//   const studentId = localStorage.getItem('student_id')
+//   if (!studentId) {
+//     throw new Error('Estudante ID não encontrado no localStorage')
+//   }
+//   return studentId
+// }
 
 export function Pre_Instituto() {
   const [nivelAcademico, setNivelAcademico] = useState('')
   const [provincia, setProvincia] = useState('')
+  const [studentId, setStudentId] = useState<string | null>(null)
   const [isStudentRegistered] = useState(false)
 
   const navigate = useNavigate()
 
-  const studentId = getStudentIdFromStorage()
+   useEffect(() => {
+      setStudentId(localStorage.getItem('student_id'));
+    }, []);
+
+  // const studentId = getStudentIdFromStorage()
   console.log('student id', studentId)
 
   const {
@@ -110,12 +115,14 @@ export function Pre_Instituto() {
     //   return // Não continua com a submissão se o estudante já estiver registrado
     // }
 
+    console.log('Dados do formulário', data)
+
     try {
       await createPreInstituto({
         schoolLevel: data.schoolLevel,
         schoolName: data.schoolName,
         schoolProvincy: data.schoolProvincy,
-        student_id: studentId,
+        studentId: studentId ?? '',
       })
 
       navigate('/registration/course')

@@ -19,16 +19,50 @@ export function LoginForm() {
     onError: (error: Error) => {
       setMensagemErro(error.message || 'Ocorreu um erro inesperado.')
     },
-    onSuccess: data => {
-      console.log('dados da api', data)
-      const student_id = data.student_id.id
-      console.log('id do estudante logado', student_id)
+    onSuccess: (data) => {
+      console.log('dados da api', data.data)
       localStorage.setItem('token', data.token)
-      localStorage.setItem('student_login_id', student_id)
+     
       setMensagemErro('')
-      navigate('/student/dashboard')
-    },
+  
+      const userType = data.data.user.jobPosition
+      console.log('tipo de usuario', userType)
+  
+      // Mapeamento dos tipos de usuário para as rotas
+      const userTypeToRouteMap: Record<string, string> = {
+        'ADMIN_IT': '/admin',
+        'CTA_ADMIN_FINANCEIRO': '/finances',
+        'CTA_ADMIN_REG_ACADEMICO': '/academic_record',
+        'CTA_ADMIN_RH': '/human_resources',
+        'CTA_ADMIN_BIBLIOTECA': '/cta-admin-biblioteca/dashboard',
+        'CTA_ADMIN_COORDENADOR': '/cta-admin-coordenador/dashboard',
+        'CTA_REG_ACADEMICO': '/cta-reg-academico/dashboard',
+        'CTA_FINANCEIRO': '/cta-financeiro/dashboard',
+        'CTA_BIBLIOTECA': '/cta-biblioteca/dashboard',
+        'CTA_DOCENTE': '/Teacher',
+        'CTA_RH': '/cta-rh/dashboard',
+        'CTA': '/cta/dashboard',
+        // 'ESTUDANTE': '/student',
+        'PROFESSOR': '/teacher/dashboard'
+      }
+
+      if (userType === 'ESTUDANTE') {
+        const student_id = data.data.student.id
+        console.log('id do estudante logado', student_id)
+        localStorage.setItem('student_login_id', student_id)
+        navigate('/student')
+      } else if (userTypeToRouteMap[userType]) {
+        navigate(userTypeToRouteMap[userType])
+      } 
+      else {
+        // Caso o tipo de usuário não esteja no mapa, você pode tratar isso aqui
+        console.error('Tipo de usuário desconhecido:', userType)
+        // Aqui você pode redirecionar para uma rota padrão, caso queira
+        // navigate('/pagina-inicial') ou qualquer outra rota
+      }
+    }
   })
+  
 
   const signupMutation = useMutation({
     mutationFn: signupRequest,
@@ -37,7 +71,8 @@ export function LoginForm() {
     },
     onSuccess: data => {
       setMensagemErro('')
-      const login_id = data.login.id
+      console.log('dados do signup vindo da api para tratamento', data)
+      const login_id = data.id
       localStorage.setItem('login_id', login_id)
       navigate('/registration')
     },

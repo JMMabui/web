@@ -19,5 +19,8 @@ export async function loginRequest({ email, password }: LoginSchema) {
     throw new Error(errorData.message || 'Erro ao fazer login')
   }
 
-  return response.json()
+  const result = response.json()
+  console.log("resposta da api de login:, ", result) 
+
+  return result
 }

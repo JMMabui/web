@@ -100,7 +100,7 @@ export async function getStudentsSubjectsByStudentId(
 ): Promise<StudentsSubjectsWithExtraDataResponse[]> {
   try {
     // Verificando a URL para garantir que o endpoint está correto
-    const response = await fetch(`${base_URL}/students_subjects/${id}`)
+    const response = await fetch(`${base_URL}/students_subjects/subject/${id}`)
 
     // Verificando se a resposta da API foi bem-sucedida
     if (!response.ok) {
@@ -116,7 +116,7 @@ export async function getStudentsSubjectsByStudentId(
     console.log('Subjects API response:', data)
 
     // Verificando se a resposta contém dados válidos
-    if (!data || !Array.isArray(data)) {
+    if (!data ) {
       throw new Error(
         'No subjects data returned or the data format is incorrect.'
       )

@@ -51,6 +51,8 @@ export function Inscricao() {
     queryFn: getRegistration,
   })
 
+  // console.log("Registrati: ", dataRegistration)
+
   // 🔄 Agrupar cursos por nível acadêmico
   useEffect(() => {
     if (dataCourses) {

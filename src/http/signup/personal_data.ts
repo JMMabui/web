@@ -25,7 +25,7 @@ type PersonalDataSchema = {
   documentIssuedAt: Date
   documentExpiredAt: Date
   nuit: number
-  login_id: string
+  loginId: string
 }
 
 export type PersonaldataWithLoginSchema = {
@@ -70,7 +70,7 @@ export async function createStudentData({
   documentType,
   fatherName,
   gender,
-  login_id,
+  loginId,
   maritalStatus,
   motherName,
   name,
@@ -79,7 +79,7 @@ export async function createStudentData({
   provincyAddress,
   surname,
 }: PersonalDataSchema) {
-  console.log('enviando para api', login_id)
+  // console.log('enviando para api', login_id)
 
   const response = await fetch(`${base_URL}/students`, {
     method: 'POST',
@@ -95,7 +95,7 @@ export async function createStudentData({
       documentType,
       fatherName,
       gender,
-      login_id,
+      loginId,
       maritalStatus,
       motherName,
       name,

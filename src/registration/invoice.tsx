@@ -1,33 +1,15 @@
-import { getRegistration } from '@/http/registration';
+import { getRegistration, type RegistrationResponse } from '@/http/registration';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import logo from '../assets/ismmalogo.png';
 import jsPDF from 'jspdf';
 
-type Registration = {
-  course_id: string;
-  student_id: string;
-  registrationStatus: 'PENDENTE' | 'CONFIRMADO' | 'CANCELADO' | 'TRANCADO' | 'INSCRITO' | 'NAO_INSCRITO';
-  student: {
-    surname: string;
-    name: string;
-  };
-  course: {
-    courseName: string;
-    levelCourse: 'CURTA_DURACAO' | 'TECNICO_MEDIO' | 'LICENCIATURA' | 'RELIGIOSO' | 'MESTRADO';
-    period: 'LABORAL' | 'POS_LABORAL';
-  };
-};
-
-type RegistrationResponse = {
-  registration: Registration[];
-};
 
 export function Invoice() {
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [studentId, setStudentId] = useState<string | null>(null);
 
-  const { data: dataRegistration, error: registrationError, isLoading } = useQuery<RegistrationResponse>({
+  const { data: dataRegistration, error: registrationError, isLoading } = useQuery<RegistrationResponse[]>({
     queryKey: ['registration_data'],
     queryFn: getRegistration,
   });
@@ -40,7 +22,7 @@ export function Invoice() {
   if (registrationError instanceof Error) return <div>Erro: {registrationError.message}</div>;
   if (!dataRegistration) return <div>Não há dados disponíveis no momento.</div>;
 
-  const studentRegistration = dataRegistration.registration.find(
+  const studentRegistration = dataRegistration.find(
     (registration) => registration.student_id === studentId
   );
 

@@ -43,74 +43,75 @@ import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPr
 // Definição do tipo para o curso
 
 export function App() {
-  return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      {/* {header_primary()} */}
 
-      <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/registration" element={<Signup />} />
-          <Route
-            path="/registration/pre-instituto"
-            element={<Pre_Instituto />}
-          />
+    return (
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+        <Router>
+          <Routes>
+            {/* Rotas do website */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/registration" element={<Signup />} />
+            <Route path="/registration/pre-instituto" element={<Pre_Instituto />} />
+            <Route path="/registration/course" element={<Inscricao />} />
+            <Route path="/registration/resume" element={<Invoice />} />
 
-          <Route path="/registration/course" element={<Inscricao />} />
-          <Route path="/registration/resume" element={<Invoice />} />
-          <Route path="/student" element={<LayoutStudents />}>
-            <Route path="dashboard" element={<DashboardStudents />} />
-            <Route path="assentiments" element={<Assessments />} />
-            <Route path="monthly-fee" element={<MonthlyFee />} />
-            <Route path="enrollment" element={<Enrollments />} />
-          </Route>
-          <Route path="/dashboard_cta" element={<Dashboard_cta />} />
-          {/* Pagina do dashboard para o departamento de registro academico */}
-          <Route path="/academic_record" element={<DashboardLayout2 />}>
-            <Route path="dashboard" element={<AcademicRecord />} />
-            <Route path="courses" element={<CoursesDashboard />} />
-            <Route path="courses/add-course" element={<AddCourse />} />
-            <Route path="courses/add-subject/:id?" element={<AddSubject />} />
-            <Route path="courses/classes" element={<Classes />} />
-            <Route path="students" element={<Students_ar />} />
-            <Route path="students/new-student" element={<AddStudents />} />
-            <Route
-              path="student_ar/add_student/addcourse/:id"
-              element={<AddPreInstituto_addCourse />}
-            />
-            <Route path="teachers" element={<Teachers_ar />} />
-            {/* <Route path="teachers/add-teacher" element={<AddTeacher />} /> */}
-            <Route path="enrollment" element={<Enrollment_Academic_Record />} />
-            <Route path="enrollment/relation" element={<AddEnrollments />} />
-            {/* <Route path="documents" element={<Documents />} /> */}
-            <Route path="certificate" element={<Certificate />} />
-            <Route path="diploma" element={<Diploma />} />
-          </Route>
-          {/* Página do dashboard para o departamento de recursos humanos */}
-          <Route path="/human_resources" element={<DashboardLayout />}>
-            <Route index element={<Dashboard_Human_Resourses />} />
-            <Route path="dashboard" element={<Dashboard_Human_Resourses />} />
-            <Route path="employee" element={<EmployeeList />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="add_employee" element={<AddEmployee />} />
-          </Route>
-          {/* <Route path="/teacher" element={<Teachers />} /> */}
-          {/* Página do dashboard */}
-          {/* Pagina do dashboard para o departamento de finanças */}
-          <Route path="/finances" element={<DashboardLayoutFinances />}>
-            <Route path="dashboard" element={<DashboardFinances />} />
-            <Route path="invoices" element={<InvoicesFinances />} />
-            <Route path="payments" element={<PaymentsFinances />} />
-          </Route>
-
-          <Route path="/Teacher" element={<LayoutTeachers />}>
-            <Route path="dashboard" element={<DashboardTeachers />} />
-            <Route path="evaluations" element={<Evaluations />} />
-            <Route path="class-management" element={<ClassManagement />} />
-          </Route>
-        </Routes>
-      </Router>
-    </div>
-  )
+            {/* Rotas do dashboard de admistrador it
+            <Route path='/admin' element={<LayoutStudents />}>
+            </Route> */}
+  
+            {/* Rotas do dashboard de estudantes */}
+            <Route path="/student" element={<LayoutStudents />}>
+              <Route path="dashboard" element={<DashboardStudents />} />
+              <Route path="assessments" element={<Assessments />} />
+              <Route path="monthly-fee" element={<MonthlyFee />} />
+              <Route path="enrollment" element={<Enrollments />} />
+            </Route>
+  
+            {/* Rotas do dashboard CTA */}
+            <Route path="/admin" element={<Dashboard_cta />} />
+  
+            {/* Rotas do dashboard de registro acadêmico */}
+            <Route path="/academic_record" element={<DashboardLayout2 />}>
+              <Route path="dashboard" element={<AcademicRecord />} />
+              <Route path="courses" element={<CoursesDashboard />} />
+              <Route path="courses/add-course" element={<AddCourse />} />
+              <Route path="courses/add-subject/:id?" element={<AddSubject />} />
+              <Route path="courses/classes" element={<Classes />} />
+              <Route path="students" element={<Students_ar />} />
+              <Route path="students/new-student" element={<AddStudents />} />
+              <Route path="student_ar/add_student/addcourse/:id" element={<AddPreInstituto_addCourse />} />
+              <Route path="teachers" element={<Teachers_ar />} />
+              <Route path="enrollment" element={<Enrollment_Academic_Record />} />
+              <Route path="enrollment/relation" element={<AddEnrollments />} />
+              <Route path="certificate" element={<Certificate />} />
+              <Route path="diploma" element={<Diploma />} />
+            </Route>
+  
+            {/* Rotas do dashboard de recursos humanos */}
+            <Route path="/human_resources" element={<DashboardLayout />}>
+              <Route path="dashboard" element={<Dashboard_Human_Resourses />} />
+              <Route path="employee" element={<EmployeeList />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="add_employee" element={<AddEmployee />} />
+            </Route>
+  
+            {/* Rotas do dashboard de finanças */}
+            <Route path="/finances" element={<DashboardLayoutFinances />}>
+              <Route path="dashboard" element={<DashboardFinances />} />
+              <Route path="invoices" element={<InvoicesFinances />} />
+              <Route path="payments" element={<PaymentsFinances />} />
+            </Route>
+  
+            {/* Rotas do dashboard de professores */}
+            <Route path="/Teacher" element={<LayoutTeachers />}>
+              <Route path="dashboard" element={<DashboardTeachers />} />
+              <Route path="evaluations" element={<Evaluations />} />
+              <Route path="class-management" element={<ClassManagement />} />
+            </Route>
+          </Routes>
+        </Router>
+      </div>
+    );
+  
 }

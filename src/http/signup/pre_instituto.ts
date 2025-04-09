@@ -13,7 +13,7 @@ export type PreInstitutoSchema = {
     | 'NAMPULA'
     | 'CABO_DELGADO'
     | 'NIASSA'
-  student_id: string
+  studentId: string
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
@@ -22,7 +22,7 @@ export async function createPreInstituto({
   schoolLevel,
   schoolName,
   schoolProvincy,
-  student_id,
+  studentId,
 }: PreInstitutoSchema) {
   const response = await fetch(`${base_URL}/pre-instituto`, {
     method: 'POST',
@@ -33,7 +33,7 @@ export async function createPreInstituto({
       schoolLevel,
       schoolName,
       schoolProvincy,
-      student_id,
+      studentId,
     }),
   })
 

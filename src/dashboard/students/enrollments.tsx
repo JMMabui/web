@@ -1,12 +1,11 @@
 import Button from '@/component/Button'
-import { getRegistration } from '@/http/registration'
+import { getRegistration, type RegistrationResponse } from '@/http/registration'
 import {
   createStudentsSubjects,
   getStudentsSubjectsByStudentId,
 } from '@/http/students-subjects'
 import {
   getSubjects,
-  getSubjectsByCourseId,
   type subjectResponse,
 } from '@/http/subjects'
 import { useQuery } from '@tanstack/react-query'
@@ -46,7 +45,7 @@ export function Enrollments() {
   }
   console.log('Header', studentId)
 
-  const { data: dataRegistration } = useQuery({
+  const { data: dataRegistration } = useQuery<RegistrationResponse[]>({
     queryKey: ['courses'],
     queryFn: getRegistration,
   })
@@ -77,6 +76,12 @@ export function Enrollments() {
   })
 
   console.log('Disciplinas do curso:', dataSubjects)
+
+  if (isLoadingSubjects) {
+    return <div className="text-center text-lg">Carregando...</div>
+  }
+
+
 
   const filteredSubjectsByCourse = dataSubjects?.filter(
     subjects => subjects.courseId === courseId

@@ -86,7 +86,7 @@ export function Personal_data() {
 
   async function handlerCreateStudent(data: dataSchema) {
     try {
-      console.log('Formulário enviado', data)
+      console.log('Formulário enviado', data, loginId)
 
       // Enviar dados para a API
       const studentResponse = await createStudentData({
@@ -105,7 +105,7 @@ export function Personal_data() {
         documentIssuedAt: new Date(data.issueDate),
         documentExpiredAt: new Date(data.expiryDate),
         nuit: Number(data.nuit),
-        login_id: loginId, // Certifique-se de que loginId esteja disponível no seu escopo
+        loginId, // Certifique-se de que loginId esteja disponível no seu escopo
       })
 
       console.log('Dados enviados com sucesso', studentResponse)
