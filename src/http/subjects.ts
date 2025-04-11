@@ -92,8 +92,8 @@ export async function getSubjects() {
     }
 
     const data = await response.json()
-    console.log('Resposta da API:', data)
-    return data
+    // console.log('Resposta da API:', data)
+    return data.data
   } catch (error) {
     console.error('Erro ao buscar os dados:', error)
     throw error

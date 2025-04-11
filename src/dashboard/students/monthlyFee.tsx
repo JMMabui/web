@@ -1,58 +1,41 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from '@/component/Button'
 
 export function MonthlyFee() {
   const [showForm, setShowForm] = useState(false)
   const [newInvoice, setNewInvoice] = useState<{
-    number: string
     months: string[]
     date: string
     status: string
   }>({
-    number: '',
     months: [],
     date: '',
     status: 'Não Pago',
   })
   const [invoices, setInvoices] = useState([
     {
-      number: '001',
       month: 'Abril',
       date: '25/03/2025',
       status: 'Pago',
     },
     {
-      number: '002',
       month: 'Maio',
       date: '30/04/2025',
       status: 'Não Pago',
     },
     {
-      number: '003',
       month: 'Junho',
       date: '01/06/2025',
       status: 'Pago',
     },
-    {
-      number: '004',
-      month: 'Julho',
-      date: '15/07/2025',
-      status: 'Não Pago',
-    },
-    {
-      number: '005',
-      month: 'Agosto',
-      date: '20/08/2025',
-      status: 'Pago',
-    },
-    {
-      number: '006',
-      month: 'Setembro',
-      date: '30/09/2025',
-      status: 'Não Pago',
-    },
   ])
 
+  const [studentId, setStudentId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setStudentId(localStorage.getItem('student_login_id') || null)
+    // console.log('ID do estudante:', studentId) // Mostra o ID do estudante armazenado
+  })
   // Função para calcular a data final (dia 5 do mês selecionado)
   const getDueDate = (month: string): string => {
     const currentYear = new Date().getFullYear()
@@ -99,64 +82,9 @@ export function MonthlyFee() {
     return sortedMonths[0] // Retorna o mês mais recente
   }
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
-    if (name === 'months') {
-      // Caso o campo seja meses, lidamos de forma diferente
-      const selectedMonths = Array.from(
-        (e.target as HTMLSelectElement).selectedOptions,
-        option => option.value
-      )
-
-      // Se houver múltiplos meses selecionados, atualiza a data de vencimento para o mês mais recente
-      if (selectedMonths.length > 0) {
-        const mostRecentMonth = getMostRecentMonth(selectedMonths)
-        setNewInvoice(prevInvoice => ({
-          ...prevInvoice,
-          months: selectedMonths,
-          date: getDueDate(mostRecentMonth), // Calcula a data para o mês mais recente
-        }))
-      } else {
-        setNewInvoice(prevInvoice => ({
-          ...prevInvoice,
-          months: [],
-          date: '', // Limpa a data se nenhum mês for selecionado
-        }))
-      }
-    } else {
-      setNewInvoice(prevInvoice => ({
-        ...prevInvoice,
-        [name]: value,
-      }))
-    }
-  }
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    console.log('Nova fatura criada:', newInvoice)
-
-    // Adiciona a nova fatura à lista de faturas
-    setInvoices(prevInvoices => [
-      ...prevInvoices,
-      ...newInvoice.months.map((month, index) => ({
-        number: (prevInvoices.length + index + 1).toString().padStart(3, '0'), // Gera um número único para cada nova fatura
-        month,
-        date: newInvoice.date,
-        status: newInvoice.status,
-      })),
-    ])
-
-    // Fechar o formulário após o envio
-    setShowForm(false)
-    // Limpar os campos do formulário
-    setNewInvoice({
-      number: '',
-      months: [],
-      date: '',
-      status: 'Não Pago',
-    })
+    console.log('Nova fatura criada:', newInvoice, studentId)
   }
 
   return (
@@ -178,7 +106,7 @@ export function MonthlyFee() {
               >
                 <div>
                   <h3 className="font-bold text-lg text-gray-800">
-                    Mensalidade Nº {invoice.number}
+                    Mensalidade
                   </h3>
                   <p className="text-gray-600">Mes: {invoice.month}</p>
                   <p className="text-gray-600">Data: {invoice.date}</p>
@@ -219,38 +147,12 @@ export function MonthlyFee() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
-                  htmlFor="number"
-                  className="block text-sm font-semibold text-gray-700"
-                >
-                  Número de Meses
-                </label>
-                <input
-                  type="number"
-                  id="number"
-                  name="number"
-                  min="1"
-                  value={newInvoice.number}
-                  onChange={handleInputChange}
-                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label
                   htmlFor="months"
                   className="block text-sm font-semibold text-gray-700"
                 >
                   Selecione os Meses
                 </label>
-                <select
-                  id="months"
-                  name="months"
-                  multiple
-                  value={newInvoice.months}
-                  onChange={handleInputChange}
-                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                >
+                <div className="mt-2 grid grid-cols-3 gap-2">
                   {[
                     'Janeiro',
                     'Fevereiro',
@@ -265,46 +167,32 @@ export function MonthlyFee() {
                     'Novembro',
                     'Dezembro',
                   ].map(month => (
-                    <option key={month} value={month}>
-                      {month}
-                    </option>
+                    <label key={month} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name="months"
+                        value={month}
+                        checked={newInvoice.months.includes(month)}
+                        onChange={e => {
+                          const selectedMonths = e.target.checked
+                            ? [...newInvoice.months, month]
+                            : newInvoice.months.filter(m => m !== month)
+                          const mostRecentMonth =
+                            getMostRecentMonth(selectedMonths)
+                          setNewInvoice(prevInvoice => ({
+                            ...prevInvoice,
+                            months: selectedMonths,
+                            date: selectedMonths.length
+                              ? getDueDate(mostRecentMonth)
+                              : '',
+                          }))
+                        }}
+                        className="form-checkbox h-4 w-4 text-blue-500"
+                      />
+                      <span>{month}</span>
+                    </label>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="date"
-                  className="block text-sm font-semibold text-gray-700"
-                >
-                  Data de Vencimento
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  value={newInvoice.date}
-                  onChange={handleInputChange}
-                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="status"
-                  className="block text-sm font-semibold text-gray-700"
-                >
-                  Status
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={newInvoice.status}
-                  onChange={handleInputChange}
-                  className="mt-2 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Pago">Pago</option>
-                  <option value="Não Pago">Não Pago</option>
-                </select>
+                </div>
               </div>
               <div className="mt-4 flex justify-end space-x-4">
                 <Button

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getStudentData } from '@/http/signup/header'
 import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { getStudentsSubjectsByStudentId } from '@/http/students-subjects'
+import { getStudentsSubjectsByStudentId, type StudentsSubjectsWithExtraDataResponse} from '@/http/students-subjects'
 
 const NavbarLink = ({
   section,
@@ -38,9 +38,9 @@ export function LayoutStudents() {
       id ? getStudentData(id) : Promise.reject('ID não encontrado'),
     enabled: !!id, // Só executa a query se o ID existir
   })
-  console.log('Data:', data)
+  // console.log('Data:', data)
 
-  const { data: dataSubject } = useQuery({
+  const { data: dataSubject } = useQuery<StudentsSubjectsWithExtraDataResponse[]>({
     queryKey: ['student_subjects', id],
     queryFn: () =>
       id
@@ -49,7 +49,7 @@ export function LayoutStudents() {
     enabled: !!id, // Só executa a query se o ID existir
   })
 
-  console.log('Data subjects:', dataSubject)
+  // console.log('Data subjects:', dataSubject)
 
   if (isLoading) {
     return (
@@ -71,7 +71,7 @@ export function LayoutStudents() {
     subjects =>
       subjects.status === 'INSCRITO' && subjects.result === 'EM_ANDAMENTO'
   )
-  console.log('Filtered subjects:', filteredSubjects)
+  // console.log('Filtered subjects:', filteredSubjects)
 
   const student = data
   const course = student?.Registration[0]?.course
@@ -106,7 +106,7 @@ export function LayoutStudents() {
     {
       name: 'Avaliacao',
       icon: FileText,
-      route: '/student/assentiments',
+      route: '/student/assessments',
     },
     {
       name: 'Mensalidade',

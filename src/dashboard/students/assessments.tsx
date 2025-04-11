@@ -1,5 +1,8 @@
 import { getAssessmentResultByStudentId } from '@/http/assessmentResult'
-import { getStudentsSubjectsByStudentId } from '@/http/students-subjects'
+import {
+  getStudentsSubjectsByStudentId,
+  type StudentsSubjectsWithExtraDataResponse,
+} from '@/http/students-subjects'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
@@ -14,7 +17,7 @@ export function Assessments() {
     data: dataSubjects,
     isLoading: isLoadingSubjects,
     error: errorSubjects,
-  } = useQuery({
+  } = useQuery<StudentsSubjectsWithExtraDataResponse[]>({
     queryKey: ['subject'],
     queryFn: () => getStudentsSubjectsByStudentId(id),
   })
@@ -92,82 +95,80 @@ export function Assessments() {
 
       {/* Lista de disciplinas */}
       <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-700 mb-3">
-          Escolha uma disciplina
-        </h2>
         {Array.isArray(filteredSubjects) && filteredSubjects.length > 0 ? (
-          <select
-            onChange={e => {
-              const selectedSubjectId = e.target.value
-              const selectedSubjectData = dataSubjects?.find(
-                subject => subject.id === selectedSubjectId
-              )
-              if (selectedSubjectData) {
-                handleSelectSubject(
-                  selectedSubjectId,
-                  selectedSubjectData.disciplineId
-                ) // Passando o código da disciplina
-              }
-            }}
-            value={selectedSubject}
-            className="w-full text-gray-700 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Selecione uma disciplina</option>
-            {filteredSubjects?.map(subject => (
-              <option key={subject.id} value={subject.id}>
-                {subject.disciplineId} - {subject.discipline.disciplineName}
-              </option>
-            ))}
-          </select>
+          <>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-700 mb-3">
+                Escolha uma disciplina
+              </h2>
+              <select
+                onChange={e => {
+                  const selectedSubjectId = e.target.value
+                  const selectedSubjectData = dataSubjects?.find(
+                    subject => subject.id === selectedSubjectId
+                  )
+                  if (selectedSubjectData) {
+                    handleSelectSubject(
+                      selectedSubjectId,
+                      selectedSubjectData.disciplineId
+                    ) // Passando o código da disciplina
+                  }
+                }}
+                value={selectedSubject}
+                className="w-full text-gray-700 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecione uma disciplina</option>
+                {filteredSubjects?.map(subject => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.disciplineId} - {subject.discipline.disciplineName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="overflow-x-auto">
+              <h2 className="text-xl font-semibold text-gray-700 mb-3">
+                Resultados da Avaliação
+              </h2>
+              {Array.isArray(filteredAssessmentResults) &&
+              filteredAssessmentResults.length > 0 ? (
+                <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+                  <thead className="bg-amber-500 text-white">
+                    <tr>
+                      <th className="p-3 border-b">Disciplina</th>
+                      <th className="p-3 border-b">Nota</th>
+                      <th className="p-3 border-b">Data da Avaliação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAssessmentResults.map(assessmentResult => (
+                      <tr key={assessmentResult.id}>
+                        <td className="p-3 border-b text-gray-700">
+                          {assessmentResult.assessment.name}
+                        </td>
+                        <td className="p-3 border-b text-gray-700">
+                          {assessmentResult.grade}
+                        </td>
+                        <td className="p-3 border-b text-gray-700">
+                          {new Date(
+                            assessmentResult.createdAt
+                          ).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-center text-gray-500">
+                  Nenhum resultado encontrado para a disciplina selecionada.
+                </p>
+              )}
+            </div>
+          </>
         ) : (
           <p className="text-center text-gray-500">
             Nenhuma disciplina disponível. Caso não tenha disciplinas
             disponíveis, verifique se você está inscrito em alguma disciplina.
-          </p>
-        )}
-      </div>
-
-      {/* Exibindo o código da disciplina selecionada */}
-      {selectedSubject && selectedSubjectCode && (
-        <div className="mb-6 text-lg text-gray-700">
-          <strong>Código da Disciplina:</strong> {selectedSubjectCode}
-        </div>
-      )}
-
-      {/* Tabela de resultados da avaliação */}
-      <div className="overflow-x-auto">
-        <h2 className="text-xl font-semibold text-gray-700 mb-3">
-          Resultados da Avaliação
-        </h2>
-        {Array.isArray(filteredAssessmentResults) &&
-        filteredAssessmentResults.length > 0 ? (
-          <table className="min-w-full bg-white border border-gray-300 rounded-lg">
-            <thead className="bg-amber-500 text-white">
-              <tr>
-                <th className="p-3 border-b">Disciplina</th>
-                <th className="p-3 border-b">Nota</th>
-                <th className="p-3 border-b">Data da Avaliação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredAssessmentResults.map(assessmentResult => (
-                <tr key={assessmentResult.id}>
-                  <td className="p-3 border-b text-gray-700">
-                    {assessmentResult.assessment.name}
-                  </td>
-                  <td className="p-3 border-b text-gray-700">
-                    {assessmentResult.grade}
-                  </td>
-                  <td className="p-3 border-b text-gray-700">
-                    {new Date(assessmentResult.createdAt).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-center text-gray-500">
-            Nenhum resultado encontrado para a disciplina selecionada.
           </p>
         )}
       </div>

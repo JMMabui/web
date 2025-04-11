@@ -31,7 +31,7 @@ export async function getRegistration() {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
-  console.log('Resposta da API para registration:', data)
+  // console.log('Resposta da API para registration:', data)
   return data.data 
 }
 

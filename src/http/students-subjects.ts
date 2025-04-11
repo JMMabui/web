@@ -97,7 +97,7 @@ export async function getStudentsSubjects(): Promise<
 
 export async function getStudentsSubjectsByStudentId(
   id: string | null
-): Promise<StudentsSubjectsWithExtraDataResponse[]> {
+) {
   try {
     // Verificando a URL para garantir que o endpoint está correto
     const response = await fetch(`${base_URL}/students_subjects/subject/${id}`)
@@ -113,7 +113,7 @@ export async function getStudentsSubjectsByStudentId(
     const data = await response.json()
 
     // Exibindo os dados para depuração
-    console.log('Subjects API response:', data)
+    // console.log('Subjects API response:', data)
 
     // Verificando se a resposta contém dados válidos
     if (!data ) {
@@ -122,7 +122,7 @@ export async function getStudentsSubjectsByStudentId(
       )
     }
 
-    return data as StudentsSubjectsWithExtraDataResponse[] // Retorna os dados dos assuntos
+    return data.data // Retorna os dados dos assuntos
   } catch (error) {
     // Exibindo um erro geral
     console.error('Error fetching student subjects:', error)

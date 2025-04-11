@@ -3,6 +3,7 @@ import { getRegistration, type RegistrationResponse } from '@/http/registration'
 import {
   createStudentsSubjects,
   getStudentsSubjectsByStudentId,
+ type StudentsSubjectsWithExtraDataResponse,
 } from '@/http/students-subjects'
 import {
   getSubjects,
@@ -43,27 +44,14 @@ export function Enrollments() {
       </div>
     )
   }
-  console.log('Header', studentId)
+  // console.log('Header', studentId)
 
-  const { data: dataRegistration } = useQuery<RegistrationResponse[]>({
+  const { data: dataRegistration, isLoading: isLoadingRegistration } = useQuery<RegistrationResponse[]>({
     queryKey: ['courses'],
     queryFn: getRegistration,
   })
-
-  console.log('data registration: ', dataRegistration)
-
-  const findCourseId = dataRegistration?.find(
-    course => course.student_id === studentId
-  )
-
-  console.log('filterted course', findCourseId)
-
-  const courseId = findCourseId?.course_id
-  if (!courseId) {
-    return <div className="text-center text-red-500">Curso não encontrado.</div>
-  }
-
-  console.log('course id: ', courseId)
+  
+  // console.log('data registration: ', dataRegistration)
 
   const {
     data: dataSubjects,
@@ -77,23 +65,11 @@ export function Enrollments() {
 
   console.log('Disciplinas do curso:', dataSubjects)
 
-  if (isLoadingSubjects) {
-    return <div className="text-center text-lg">Carregando...</div>
-  }
-
-
-
-  const filteredSubjectsByCourse = dataSubjects?.filter(
-    subjects => subjects.courseId === courseId
-  )
-
-  console.log('filtered subjects: ', filteredSubjectsByCourse)
-
   const {
     data: dataSubjectsStudent,
     isLoading: isLoadingSubjectsStudents,
     // isError: isErrorSubjectsStudents,
-  } = useQuery({
+  } = useQuery<StudentsSubjectsWithExtraDataResponse[]>({
     queryKey: ['student_subjects', studentId],
     queryFn: () =>
       studentId
@@ -103,6 +79,38 @@ export function Enrollments() {
   })
 
   console.log('Disciplinas:', dataSubjectsStudent)
+
+  if (isLoadingSubjects || isLoadingSubjectsStudents || isLoadingRegistration)
+    return <div className="text-center text-lg">Carregando...</div>
+  if (isErrorSubjects)
+    return (
+      <div className="text-center text-red-500">
+        Erro ao carregar as cadeiras
+      </div>
+    )
+
+
+  const findCourseId = dataRegistration?.find(
+    course => course.student_id === studentId
+  )
+
+  // console.log('filterted course', findCourseId)
+
+  const courseId = findCourseId?.course_id
+  if (!courseId) {
+    return <div className="text-center text-red-500">Curso não encontrado.</div>
+  }
+
+  // console.log('course id: ', courseId)
+
+
+  const filteredSubjectsByCourse = dataSubjects?.filter(
+    subjects => subjects.courseId === courseId
+  )
+
+  console.log('filtered subjects: ', filteredSubjectsByCourse)
+
+ 
 
   const filteredSubjects = filteredSubjectsByCourse?.filter(subject => {
     if (!year || !semester) {
@@ -122,14 +130,7 @@ export function Enrollments() {
     return subject.year_study === yearAdd3 && subject.semester === semesterAdd3
   })
 
-  if (isLoadingSubjects || isLoadingSubjectsStudents)
-    return <div className="text-center text-lg">Carregando...</div>
-  if (isErrorSubjects)
-    return (
-      <div className="text-center text-red-500">
-        Erro ao carregar as cadeiras
-      </div>
-    )
+ 
 
   function isAlreadyEnrolled(subjectCode: string): boolean {
     return (
