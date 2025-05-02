@@ -1,12 +1,17 @@
+type teacherData = {
+  id: string
+  surname: string
+  name: string
+  email: string
+  contact: string
+  teacherType: 'DOCENTE' | 'COORDENADOR' | 'AUXILIAR'
+  statusTeacher: 'ATIVO' | 'INATIVO'
+  loginId: string | null
+}
 export type teacherResponse = {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  fullName: string;
-  email: string;
-  contact: string;
-  profession: string;
-  type: 'DOCENTE' | 'COORDENADOR' | 'AUXILIAR';
+  success: boolean
+  message: string
+  data: teacherData[]
 }
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
@@ -16,6 +21,22 @@ export async function getTeachers(): Promise<teacherResponse[]> {
     throw new Error('Erro ao buscar os dados')
   }
   const data = await response.json()
-  console.log('Resposta da API:', data)
-  return data as teacherResponse[]
+  // console.log('Resposta da API:', data)
+  return data.map((item: any) => ({
+    ...item,
+    success: item.sucess,
+  })) as teacherResponse[]
+}
+
+export async function getTeacherByEmail(email: string) {
+  if (!email) {
+    throw new Error('Email inválido')
+  }
+  const response = await fetch(`${base_URL}/teacher/email/${email}`)
+  if (!response.ok) {
+    throw new Error('Erro ao buscar os dados')
+  }
+  const data = await response.json()
+  // console.log('Resposta da API:', data)
+  return data.data
 }

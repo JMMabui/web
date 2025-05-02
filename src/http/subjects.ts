@@ -4,8 +4,8 @@ import type { StudentsSubjectsResponse } from './students-subjects'
 export type SubjectsRequest = {
   codigo: string
   credits: number
-  disciplineName: string
-  disciplineType: 'NUCLEAR' | 'COMPLEMENTAR' // Corrigido para tipo literal
+  subjectName: string
+  subjectType: 'NUCLEAR' | 'COMPLEMENTAR' // Corrigido para tipo literal
   hcs: number
   semester: 'PRIMEIRO_SEMESTRE' | 'SEGUNDO_SEMESTRE' // Corrigido para tipo literal
   year_study: 'PRIMEIRO_ANO' | 'SEGUNDO_ANO' | 'TERCEIRO_ANO' | 'QUARTO_ANO' // Corrigido para tipo literal
@@ -13,12 +13,12 @@ export type SubjectsRequest = {
 }
 export type subjectResponse = {
   Course: CourseResponse | null
-  StudentDiscipline: StudentsSubjectsResponse[]
+  StudentSubject: StudentsSubjectsResponse[]
 } & {
   codigo: string
   credits: number
-  disciplineName: string
-  disciplineType: 'NUCLEAR' | 'COMPLEMENTAR'
+  subjectName: string
+  subjectType: 'NUCLEAR' | 'COMPLEMENTAR'
   hcs: number
   semester: 'PRIMEIRO_SEMESTRE' | 'SEGUNDO_SEMESTRE'
   year_study: 'PRIMEIRO_ANO' | 'SEGUNDO_ANO' | 'TERCEIRO_ANO' | 'QUARTO_ANO'
@@ -31,8 +31,8 @@ const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 export async function PostSubjects({
   codigo,
-  disciplineName,
-  disciplineType,
+  subjectName,
+  subjectType,
   year_study,
   semester,
   credits,
@@ -42,8 +42,8 @@ export async function PostSubjects({
   console.log(
     'Mandando para API:',
     codigo,
-    disciplineName,
-    disciplineType,
+    subjectName,
+    subjectType,
     year_study,
     semester,
     credits,
@@ -59,8 +59,8 @@ export async function PostSubjects({
       body: JSON.stringify({
         codigo,
         credits,
-        disciplineName,
-        disciplineType,
+        subjectName,
+        subjectType,
         hcs,
         semester,
         year_study,
@@ -92,7 +92,7 @@ export async function getSubjects() {
     }
 
     const data = await response.json()
-    // console.log('Resposta da API:', data)
+    // console.log('Resposta da API do subjects:', data)
     return data.data
   } catch (error) {
     console.error('Erro ao buscar os dados:', error)
@@ -101,6 +101,7 @@ export async function getSubjects() {
 }
 
 export async function getSubjectsByCourseId(courseId: string | null) {
+  console.log('Mandando para API:', courseId)
   try {
     const response = await fetch(`${base_URL}/subjects/course/${courseId}`)
 
@@ -109,7 +110,7 @@ export async function getSubjectsByCourseId(courseId: string | null) {
     }
 
     const data = await response.json()
-    console.log('Resposta da API:', data)
+    console.log('Resposta da API do subjectsByCourseId:', data)
     return data as subjectResponse[]
   } catch (error) {
     console.error('Erro ao buscar os dados:', error)

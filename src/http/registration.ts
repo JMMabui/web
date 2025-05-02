@@ -1,5 +1,5 @@
-import type { CourseResponse } from './courses';
-import type { StudentsResponse } from './students';
+import type { CourseResponse } from './courses'
+import type { StudentsResponse } from './students'
 export type RegistrationRequest = {
   course_id: string
   student_id: string
@@ -18,7 +18,7 @@ export type RegistrationResponse = {
     | 'NAO_INSCRITO'
   student: StudentsResponse
   course: CourseResponse
-  
+
   createdAt: Date
   updatedAt: Date | null
 }
@@ -26,13 +26,18 @@ export type RegistrationResponse = {
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 export async function getRegistration() {
-  const response = await fetch(`${base_URL}/registration`)
-  if (!response.ok) {
-    throw new Error('Erro ao buscar os dados')
+  try {
+    const response = await fetch(`${base_URL}/registration`)
+    if (!response.ok) {
+      throw new Error('Erro ao buscar os dados')
+    }
+    const data = await response.json()
+    console.log('Resposta da API para registration:', data)
+    return data.data
+  } catch (error) {
+    console.error('Error fetching registration data:', error)
+    throw error
   }
-  const data = await response.json()
-  // console.log('Resposta da API para registration:', data)
-  return data.data 
 }
 
 export async function postRegistration({

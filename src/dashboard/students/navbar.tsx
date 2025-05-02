@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Enrollments } from './enrollments'
 import { Assessments } from './assessments'
-import { Dashboard } from './dashboard'
 import { MonthlyFee } from './monthlyFee'
+import { DashboardStudents } from './dashboard'
 
 const NavbarLink = ({
   section,
@@ -100,7 +100,7 @@ export const Navbar = () => {
       <div className="mt-8 p-4 text-white">
         {activeSection === 'dashboard' && (
           <div>
-            <Dashboard />
+            <DashboardStudents />
           </div>
         )}
         {activeSection === 'avaliacao' && (

@@ -5,7 +5,7 @@ export type assessmentResponse = {
   AssessmentResult: assessmentResponse[]
 } & {
   name: string
-  type: string
+  assessmentType: string
   dateApplied: Date
   subjectId: string
   weight: number | null
@@ -14,7 +14,7 @@ export type assessmentResponse = {
 
 export type assessmentRequest = {
   name: string
-  type:
+  assessmentType:
     | 'TESTE_INDIVIDUAL'
     | 'TESTE_GRUPO'
     | 'TRABALHO_INDIVIDUAL'
@@ -31,7 +31,7 @@ const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 export async function createAssessment({
   name,
-  type,
+  assessmentType,
   dateApplied,
   weight,
   subjectId,
@@ -43,7 +43,7 @@ export async function createAssessment({
     },
     body: JSON.stringify({
       name,
-      type,
+      assessmentType,
       dateApplied,
       weight,
       subjectId,
@@ -135,7 +135,7 @@ export async function getAssessmentsBySubjectId(
 
 export async function updateAssessment(
   id: string,
-  { name, type, dateApplied, weight, subjectId }: assessmentRequest
+  { name, assessmentType, dateApplied, weight, subjectId }: assessmentRequest
 ): Promise<assessmentResponse> {
   const response = await fetch(`${base_URL}/assessment/${id}`, {
     method: 'PUT', // Usando o método PUT para atualização
@@ -144,7 +144,7 @@ export async function updateAssessment(
     },
     body: JSON.stringify({
       name,
-      type,
+      assessmentType,
       dateApplied,
       weight,
       subjectId,

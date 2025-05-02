@@ -1,64 +1,91 @@
-// src/components/Dashboard.jsx
-import { useState } from 'react' // Importar useState
-import { getStudentsSubjects } from '@/http/students-subjects'
+// src/components/DashboardTeachers.jsx
+import { useState, useMemo } from 'react'
+import { Search } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
 import {
-  getTeacherSubjectByTeacherId,
-  type teacherSubjectResponse,
-} from '@/http/teacherSubjects'
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
 import { useQuery } from '@tanstack/react-query'
+import { getTeacherByEmail } from '@/http/teacher'
+import { getTeacherSubjectByTeacherId } from '@/http/teacherSubjects'
+import {
+  getStudentsSubjectsBySubjectId,
+  type StudentsSubjectsWithExtraDataResponse,
+} from '@/http/students-subjects'
 
 export function DashboardTeachers() {
-  // Estado para armazenar a disciplina selecionada
-  const [selectedSubject, setSelectedSubject] =
-    useState<teacherSubjectResponse | null>(null)
+  const [selectedSubject, setSelectedSubject] = useState<any>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('')
+  const { theme } = useTheme()
 
-  // Busca os dados das disciplinas do professor
-  const {
-    data: dataTeacherSubjects,
-    isLoading: isLoadingTeacherSubject,
-    error: errorTeacherSubject,
-  } = useQuery({
-    queryKey: ['teacherSubjects'],
-    queryFn: () =>
-      getTeacherSubjectByTeacherId('cc6bb5df-bc97-429a-95cd-9fa4a8dc5454'),
+  const email = localStorage.getItem('email')
+
+  // Buscar dados do professor
+  const { data: dataTeacher } = useQuery({
+    queryKey: ['teacher'],
+    queryFn: async () =>
+      email ? getTeacherByEmail(email) : Promise.reject('Invalid email'),
+    enabled: !!email,
   })
 
-  // Busca os dados dos alunos das disciplinas
-  const {
-    data: studentsSubjects,
-    isLoading: isLoadingStudentsSubjects,
-    error: errorStudentsSubjects,
-  } = useQuery({
-    queryKey: ['studentsSubjects'],
-    queryFn: getStudentsSubjects,
+  const teacherId = dataTeacher?.id || ''
+  localStorage.setItem('teacherId', teacherId)
+
+  // Buscar disciplinas do professor
+  const { data: dataTeacherSubjects } = useQuery({
+    queryKey: ['teacherSubjects', teacherId],
+    queryFn: async () => getTeacherSubjectByTeacherId(teacherId),
+    enabled: !!teacherId,
   })
 
-  // Verifica se está carregando os dados
-  if (isLoadingTeacherSubject || isLoadingStudentsSubjects) {
-    return <div>Carregando...</div>
+  const teacherSubjects = (dataTeacherSubjects || []).map(subjectData => ({
+    ...subjectData,
+    subject: {
+      ...subjectData.Subject,
+      year_study: subjectData.Subject.year_study,
+      semester: subjectData.Subject.semester,
+    },
+  }))
+
+  const subjectIds = teacherSubjects.map(subject => subject.subjectId)
+
+  // Buscar alunos das disciplinas
+  const { data: dataStudentsSubjects } = useQuery<
+    StudentsSubjectsWithExtraDataResponse[]
+  >({
+    queryKey: ['studentsSubjects', subjectIds],
+    queryFn: async () => {
+      const results = await Promise.all(
+        subjectIds.map(subjectId => getStudentsSubjectsBySubjectId(subjectId))
+      )
+      return results.flat()
+    },
+    enabled: subjectIds.length > 0,
+  })
+
+  console.log('Dados dos alunos por disciplina:', dataStudentsSubjects)
+
+  // Unificar os alunos
+  const studentsSubjects = (dataStudentsSubjects || []).map(studentData => ({
+    ...studentData,
+    studentId: studentData.studentId,
+  }))
+
+  const getTotalAlunos = (subjectId: string) => {
+    return studentsSubjects.filter(student => student.subjectId === subjectId)
   }
 
-  // Verifica se ocorreu um erro ao buscar os dados
-  if (errorTeacherSubject || errorStudentsSubjects) {
-    return <div>Erro ao carregar os dados </div>
-  }
-
-  // Converte os dados para o tipo teacher
-  const teacherSubjects = dataTeacherSubjects as teacherSubjectResponse[]
-
-  // Para cada disciplina do professor, filtra os alunos correspondentes
-  const getTotalAlunos = (disciplineId: string) => {
-    return studentsSubjects?.filter(
-      student => student.disciplineId === disciplineId
-    )
-  }
-
-  // Função para lidar com o clique no card e exibir o resumo
-  const handleCardClick = (subject: teacherSubjectResponse) => {
+  const handleCardClick = (subject: any) => {
     setSelectedSubject(subject)
   }
 
-  // Função para formatar o semestre e o ano de estudo
   const formatPeriodo = (yearStudy: string, semester: string) => {
     const semestreFormatado = formSemester(semester)
     const anoFormatado = formatYear(yearStudy)
@@ -72,11 +99,10 @@ export function DashboardTeachers() {
       case 'SEGUNDO_SEMESTRE':
         return '2º Semestre'
       default:
-        return semester // Caso o semestre não esteja mapeado, retorna o valor original
+        return semester
     }
   }
 
-  // Função para formatar o ano de estudo
   const formatYear = (yearStudy: string) => {
     switch (yearStudy) {
       case 'PRIMEIRO_ANO':
@@ -88,76 +114,173 @@ export function DashboardTeachers() {
       case 'QUARTO_ANO':
         return '4º Ano'
       default:
-        return yearStudy // Caso o ano não esteja mapeado, retorna o valor original
+        return yearStudy
     }
   }
 
+  const filteredSubjects = useMemo(() => {
+    return teacherSubjects
+      .filter(subject => {
+        const matchesSearch = subject?.subject?.subjectName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+        const matchesPeriod =
+          !selectedPeriod ||
+          formatPeriodo(
+            subject.subject.year_study,
+            subject.subject.semester
+          ) === selectedPeriod
+        return matchesSearch && matchesPeriod
+      })
+      .sort((a, b) =>
+        a.subject.subjectName.localeCompare(b.subject.subjectName)
+      )
+  }, [teacherSubjects, searchTerm, selectedPeriod])
+
+  console.log('Disciplinas filtradas:', filteredSubjects)
+
+  const chartData = useMemo(() => {
+    return filteredSubjects.map(subject => {
+      const totalAlunos = getTotalAlunos(subject.subject.codigo).length
+      return {
+        name: subject.subject.subjectName,
+        alunos: totalAlunos,
+      }
+    })
+  }, [filteredSubjects, studentsSubjects])
+
+  const uniquePeriods = useMemo(() => {
+    const periods = new Set(
+      teacherSubjects.map(subject =>
+        formatPeriodo(subject.subject.year_study, subject.subject.semester)
+      )
+    )
+    return Array.from(periods)
+  }, [teacherSubjects])
+
   return (
-    <div className="p-8 w-full bg-gray-50 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Cards das turmas */}
-          {teacherSubjects
-            .sort((a, b) =>
-              a.discipline.disciplineName.localeCompare(
-                b.discipline.disciplineName
-              )
-            )
-            .map((subject, index) => {
-              const totalAlunos = getTotalAlunos(subject.discipline.codigo) // Filtra e conta os alunos dessa disciplina
-              return (
-                <div
-                  key={index}
-                  className="p-6 bg-blue-200 rounded-md shadow-md hover:bg-blue-300 transition-colors cursor-pointer"
-                  onClick={() => handleCardClick(subject)} // Lida com o clique no card
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      handleCardClick(subject)
-                    }
-                  }}
-                >
-                  <h3 className="text-xl font-medium mb-2">
-                    {subject.discipline.disciplineName}
-                  </h3>
-                  <p className="text-sm text-gray-700">
-                    Estado:{' '}
-                    {subject.status.charAt(0).toUpperCase() +
-                      subject.status.slice(1).toLocaleLowerCase()}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Total de Alunos: {totalAlunos?.length}
-                  </p>
-                </div>
-              )
-            })}
+    <div
+      className={`p-8 w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}
+    >
+      <div
+        className={`max-w-6xl mx-auto ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md`}
+      >
+        {/* Filtros */}
+        <div className="mb-6 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar disciplina..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className={`w-full pl-10 p-2 border rounded-md ${
+                theme === 'dark'
+                  ? 'bg-gray-700 text-white border-gray-600'
+                  : 'bg-white'
+              }`}
+            />
+          </div>
+          <select
+            value={selectedPeriod}
+            onChange={e => setSelectedPeriod(e.target.value)}
+            className={`p-2 border rounded-md ${
+              theme === 'dark'
+                ? 'bg-gray-700 text-white border-gray-600'
+                : 'bg-white'
+            }`}
+          >
+            <option value="">Todos os períodos</option>
+            {uniquePeriods.map(period => (
+              <option key={period} value={period}>
+                {period}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Exibir resumo da turma selecionada */}
+        {/* Gráfico */}
+        <div className="mb-8 h-64">
+          <h3 className="text-xl font-semibold mb-4">
+            Distribuição de Alunos por Disciplina
+          </h3>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="alunos" fill="#eab308" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredSubjects.map((subject, index) => {
+            const totalAlunos = getTotalAlunos(subject.subject.codigo)
+            return (
+              <button
+                type="button"
+                key={index}
+                className={`p-6 rounded-md shadow-md transition-colors cursor-pointer w-full text-left ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 hover:bg-gray-600'
+                    : 'bg-blue-200 hover:bg-blue-300'
+                }`}
+                onClick={() => handleCardClick(subject)}
+              >
+                <h3 className="text-xl font-medium mb-2">
+                  {subject.subject.subjectName}
+                </h3>
+                <p className="text-sm">
+                  Estado: {subject.status === 'ATIVO' ? 'activo' : 'inactivo'}
+                </p>
+                <p className="text-sm">Total de Alunos: {totalAlunos.length}</p>
+                <p className="text-sm">
+                  Período:{' '}
+                  {formatPeriodo(
+                    subject.subject.year_study,
+                    subject.subject.semester
+                  )}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Resumo */}
         {selectedSubject && (
-          <div className="mt-8 bg-gray-100 p-6 rounded-lg shadow-md">
+          <div
+            className={`mt-8 p-6 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}
+          >
             <h2 className="text-2xl font-bold mb-4">
-              {selectedSubject.discipline.disciplineName}
+              {selectedSubject.subject.subjectName}
             </h2>
-            <p className="text-lg mb-2">
-              <strong>Código: </strong>
-              {selectedSubject.discipline.codigo}
-            </p>
-            <p className="text-lg mb-2">
-              <strong>Estado:</strong>{' '}
-              {selectedSubject.status.charAt(0).toUpperCase() +
-                selectedSubject.status.slice(1).toLocaleLowerCase()}
-            </p>
-            <p className="text-lg mb-2">
-              <strong>Total de Alunos:</strong>{' '}
-              {getTotalAlunos(selectedSubject?.discipline.codigo)?.length}
-            </p>
-            <p className="text-lg mb-2">
-              <strong>Período:</strong>{' '}
-              {formatPeriodo(
-                selectedSubject.discipline.year_study,
-                selectedSubject.discipline.semester
-              )}
-            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-lg mb-2">
+                  <strong>Código:</strong> {selectedSubject.subject.codigo}
+                </p>
+                <p className="text-lg mb-2">
+                  <strong>Estado:</strong>{' '}
+                  {selectedSubject.status === 'ATIVO' ? 'Ativo' : 'Inativo'}
+                </p>
+              </div>
+              <div>
+                <p className="text-lg mb-2">
+                  <strong>Total de Alunos:</strong>{' '}
+                  {getTotalAlunos(selectedSubject.subject.codigo).length}
+                </p>
+                <p className="text-lg mb-2">
+                  <strong>Período:</strong>{' '}
+                  {formatPeriodo(
+                    selectedSubject.subject.year_study,
+                    selectedSubject.subject.semester
+                  )}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>

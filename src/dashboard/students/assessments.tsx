@@ -1,3 +1,5 @@
+import { LoadingSkeleton } from '@/components/LoadingSkeleton'
+import { ErrorComponent } from '@/components/ErrorComponent'
 import { getAssessmentResultByStudentId } from '@/http/assessmentResult'
 import {
   getStudentsSubjectsByStudentId,
@@ -22,9 +24,8 @@ export function Assessments() {
     queryFn: () => getStudentsSubjectsByStudentId(id),
   })
 
-  // console.log('Disciplinas:', dataSubjects)
+  console.log('/students_subjects/${id} ', dataSubjects)
 
-  // Obtendo os resultados de avaliação de todos os estudantes
   const {
     data: dataAssessmentResultById,
     isLoading: isLoadingAssessmentResult,
@@ -34,34 +35,14 @@ export function Assessments() {
     queryFn: () => getAssessmentResultByStudentId(id),
   })
 
-  // console.log('Resultados de avaliação:', dataAssessmentResultById)
+  console.log('assessment-result/${id} ', dataAssessmentResultById)
 
   if (isLoadingSubjects || isLoadingAssessmentResult) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-gray-600">Carregando...</div>
-      </div>
-    )
+    return <LoadingSkeleton />
   }
 
-  if (errorSubjects) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-red-600">
-          Erro ao carregar as disciplinas
-        </div>
-      </div>
-    )
-  }
-
-  if (errorAssessmentResult) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-red-600">
-          Erro ao carregar os resultados da avaliação
-        </div>
-      </div>
-    )
+  if (errorSubjects || errorAssessmentResult) {
+    return <ErrorComponent />
   }
 
   // Função para selecionar uma disciplina e atualizar o código da disciplina
@@ -69,23 +50,55 @@ export function Assessments() {
     setSelectedSubject(subjectId)
     setSelectedSubjectCode(subjectCode) // Atualizando o código da disciplina
   }
-
-  // console.log('selectedSubject:', selectedSubject)
-  // console.log('selectedSubjectCode:', selectedSubjectCode) // Verificando o código da disciplina
   const filteredSubjects = dataSubjects?.filter(
     subjects =>
-      subjects.status === 'INSCRITO' && subjects.result === 'REPROVADO'
+      subjects.status === 'INSCRITO' && subjects.result === 'EM_ANDAMENTO'
   )
-  console.log('Filtered subjects:', filteredSubjects)
 
   // Filtrando os resultados de avaliação para a disciplina selecionada
   const filteredAssessmentResults = dataAssessmentResultById?.filter(
     assessmentResult => {
-      return assessmentResult.assessment.subjectId === selectedSubjectCode
+      return (
+        assessmentResult.assessment.subjectId === selectedSubjectCode &&
+        !assessmentResult.assessment.assessmentType.startsWith('EXAME')
+      )
     }
   )
 
-  // console.log('Resultados filtrados:', filteredAssessmentResults)
+  const filteredExams = dataAssessmentResultById?.filter(assessmentResult => {
+    return (
+      assessmentResult.assessment.subjectId === selectedSubjectCode &&
+      assessmentResult.assessment.assessmentType.startsWith('EXAME')
+    )
+  })
+
+  const filterWeight = filteredAssessmentResults?.map(assessmentResult => {
+    return assessmentResult.assessment.weight
+  })
+
+  const sumWeight = filterWeight?.reduce<number>((acc, curr) => {
+    const accValue = acc ?? 0
+    const currValue = curr ?? 0
+    return accValue + currValue
+  }, 0)
+
+  const averageFrequency = filteredAssessmentResults
+    ?.reduce((acc, curr) => {
+      const weight = curr.assessment.weight ?? 0
+      const grade = curr.grade ?? 0
+      return acc + (weight * grade) / 100
+    }, 0)
+    .toFixed(2)
+
+  const filterExamsGrade = filteredExams
+    ?.reduce((acc, curr) => {
+      const grade = curr.grade ?? 0
+      const sum = acc + grade
+      return sum
+    }, 0)
+    .toFixed(2)
+
+  const averageFinal = (Number(averageFrequency) + Number(filterExamsGrade)) / 2
 
   return (
     <div className="w-full mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -110,7 +123,7 @@ export function Assessments() {
                   if (selectedSubjectData) {
                     handleSelectSubject(
                       selectedSubjectId,
-                      selectedSubjectData.disciplineId
+                      selectedSubjectData.subjectId
                     ) // Passando o código da disciplina
                   }
                 }}
@@ -120,7 +133,7 @@ export function Assessments() {
                 <option value="">Selecione uma disciplina</option>
                 {filteredSubjects?.map(subject => (
                   <option key={subject.id} value={subject.id}>
-                    {subject.disciplineId} - {subject.discipline.disciplineName}
+                    {subject.subjectId} - {subject.Subject.subjectName}
                   </option>
                 ))}
               </select>
@@ -133,14 +146,14 @@ export function Assessments() {
               {Array.isArray(filteredAssessmentResults) &&
               filteredAssessmentResults.length > 0 ? (
                 <table className="min-w-full bg-white border border-gray-300 rounded-lg">
-                  <thead className="bg-amber-500 text-white">
+                  <thead className="bg-amber-500 text-white text-center">
                     <tr>
                       <th className="p-3 border-b">Disciplina</th>
                       <th className="p-3 border-b">Nota</th>
                       <th className="p-3 border-b">Data da Avaliação</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="text-center">
                     {filteredAssessmentResults.map(assessmentResult => (
                       <tr key={assessmentResult.id}>
                         <td className="p-3 border-b text-gray-700">
@@ -151,7 +164,7 @@ export function Assessments() {
                         </td>
                         <td className="p-3 border-b text-gray-700">
                           {new Date(
-                            assessmentResult.createdAt
+                            assessmentResult.assessment.dateApplied
                           ).toLocaleDateString()}
                         </td>
                       </tr>
@@ -164,6 +177,69 @@ export function Assessments() {
                 </p>
               )}
             </div>
+
+            {/* Componentes adicionais quando a soma for 100 */}
+            {sumWeight === 100 && (
+              <div className="mt-8 space-y-6">
+                <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+                  <h3 className="text-xl font-semibold text-green-800 mb-4">
+                    Situação da disciplina
+                  </h3>
+                  <p>Média frequência: {averageFrequency}</p>
+                  {averageFrequency && Number(averageFrequency) < 10 ? (
+                    <div>
+                      <p>Situação: Reprovado</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p>Situação: Admitido para exame normal</p>
+                      {Array.isArray(filteredExams) &&
+                        filteredExams.length > 0 && (
+                          <table className="min-w-full bg-white border border-gray-300 rounded-lg">
+                            <thead className="bg-amber-500 text-white text-center">
+                              <tr>
+                                <th className="p-3 border-b">Exame</th>
+                                <th className="p-3 border-b">Nota</th>
+                                <th className="p-3 border-b">Situacao</th>
+                              </tr>
+                            </thead>
+                            <tbody className="text-center">
+                              {filteredExams.map(exam => (
+                                <tr key={exam.id}>
+                                  <td className="p-3 border-b text-gray-700">
+                                    {exam.assessment.name}
+                                  </td>
+                                  <td className="p-3 border-b text-gray-700">
+                                    {exam.grade}
+                                  </td>
+                                  <td className="p-3 border-b text-gray-700">
+                                    {exam.grade >= 10
+                                      ? 'Aprovado'
+                                      : 'Reprovado'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="bg-amber-500 text-white text-center w-full">
+                              <tr>
+                                <td
+                                  className="p-3 border-b text-gray-700"
+                                  colSpan={2}
+                                >
+                                  <span>Média final</span>
+                                </td>
+                                <td className="p-3 border-b text-gray-700">
+                                  <span>{averageFinal}</span>
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <p className="text-center text-gray-500">

@@ -1,0 +1,244 @@
+import { createBrowserRouter } from 'react-router-dom'
+import { LandingPage } from './website/landingPage'
+import { CursoTecnico } from './website/pages/cursos/tecnico'
+import { Licenciatura } from './website/pages/cursos/licenciatura'
+import { Mestrado } from './website/pages/cursos/mestrado'
+import { CursoReligioso } from './website/pages/cursos/religioso'
+import { CurtaDuracao } from './website/pages/cursos/curtaDuracao'
+import { LoginForm } from './Login/loginForm'
+import { LayoutStudents } from './dashboard/students/layoutStudent'
+import { Signup } from './registration/signup'
+import { Dashboard_cta } from './dashboard/CTA/dashboard'
+import { Pre_Instituto } from './registration/pre_institutos'
+import { Inscricao } from './registration/course'
+import { Invoice } from './registration/invoice'
+import { DashboardLayout2 } from './dashboard/CTA/academic_record/dashboardLayout'
+import { Dashboard_Human_Resourses } from './dashboard/CTA/human resources/dashboard_human_resourses'
+import { AddEmployee } from './dashboard/CTA/human resources/add_employee'
+import { EmployeeList } from './dashboard/CTA/human resources/list_employee'
+import { DashboardLayout } from './dashboard/CTA/human resources/dashboardLayout'
+import { AcademicRecord } from './dashboard/CTA/academic_record/dashboard_academic_record'
+import { CoursesDashboard } from './dashboard/CTA/academic_record/course_AR'
+import { Enrollment_Academic_Record } from './dashboard/CTA/academic_record/registration_academic_record'
+import { Students_ar } from './dashboard/CTA/academic_record/student_ar'
+import { Reports } from './dashboard/CTA/human resources/reports'
+import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
+import { AddCourse } from './dashboard/CTA/academic_record/addCourse'
+import { AddSubject } from './dashboard/CTA/academic_record/addSubject'
+import { Classes } from './dashboard/CTA/academic_record/classes'
+import { Teachers_ar } from './dashboard/CTA/academic_record/teacher_AR'
+import { Diploma } from './dashboard/CTA/academic_record/documents/diploma'
+import { Certificate } from './dashboard/CTA/academic_record/documents/certificado'
+import { AddEnrollments } from './dashboard/CTA/academic_record/addEnrollment'
+import { LayoutTeachers } from './dashboard/Teacher/layoutTeacher'
+import { DashboardLayoutFinances } from './dashboard/CTA/finance/layout'
+import { DashboardFinances } from './dashboard/CTA/finance/dashboard'
+import { InvoicesFinances } from './dashboard/CTA/finance/invoices'
+import { PaymentsFinances } from './dashboard/CTA/finance/payments'
+import { DashboardStudents } from './dashboard/students/dashboard'
+import { Assessments } from './dashboard/students/assessments'
+import { MonthlyFee } from './dashboard/students/monthlyFee'
+import { Enrollments } from './dashboard/students/enrollments'
+import { DashboardTeachers } from './dashboard/Teacher/dashboard'
+import { ClassManagement } from './dashboard/Teacher/classManagement'
+import { Evaluations } from './dashboard/Teacher/evaluations'
+import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
+import { Announcements } from './dashboard/Teacher/announcements'
+import { ActivityHistory } from './dashboard/Teacher/activityHistory'
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LandingPage />,
+  },
+  {
+    path: '/cursos/curta-duracao',
+    element: <CurtaDuracao />,
+  },
+  {
+    path: '/cursos/tecnico-medio',
+    element: <CursoTecnico />,
+  },
+  {
+    path: '/cursos/licenciatura',
+    element: <Licenciatura />,
+  },
+  {
+    path: '/cursos/mestrado',
+    element: <Mestrado />,
+  },
+  {
+    path: '/cursos/religioso',
+    element: <CursoReligioso />,
+  },
+  {
+    path: '/login',
+    element: <LoginForm />,
+  },
+  {
+    path: '/registration',
+    element: <Signup />,
+  },
+  {
+    path: '/registration/pre-instituto',
+    element: <Pre_Instituto />,
+  },
+  {
+    path: '/registration/course',
+    element: <Inscricao />,
+  },
+  {
+    path: '/registration/resume',
+    element: <Invoice />,
+  },
+  {
+    path: '/student',
+    element: <LayoutStudents />,
+    children: [
+      {
+        path: 'dashboard',
+        element: <DashboardStudents />,
+      },
+      {
+        path: 'assessments',
+        element: <Assessments />,
+      },
+      {
+        path: 'monthly-fee',
+        element: <MonthlyFee />,
+      },
+      {
+        path: 'enrollment',
+        element: <Enrollments />,
+      },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <Dashboard_cta />,
+  },
+  {
+    path: '/academic_record',
+    element: <DashboardLayout2 />,
+    children: [
+      {
+        path: 'dashboard',
+        element: <AcademicRecord />,
+      },
+      {
+        path: 'courses',
+        element: <CoursesDashboard />,
+      },
+      {
+        path: 'courses/add-course',
+        element: <AddCourse />,
+      },
+      {
+        path: 'courses/add-subject/:id?',
+        element: <AddSubject />,
+      },
+      {
+        path: 'courses/classes',
+        element: <Classes />,
+      },
+      {
+        path: 'students',
+        element: <Students_ar />,
+      },
+      {
+        path: 'students/new-student',
+        element: <AddStudents />,
+      },
+      {
+        path: 'student_ar/add_student/addcourse/:id',
+        element: <AddPreInstituto_addCourse />,
+      },
+      {
+        path: 'teachers',
+        element: <Teachers_ar />,
+      },
+      {
+        path: 'enrollment',
+        element: <Enrollment_Academic_Record />,
+      },
+      {
+        path: 'enrollment/relation',
+        element: <AddEnrollments />,
+      },
+      {
+        path: 'certificate',
+        element: <Certificate />,
+      },
+      {
+        path: 'diploma',
+        element: <Diploma />,
+      },
+    ],
+  },
+  {
+    path: '/human_resources',
+    element: <DashboardLayout />,
+    children: [
+      {
+        path: 'dashboard',
+        element: <Dashboard_Human_Resourses />,
+      },
+      {
+        path: 'employee',
+        element: <EmployeeList />,
+      },
+      {
+        path: 'reports',
+        element: <Reports />,
+      },
+      {
+        path: 'add_employee',
+        element: <AddEmployee />,
+      },
+    ],
+  },
+  {
+    path: '/finances',
+    element: <DashboardLayoutFinances />,
+    children: [
+      {
+        path: 'dashboard',
+        element: <DashboardFinances />,
+      },
+      {
+        path: 'invoices',
+        element: <InvoicesFinances />,
+      },
+      {
+        path: 'payments',
+        element: <PaymentsFinances />,
+      },
+    ],
+  },
+  {
+    path: '/Teacher',
+    element: <LayoutTeachers />,
+    children: [
+      {
+        path: 'dashboard',
+        element: <DashboardTeachers />,
+      },
+
+      {
+        path: 'evaluations',
+        element: <Evaluations />,
+      },
+      {
+        path: 'class-management',
+        element: <ClassManagement />,
+      },
+      {
+        path: 'announcements',
+        element: <Announcements />,
+      },
+      {
+        path: 'activity-history',
+        element: <ActivityHistory />,
+      },
+    ],
+  },
+])

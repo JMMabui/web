@@ -91,7 +91,7 @@ export async function getAssessmentResultByStudentId(
   }
 
   const result = await response.json()
-  //   console.log('Resposta da API assessment result:', result)
+  console.log('Resposta da API assessment result:', result)
   const resultData = result.data
   if (!resultData || !Array.isArray(resultData)) {
     throw new Error(

@@ -1,4 +1,4 @@
-import ErrorMessage from '@/component/error-message'
+import ErrorMessage from '@/components/error-message'
 import { type CourseResponse, getCourses } from '@/http/courses'
 import {
   checkIfCodeExists,

@@ -2,14 +2,14 @@ import type { StudentsResponse } from './students'
 import type { subjectResponse } from './subjects'
 
 export type StudentsSubjectsRequest = {
-  student_id: string
-  disciplineId: string
+  studentId: string
+  subjectIds: string[]
 }
 
 export type StudentsSubjectsResponse = {
   id: string
-  student_id: string
-  disciplineId: string
+  studentId: string
+  subjectId: string
   status:
     | 'PENDENTE'
     | 'CONFIRMADO'
@@ -23,11 +23,11 @@ export type StudentsSubjectsResponse = {
 }
 
 export type StudentsSubjectsWithExtraDataResponse = {
-  discipline: subjectResponse
+  Subject: subjectResponse
   student: StudentsResponse
 } & {
-  student_id: string
-  disciplineId: string
+  studentId: string
+  subjectId: string
   result: 'APROVADO' | 'REPROVADO' | 'EM_ANDAMENTO'
   id: string
   status:
@@ -44,12 +44,9 @@ export type StudentsSubjectsWithExtraDataResponse = {
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
 
 export async function createStudentsSubjects({
-  student_id,
-  disciplineIds, // Agora é um array de disciplineId
-}: {
-  student_id: string
-  disciplineIds: string[] // Array de disciplineIds
-}) {
+  studentId,
+  subjectIds, // Agora é um array de disciplineId
+}: StudentsSubjectsRequest) {
   try {
     const response = await fetch(`${base_URL}/students_subjects`, {
       method: 'POST',
@@ -57,8 +54,8 @@ export async function createStudentsSubjects({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        student_id,
-        disciplineIds, // Passando o array de disciplineId
+        studentId,
+        subjectIds, // Passando o array de disciplineId
       }),
     })
 
@@ -83,56 +80,96 @@ export async function createStudentsSubjects({
   }
 }
 
-export async function getStudentsSubjects(): Promise<
-  StudentsSubjectsWithExtraDataResponse[]
-> {
-  const response = await fetch(`${base_URL}/students_subjects`)
-  if (!response.ok) {
-    throw new Error('Erro ao buscar os dados')
+export async function getStudentsSubjects() {
+  try {
+    const response = await fetch(`${base_URL}/students_subjects`)
+    if (!response.ok) {
+      throw new Error('Erro ao buscar os dados')
+    }
+    const result = await response.json()
+
+    // Verifica se a resposta tem a estrutura esperada
+    if (!result || typeof result !== 'object') {
+      throw new Error('Resposta inválida da API')
+    }
+
+    // Verifica se a requisição foi bem sucedida
+    if (!result.success) {
+      console.warn('API retornou sucesso falso:', result.message)
+      return [] // Retorna array vazio em caso de sucesso falso
+    }
+
+    // Verifica se os dados são um array
+    if (!Array.isArray(result.data)) {
+      throw new Error('Dados retornados não são um array')
+    }
+
+    console.log('Resposta da API getStudentsSubjects:', result.data)
+    return result.data
+  } catch (error) {
+    console.error('Error fetching student subjects:', error)
+    throw error
   }
-  const data = await response.json()
-  // console.log('Resposta da API:', data)
-  return data as StudentsSubjectsWithExtraDataResponse[]
+}
+
+// Interface para a estrutura padrão de resposta da API
+interface ApiResponse<T> {
+  success: boolean
+  message: string
+  data: T
+  status?: number
+}
+
+// Função auxiliar para tratar erros HTTP
+function handleHttpError(response: Response): never {
+  const errorMessages: Record<number, string> = {
+    400: 'Requisição inválida',
+    401: 'Não autorizado',
+    403: 'Acesso negado',
+    404: 'Recurso não encontrado',
+    500: 'Erro interno do servidor',
+  }
+
+  const errorMessage = errorMessages[response.status] || 'Erro desconhecido'
+  throw new Error(`${errorMessage} (Status: ${response.status})`)
 }
 
 export async function getStudentsSubjectsByStudentId(
   id: string | null
-) {
+): Promise<StudentsSubjectsWithExtraDataResponse[]> {
   try {
-    // Verificando a URL para garantir que o endpoint está correto
-    const response = await fetch(`${base_URL}/students_subjects/subject/${id}`)
+    const response = await fetch(`${base_URL}/students_subjects/${id}`)
 
-    // Verificando se a resposta da API foi bem-sucedida
     if (!response.ok) {
-      const errorMessage = `Failed to fetch subjects for student with ID: ${id}. Status: ${response.status} - ${response.statusText}`
-      console.error(errorMessage)
-      throw new Error(errorMessage) // Lançando o erro com uma mensagem mais detalhada
+      return handleHttpError(response)
     }
 
-    // Tentando obter os dados em formato JSON
-    const data = await response.json()
+    const result: ApiResponse<StudentsSubjectsWithExtraDataResponse[]> =
+      await response.json()
 
-    // Exibindo os dados para depuração
-    // console.log('Subjects API response:', data)
-
-    // Verificando se a resposta contém dados válidos
-    if (!data ) {
-      throw new Error(
-        'No subjects data returned or the data format is incorrect.'
-      )
+    if (!result || typeof result !== 'object') {
+      throw new Error('Resposta inválida da API')
     }
 
-    return data.data // Retorna os dados dos assuntos
+    if (!result.success) {
+      console.warn(`API retornou sucesso falso: ${result.message}`)
+      return []
+    }
+
+    if (!Array.isArray(result.data)) {
+      throw new Error('Dados retornados não são um array')
+    }
+
+    // console.log('result.data: ', result.data)
+
+    return result.data
   } catch (error) {
-    // Exibindo um erro geral
-    console.error('Error fetching student subjects:', error)
-    throw error // Re-lançando o erro para ser tratado por quem chamar a função
+    console.error('Erro ao buscar disciplinas do estudante:', error)
+    throw error
   }
 }
 
-export async function getStudentsSubjectsBySubjectId(
-  subjectId: string | null
-): Promise<StudentsSubjectsWithExtraDataResponse[]> {
+export async function getStudentsSubjectsBySubjectId(subjectId: string | null) {
   try {
     // Verificando a URL para garantir que o endpoint está correto
     const response = await fetch(
@@ -147,19 +184,19 @@ export async function getStudentsSubjectsBySubjectId(
     }
 
     // Tentando obter os dados em formato JSON
-    const data = await response.json()
+    const result = await response.json()
 
     // Exibindo os dados para depuração
-    // console.log('Subjects API response:', data)
+    console.log('Subjects API response:', result)
 
     // Verificando se a resposta contém dados válidos
-    if (!data || !Array.isArray(data)) {
+    if (!result || !Array.isArray(result.data)) {
       throw new Error(
-        'No subjects data returned or the data format is incorrect.'
+        'No subjects result returned or the result format is incorrect.'
       )
     }
 
-    return data as StudentsSubjectsWithExtraDataResponse[] // Retorna os dados dos assuntos
+    return result.data
   } catch (error) {
     // Exibindo um erro geral
     console.error('Error fetching student subjects:', error)

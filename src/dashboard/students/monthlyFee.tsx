@@ -1,191 +1,333 @@
 import { useEffect, useState } from 'react'
-import Button from '@/component/Button'
+import Button from '@/components/Button'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { getInvoicesByStudentId, createInvoice } from '../../http/invoices'
+import { LoadingSkeleton } from '@/components/LoadingSkeleton'
+import { ErrorComponent } from '@/components/ErrorComponent'
+
+interface Invoice {
+  id: string
+  month: string
+  date: string
+  status: string
+  amount: number
+  dueDate: string
+  paymentDate?: string
+  paymentMethod?: string
+  courseId: string
+}
 
 export function MonthlyFee() {
   const [showForm, setShowForm] = useState(false)
-  const [newInvoice, setNewInvoice] = useState<{
-    months: string[]
-    date: string
-    status: string
-  }>({
-    months: [],
-    date: '',
-    status: 'Não Pago',
-  })
-  const [invoices, setInvoices] = useState([
-    {
-      month: 'Abril',
-      date: '25/03/2025',
-      status: 'Pago',
-    },
-    {
-      month: 'Maio',
-      date: '30/04/2025',
-      status: 'Não Pago',
-    },
-    {
-      month: 'Junho',
-      date: '01/06/2025',
-      status: 'Pago',
-    },
-  ])
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([])
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const studentId = localStorage.getItem('student_login_id')
 
-  const [studentId, setStudentId] = useState<string | null>(null)
-
-  useEffect(() => {
-    setStudentId(localStorage.getItem('student_login_id') || null)
-    // console.log('ID do estudante:', studentId) // Mostra o ID do estudante armazenado
+  // Fetch invoices
+  const {
+    data: invoices,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['invoices', studentId],
+    queryFn: () => getInvoicesByStudentId(studentId!),
+    enabled: !!studentId,
   })
-  // Função para calcular a data final (dia 5 do mês selecionado)
+
+  const courseId = localStorage.getItem('course_id')
+
+  // Create invoice mutation
+  const createInvoiceMutation = useMutation({
+    mutationFn: createInvoice,
+    onSuccess: () => {
+      alert('Fatura criada com sucesso!')
+      setShowForm(false)
+      setSelectedMonths([])
+    },
+    onError: (error: any) => {
+      console.error('Erro ao criar fatura:', error)
+
+      // Verificar a estrutura do erro e o status
+      if (error?.response?.status === 409) {
+        alert('Já existe uma fatura para este estudante e mês(es).')
+      } else {
+        alert('Erro ao criar fatura. Tente novamente.')
+      }
+    },
+  })
+
+  const months = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ]
+
   const getDueDate = (month: string): string => {
-    const currentYear = new Date().getFullYear()
-    const monthIndex = [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ].indexOf(month)
+    const now = new Date() // Obtém a data e hora atuais
+    const currentYear = now.getFullYear()
+    const currentHour = now.getHours()
+    const currentMinute = now.getMinutes()
+    const currentSecond = now.getSeconds()
 
-    const dueDate = new Date(currentYear, monthIndex, 5) // Define o dia 5 para o mês escolhido
-    return dueDate.toISOString().split('T')[0] // Retorna no formato YYYY-MM-DD
+    const monthIndex = months.indexOf(month)
+    const dueDate = new Date(
+      currentYear,
+      monthIndex,
+      5,
+      currentHour,
+      currentMinute,
+      currentSecond
+    ) // Usa a hora atual
+    return dueDate.toISOString() // Retorna a data completa com hora
   }
 
-  // Função para obter o mês mais recente selecionado
-  const getMostRecentMonth = (months: string[]): string => {
-    const monthOrder = [
-      'Janeiro',
-      'Fevereiro',
-      'Março',
-      'Abril',
-      'Maio',
-      'Junho',
-      'Julho',
-      'Agosto',
-      'Setembro',
-      'Outubro',
-      'Novembro',
-      'Dezembro',
-    ]
-
-    // Ordena os meses selecionados com base no índice do array
-    const sortedMonths = months.sort(
-      (a, b) => monthOrder.indexOf(b) - monthOrder.indexOf(a)
-    )
-    return sortedMonths[0] // Retorna o mês mais recente
-  }
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Nova fatura criada:', newInvoice, studentId)
+    if (!studentId || selectedMonths.length === 0) return
+
+    try {
+      const dataSubmited = await createInvoiceMutation.mutateAsync({
+        studentId,
+        courseId,
+        months: selectedMonths.map(month => month.toUpperCase()),
+        type: 'MENSALIDADE',
+        dueDate: getDueDate(selectedMonths[selectedMonths.length - 1]),
+      })
+
+      console.log('Fatura criada com sucesso:', dataSubmited)
+      setShowForm(false)
+    } catch (error) {
+      console.error('Erro ao criar fatura:', error)
+    }
   }
+
+  if (isLoading) return <LoadingSkeleton />
+  if (isError) return <ErrorComponent />
 
   return (
-    <div className="flex w-full justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-3xl">
-        {/* Lista de faturas */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Facturas
-          </h2>
-          <div
-            className="space-y-4 overflow-y-auto"
-            style={{ maxHeight: '400px' }} // Limita a altura e ativa o scroll
-          >
-            {invoices.map((invoice, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center bg-gray-50 p-4 rounded-lg shadow-sm"
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+        Gestão de Mensalidades
+      </h1>
+
+      {/* Invoice Details Modal */}
+      {selectedInvoice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Detalhes da Fatura
+              </h2>
+              <button
+                type="button"
+                onClick={() => setSelectedInvoice(null)}
+                className="text-gray-500 hover:text-gray-700"
               >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <h3 className="text-lg font-medium text-gray-700">
+                  Informações Básicas
+                </h3>
+                <div className="mt-2 space-y-2">
+                  <p>
+                    <span className="font-medium">Mês:</span>{' '}
+                    {selectedInvoice.month}
+                  </p>
+                  <p>
+                    <span className="font-medium">Data de Emissão:</span>{' '}
+                    {selectedInvoice.date}
+                  </p>
+                  <p>
+                    <span className="font-medium">Vencimento:</span>{' '}
+                    {selectedInvoice.dueDate}
+                  </p>
+                  <p>
+                    <span className="font-medium">Valor:</span>{' '}
+                    {selectedInvoice.amount.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'MZN',
+                    })}
+                  </p>
+                  <p>
+                    <span className="font-medium">Status:</span>{' '}
+                    <span
+                      className={`px-2 py-1 rounded-full text-sm ${
+                        selectedInvoice.status === 'Pago'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {selectedInvoice.status}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-700">
+                  Informações do Pagamento
+                </h3>
+                <div className="mt-2 space-y-2">
+                  <p>
+                    <span className="font-medium">ID da Fatura:</span>{' '}
+                    {selectedInvoice.id}
+                  </p>
+                  <p>
+                    <span className="font-medium">ID do Estudante:</span>{' '}
+                    {studentId}
+                  </p>
+                  {selectedInvoice.paymentDate && (
+                    <p>
+                      <span className="font-medium">Data do Pagamento:</span>{' '}
+                      {selectedInvoice.paymentDate}
+                    </p>
+                  )}
+                  {selectedInvoice.paymentMethod && (
+                    <p>
+                      <span className="font-medium">Método de Pagamento:</span>{' '}
+                      {selectedInvoice.paymentMethod}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4">
+              <Button
+                variant="secondary"
+                onClick={() => setSelectedInvoice(null)}
+              >
+                Fechar
+              </Button>
+              {selectedInvoice.status !== 'Pago' && (
+                <Button
+                  onClick={() => {
+                    // TODO: Implement payment functionality
+                    console.log(
+                      'Iniciar pagamento para fatura:',
+                      selectedInvoice.id
+                    )
+                  }}
+                >
+                  Realizar Pagamento
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Invoices List */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Faturas</h2>
+        <div className="space-y-4 overflow-auto h-96">
+          {invoices?.map((invoice: Invoice) => (
+            <div
+              key={invoice.id}
+              className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+            >
+              <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-lg text-gray-800">
-                    Mensalidade
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Mensalidade - {invoice.month}
                   </h3>
-                  <p className="text-gray-600">Mes: {invoice.month}</p>
-                  <p className="text-gray-600">Data: {invoice.date}</p>
+                  <p className="text-gray-600">
+                    Data de emissão: {invoice.date}
+                  </p>
+                  <p className="text-gray-600">Vencimento: {invoice.dueDate}</p>
+                  <p className="text-gray-600">
+                    Valor:{' '}
+                    {invoice.amount.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'MZN',
+                    })}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span
-                    className={`text-xl font-semibold ${
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
                       invoice.status === 'Pago'
-                        ? 'text-green-500'
-                        : 'text-red-500'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
                     }`}
                   >
                     {invoice.status}
                   </span>
-                  <Button variant="secondary">Detalhe</Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setSelectedInvoice(invoice)}
+                  >
+                    Detalhes
+                  </Button>
+
+                  {invoice.status !== 'Pago' && (
+                    <Button
+                      size="md"
+                      className=" bg-green-400 hover:bg-green-600"
+                    >
+                      Pagar
+                    </Button>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Botão para adicionar nova fatura */}
-        <div className="mt-6 text-center">
-          <Button
-            className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
-            onClick={() => setShowForm(true)}
-          >
-            Gerar nova fatura
-          </Button>
-        </div>
+      {/* Generate New Invoice Button */}
+      <div className="text-center mb-8">
+        <Button
+          onClick={() => setShowForm(true)}
+          className="bg-green-500 hover:bg-green-600 text-white"
+        >
+          Gerar Nova Fatura
+        </Button>
+      </div>
 
-        {/* Formulário de criação de fatura */}
-        {showForm && (
-          <div className="mt-8 bg-gray-50 p-6 rounded-lg shadow-sm">
+      {/* New Invoice Form */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Criar Nova Fatura
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label
-                  htmlFor="months"
-                  className="block text-sm font-semibold text-gray-700"
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Selecione os Meses
                 </label>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {[
-                    'Janeiro',
-                    'Fevereiro',
-                    'Março',
-                    'Abril',
-                    'Maio',
-                    'Junho',
-                    'Julho',
-                    'Agosto',
-                    'Setembro',
-                    'Outubro',
-                    'Novembro',
-                    'Dezembro',
-                  ].map(month => (
-                    <label key={month} className="flex items-center space-x-2">
+                <div className="grid grid-cols-2 gap-2">
+                  {months.map(month => (
+                    <label
+                      key={month}
+                      className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50"
+                    >
                       <input
                         type="checkbox"
-                        name="months"
-                        value={month}
-                        checked={newInvoice.months.includes(month)}
+                        checked={selectedMonths.includes(month)}
                         onChange={e => {
-                          const selectedMonths = e.target.checked
-                            ? [...newInvoice.months, month]
-                            : newInvoice.months.filter(m => m !== month)
-                          const mostRecentMonth =
-                            getMostRecentMonth(selectedMonths)
-                          setNewInvoice(prevInvoice => ({
-                            ...prevInvoice,
-                            months: selectedMonths,
-                            date: selectedMonths.length
-                              ? getDueDate(mostRecentMonth)
-                              : '',
-                          }))
+                          if (e.target.checked) {
+                            setSelectedMonths([...selectedMonths, month])
+                          } else {
+                            setSelectedMonths(
+                              selectedMonths.filter(m => m !== month)
+                            )
+                          }
                         }}
                         className="form-checkbox h-4 w-4 text-blue-500"
                       />
@@ -194,24 +336,33 @@ export function MonthlyFee() {
                   ))}
                 </div>
               </div>
-              <div className="mt-4 flex justify-end space-x-4">
+              <div className="flex justify-end space-x-4">
                 <Button
-                  className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition duration-300"
-                  onClick={() => setShowForm(false)}
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setShowForm(false)
+                    setSelectedMonths([])
+                  }}
                 >
                   Cancelar
                 </Button>
-                <button
+                <Button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+                  disabled={
+                    selectedMonths.length === 0 ||
+                    createInvoiceMutation.isPending
+                  }
                 >
-                  Criar Fatura
-                </button>
+                  {createInvoiceMutation.isPending
+                    ? 'Criando...'
+                    : 'Criar Fatura'}
+                </Button>
               </div>
             </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

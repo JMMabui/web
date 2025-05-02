@@ -1,4 +1,4 @@
-import ErrorMessage from '@/component/error-message'
+import ErrorMessage from '@/components/error-message'
 import { addStudentData } from '@/http/signup/personal_data'
 import { zodResolver } from '@hookform/resolvers/zod'
 import dayjs from 'dayjs'

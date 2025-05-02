@@ -2,6 +2,7 @@ import { UserCircle } from 'lucide-react'
 import logo from '../../assents/ismmalogo.png'
 import { useQuery } from '@tanstack/react-query'
 import { getStudentData } from '@/http/signup/header'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export const Header_Secondary = () => {
   const id = localStorage.getItem('student_login_id')
@@ -12,12 +13,7 @@ export const Header_Secondary = () => {
     queryFn: () => getStudentData(id),
   })
 
-  if (isLoading)
-    return (
-      <header className="flex justify-center items-center h-32 bg-blue-500 text-white">
-        <p>Carregando...</p>
-      </header>
-    )
+  if (isLoading) return <LoadingSpinner />
   if (isError)
     return (
       <header className="flex justify-center items-center h-32 bg-blue-500 text-white">

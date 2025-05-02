@@ -1,4 +1,5 @@
-import Button from '@/component/Button'
+import Button from '@/components/Button'
+import { LoadingSkeleton } from '@/components/LoadingSkeleton'
 import {
   createAssessment,
   getAssessmentsBySubjectId,
@@ -11,7 +12,10 @@ import {
   getAllAssessmentsResult,
   getAssessmentResultByAssessmentId,
 } from '@/http/assessmentResult'
-import { getStudentsSubjectsBySubjectId } from '@/http/students-subjects'
+import {
+  getStudentsSubjectsBySubjectId,
+  type StudentsSubjectsWithExtraDataResponse,
+} from '@/http/students-subjects'
 import { getTeacherSubjectByTeacherId } from '@/http/teacherSubjects'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery } from '@tanstack/react-query'
@@ -59,12 +63,6 @@ const assessmentSchema = z.object({
     .transform(val => Number(val)),
 })
 
-const assessmentResultSchema = z.object({
-  assessmentId: z.string(),
-  studentId: z.string(),
-  grade: z.number(),
-})
-
 export function Evaluations() {
   const [turmaSelecionada, setTurmaSelecionada] = useState<string>('')
   const [showAddAssessment, setShowAddAssessment] = useState<boolean>(false)
@@ -81,13 +79,16 @@ export function Evaluations() {
   const [selectedType, setSelectedType] = useState<string>('')
   const [showDataAssessments, setShowDataAssessments] = useState<boolean>(true)
 
+  const teacherId = localStorage.getItem('teacherId')
+
   const { data: dataTeacherSubjects, isLoading: isLoadingTeacherSubject } =
     useQuery({
       queryKey: ['teacherSubjects'],
-      queryFn: () =>
-        getTeacherSubjectByTeacherId('fda9ee19-a657-4590-9a69-6006695ae51e'),
+      queryFn: () => getTeacherSubjectByTeacherId(teacherId || ''),
       refetchInterval: 3000,
     })
+
+  // console.log('Dados do professor:', dataTeacherSubjects)
 
   const { data: dataAssessment } = useQuery({
     queryKey: ['assessment', turmaSelecionada],
@@ -98,12 +99,14 @@ export function Evaluations() {
   const { data: dataAssessmentResult } = useQuery({
     queryKey: ['assessment_result', assessmentId],
     queryFn: getAllAssessmentsResult,
-    // enabled: !!assessmentId,
+    enabled: !!assessmentId,
   })
 
-  console.log('assessment result: ', dataAssessmentResult)
+  // console.log('assessment result: ', dataAssessmentResult)
 
-  const { data: dataStudentsSubject } = useQuery({
+  const { data: dataStudentsSubject } = useQuery<
+    StudentsSubjectsWithExtraDataResponse[]
+  >({
     queryKey: ['students_subjects', turmaSelecionada],
     queryFn: () => getStudentsSubjectsBySubjectId(turmaSelecionada),
     enabled: !!turmaSelecionada,
@@ -128,7 +131,7 @@ export function Evaluations() {
   })
 
   if (isLoadingTeacherSubject) {
-    return <div>Carregando...</div>
+    return <LoadingSkeleton />
   }
 
   const filteredSubjectsActiveted = dataTeacherSubjects?.filter(
@@ -182,7 +185,7 @@ export function Evaluations() {
         // Neste caso, você pode enviar todos os dados, incluindo o peso
         await createAssessment({
           name,
-          type,
+          assessmentType: type,
           dateApplied,
           weight, // Envia o peso normalmente
           subjectId: turmaSelecionada,
@@ -295,7 +298,7 @@ export function Evaluations() {
   async function handleAddEvaluations() {
     // Aqui vamos pegar as notas, o studentId e o subjectId
     const evaluations = filteredStudents?.map(student => ({
-      studentId: student.student_id, // studentId de cada estudante
+      studentId: student.studentId, // studentId de cada estudante
       // subjectId: turmaSelecionada, // subjectId (id da disciplina)
       grade: studentGrade[student.id] || 0, // Nota lançada, ou 0 caso não tenha sido lançada
     }))
@@ -338,10 +341,10 @@ export function Evaluations() {
           >
             <option value="">Escolha uma disciplina</option>
             {filteredSubjectsActiveted
-              ?.sort((a, b) => a.disciplineId.localeCompare(b.disciplineId))
+              ?.sort((a, b) => a.subjectId.localeCompare(b.subjectId))
               .map(subject => (
-                <option key={subject.id} value={subject.disciplineId}>
-                  {subject.disciplineId} - {subject.discipline.disciplineName}
+                <option key={subject.id} value={subject.subjectId}>
+                  {subject.subjectId} - {subject.Subject.subjectName}
                 </option>
               ))}
           </select>
@@ -394,7 +397,7 @@ export function Evaluations() {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-lg font-medium text-gray-700">
-                        {assessment.type}
+                        {assessment.assessmentType}
                       </span>
                       <span className="text-sm text-gray-500">
                         Peso: {assessment.weight}%
@@ -715,7 +718,7 @@ export function Evaluations() {
             </table>
           </div>
 
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-end mt-6 gap-6">
             <button
               type="button"
               className="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition duration-300 active:bg-amber-700"
@@ -728,6 +731,18 @@ export function Evaluations() {
             >
               Guardar Notas
             </button>
+
+            <Button
+              className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition duration-300 active:bg-red-700 "
+              onClick={() => {
+                setShowStudent(!showStudent)
+                setShowDataAssessments(!showDataAssessments)
+                // setShowGradeReport(!showGradeReport)
+                // setShowAddAssessment(!showAddAssessment)
+              }}
+            >
+              fechar
+            </Button>
           </div>
         </div>
       )}
@@ -766,7 +781,7 @@ export function Evaluations() {
                 {filteredStudents?.map(student => {
                   // Obter as avaliações do estudante
                   const studentAssessments = getStudentAssessments(
-                    student.student_id,
+                    student.studentId,
                     dataAssessment,
                     dataAssessmentResult
                   )
@@ -788,7 +803,7 @@ export function Evaluations() {
                         const result = dataAssessmentResult?.find(
                           result =>
                             result.assessmentId === assessment.id &&
-                            result.studentId === student.student_id
+                            result.studentId === student.studentId
                         )
                         return (
                           <td

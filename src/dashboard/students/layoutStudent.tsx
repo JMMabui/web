@@ -4,7 +4,11 @@ import { useQuery } from '@tanstack/react-query'
 import { getStudentData } from '@/http/signup/header'
 import { useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { getStudentsSubjectsByStudentId, type StudentsSubjectsWithExtraDataResponse} from '@/http/students-subjects'
+import {
+  getStudentsSubjectsByStudentId,
+  type StudentsSubjectsWithExtraDataResponse,
+} from '@/http/students-subjects'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 const NavbarLink = ({
   section,
@@ -30,6 +34,10 @@ export function LayoutStudents() {
   const navigate = useNavigate()
 
   const id = localStorage.getItem('student_login_id')
+  if (!id) {
+    alert('Usuario nao reconhecido, por favor faça login novamente')
+    navigate('/login')
+  }
 
   // Verificação para garantir que o ID exista
   const { data, isLoading, isError } = useQuery({
@@ -40,7 +48,9 @@ export function LayoutStudents() {
   })
   // console.log('Data:', data)
 
-  const { data: dataSubject } = useQuery<StudentsSubjectsWithExtraDataResponse[]>({
+  const { data: dataSubject } = useQuery<
+    StudentsSubjectsWithExtraDataResponse[]
+  >({
     queryKey: ['student_subjects', id],
     queryFn: () =>
       id
@@ -52,11 +62,7 @@ export function LayoutStudents() {
   // console.log('Data subjects:', dataSubject)
 
   if (isLoading) {
-    return (
-      <header className="flex justify-center items-center h-32 bg-gray-200 text-gray-700">
-        <p>Carregando...</p>
-      </header>
-    )
+    return <LoadingSpinner />
   }
 
   if (isError) {
@@ -74,8 +80,13 @@ export function LayoutStudents() {
   // console.log('Filtered subjects:', filteredSubjects)
 
   const student = data
+  // console.log('Student:', student)
   const course = student?.Registration[0]?.course
-  const courseId = student?.Registration[0]?.course_id
+  // console.log('Course:', course)
+  const courseId = student?.Registration[0]?.course.id
+  // console.log('Course ID:', courseId)
+
+  localStorage.setItem('courseId', courseId || '')
 
   // Verificação se courseId existe e o armazena no localStorage
   if (courseId) {
@@ -172,11 +183,11 @@ export function LayoutStudents() {
                 {filteredSubjects.map(assessmentResult => (
                   <tr key={assessmentResult.id}>
                     <td className="p-3 border-b text-gray-700">
-                      {assessmentResult.disciplineId}
+                      {assessmentResult.subjectId}
                     </td>
-                    <td className="p-3 border-b text-gray-700">
-                      {assessmentResult.discipline.disciplineName}
-                    </td>
+                    {/* <td className="p-3 border-b text-gray-700">
+                      {assessmentResult.subject.subjectName}
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
