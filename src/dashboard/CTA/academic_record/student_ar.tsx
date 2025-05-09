@@ -3,6 +3,8 @@ import { getRegistration } from '@/http/registration'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import type { RegistrationResponse } from '../../../http/registration'
+import { ErrorComponent } from '@/components/ErrorComponent'
+import LoadingSpinner from '@/components/LoadingSpinner'
 
 export function Students_ar() {
   const [isAddingStudent] = useState(false)
@@ -28,15 +30,11 @@ export function Students_ar() {
   }, [isAddingStudent, navegate])
 
   if (isLoadingRegistration) {
-    return <div>Carregando...</div>
+    return <LoadingSpinner />
   }
 
   if (RegistrationError) {
-    return (
-      <div>
-        Erro ao carregar os dados dos estudantes: {RegistrationError.message}
-      </div>
-    )
+    return <ErrorComponent />
   }
 
   const registrationData = dataRegistration
@@ -48,7 +46,7 @@ export function Students_ar() {
   const filteredStudents = registrationData?.filter(student => {
     const searchTermLower = searchTerm.toLowerCase()
     return (
-      student.student_id.includes(searchTermLower) ||
+      student.studentId.includes(searchTermLower) ||
       student.student.name.toLowerCase().includes(searchTermLower) ||
       student.student.surname.toLowerCase().includes(searchTermLower)
     )
@@ -59,7 +57,6 @@ export function Students_ar() {
       <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Gestão de Estudantes
       </h2>
-
       <div className="mb-6 flex justify-end">
         <input
           type="text"
@@ -93,7 +90,7 @@ export function Students_ar() {
                 <td className="px-4 py-2 border-b">
                   {student.student.name} {student.student.surname}
                 </td>
-                <td className="px-4 py-2 border-b">{student.student_id}</td>
+                <td className="px-4 py-2 border-b">{student.studentId}</td>
                 <td className="px-4 py-2 border-b">
                   {student.course.courseName}
                 </td>
@@ -123,7 +120,7 @@ export function Students_ar() {
               {selectedStudent.student.surname}
             </h3>
             <p>
-              <strong>Numero de Estudante:</strong> {selectedStudent.student_id}
+              <strong>Numero de Estudante:</strong> {selectedStudent.studentId}
             </p>
             <p>
               <strong>Nivel Academico:</strong>{' '}
@@ -154,7 +151,7 @@ export function Students_ar() {
                 type="button"
                 onClick={() =>
                   window.open(
-                    `/student_profile/${selectedStudent.student_id}`,
+                    `/student_profile/${selectedStudent.studentId}`,
                     '_blank'
                   )
                 }

@@ -1,13 +1,13 @@
 import type { CourseResponse } from './courses'
 import type { StudentsResponse } from './students'
 export type RegistrationRequest = {
-  course_id: string
-  student_id: string
+  courseId: string
+  studentId: string
 }
 
 export type RegistrationResponse = {
-  course_id: string
-  student_id: string
+  courseId: string
+  studentId: string
   id: string
   registrationStatus:
     | 'PENDENTE'
@@ -18,7 +18,6 @@ export type RegistrationResponse = {
     | 'NAO_INSCRITO'
   student: StudentsResponse
   course: CourseResponse
-
   createdAt: Date
   updatedAt: Date | null
 }
@@ -41,8 +40,8 @@ export async function getRegistration() {
 }
 
 export async function postRegistration({
-  course_id,
-  student_id,
+  courseId,
+  studentId,
 }: RegistrationRequest) {
   const response = await fetch(`${base_URL}/registration-status-confirmation`, {
     method: 'POST',
@@ -50,8 +49,8 @@ export async function postRegistration({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      course_id,
-      student_id,
+      courseId,
+      studentId,
     }),
   })
   if (!response.ok) {
@@ -97,8 +96,8 @@ export async function validateRegistration(student_id: string) {
 }
 
 export async function AddEnrollment({
-  course_id,
-  student_id,
+  courseId,
+  studentId,
 }: RegistrationRequest) {
   const response = await fetch(`${base_URL}/registration`, {
     method: 'POST',
@@ -106,8 +105,8 @@ export async function AddEnrollment({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      course_id,
-      student_id,
+      courseId,
+      studentId,
     }),
   })
   if (!response.ok) {

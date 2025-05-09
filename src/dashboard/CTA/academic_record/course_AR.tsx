@@ -3,11 +3,75 @@ import { BookOpen, Clipboard } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { getCourses, type CourseResponse } from '@/http/courses'
 import { useNavigate } from 'react-router-dom'
+import Card from '@/components/Card'
+import { LoadingSkeleton } from '@/components/LoadingSkeleton'
+
+// Componente para a Tabela de Cursos
+function CoursesTable({
+  courses,
+  onAddSubject,
+}: {
+  courses: CourseResponse[]
+  onAddSubject: (id: string) => void
+}) {
+  return (
+    <div className="mt-8">
+      <h3 className="text-xl font-semibold mb-4">Cursos Cadastrados</h3>
+      <div className="overflow-auto max-h-80">
+        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b text-left">Nivel Academico</th>
+              <th className="py-2 px-4 border-b text-left">Nome do Curso</th>
+              <th className="py-2 px-4 border-b text-left">Periodo</th>
+              <th className="py-2 px-4 border-b text-left">Vagas Totais</th>
+              <th className="py-2 px-4 border-b text-left">
+                Vagas Disponíveis
+              </th>
+              <th className="py-2 px-4 border-b text-left">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {courses.map(course => (
+              <tr key={course.id}>
+                <td className="py-2 px-4 border-b">
+                  {course.levelCourse.charAt(0).toUpperCase() +
+                    course.levelCourse.slice(1).toLowerCase()}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  {course.courseName.charAt(0).toUpperCase() +
+                    course.courseName.slice(1).toLowerCase()}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  {course.period.charAt(0).toUpperCase() +
+                    course.period.slice(1).toLowerCase()}
+                </td>
+                <td className="py-2 px-4 border-b">{course.totalVacancies}</td>
+                <td className="py-2 px-4 border-b">
+                  {course.availableVacancies}
+                </td>
+                <td className="py-2 px-4 border-b">
+                  <button
+                    type="button"
+                    className="bg-blue-600 text-white py-1 px-4 rounded-lg"
+                    onClick={() => onAddSubject(course.id)}
+                  >
+                    Adicionar Disciplina
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
 
 export function CoursesDashboard() {
-  const [coursesToShow] = useState(5) // Exibindo 5 cursos por vez
-  const [selectedLevel, setSelectedLevel] = useState<string | null>(null) // Estado para armazenar o nível selecionado
-  const navegate = useNavigate()
+  const [coursesToShow] = useState(5)
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   const {
     data: dataCourses,
@@ -18,7 +82,7 @@ export function CoursesDashboard() {
     queryFn: getCourses,
   })
 
-  if (isLoadingCourses) return <div>Carregando cursos...</div>
+  if (isLoadingCourses) return <LoadingSkeleton />
   if (coursesError instanceof Error)
     return <div>Erro: {coursesError.message}</div>
 
@@ -34,15 +98,14 @@ export function CoursesDashboard() {
 
   const displayedCourses = selectedLevel
     ? dataCourses?.filter(course => course.levelCourse === selectedLevel)
-    : dataCourses?.slice(0, coursesToShow) // Exibindo todos cursos ou limitados, dependendo do filtro
+    : dataCourses?.slice(0, coursesToShow)
 
-  // Função para lidar com o clique no card do nível
-  const handleCardClick = (level: string) => {
-    if (selectedLevel === level) {
-      setSelectedLevel(null) // Desmarcar o filtro se o mesmo card for clicado
-    } else {
-      setSelectedLevel(level) // Aplicar o filtro para o nível selecionado
-    }
+  // const handleCardClick = (level: string) => {
+  //   setSelectedLevel(prev => (prev === level ? null : level))
+  // }
+
+  const handleAddSubject = (id: string) => {
+    navigate(`/academic_record/courses/add-subject/${id}`)
   }
 
   return (
@@ -61,86 +124,19 @@ export function CoursesDashboard() {
         </div>
 
         {Object.entries(coursesByLevel || {}).map(([level, count]) => (
-          <div
-            key={level}
-            className="bg-white shadow-lg rounded-lg p-6 flex items-center justify-between cursor-pointer"
-            onClick={() => handleCardClick(level)} // Adicionando o evento de clique
-            onKeyUp={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleCardClick(level)
-              }
-            }}
-            // biome-ignore lint/a11y/noNoninteractiveTabindex: <explanation>
-            tabIndex={0} // Make the div focusable
-          >
+          <Card key={level} className="w-full">
             <div>
               <h3 className="text-lg font-medium">Cursos de {level}</h3>
-              <p className="text-xl font-bold">{count}</p>
+              <p className="text-xl font-bold">{count} </p>
             </div>
-            <Clipboard className="text-green-600 w-12 h-12" />
-          </div>
+          </Card>
         ))}
       </div>
 
-      {/* Tabela de Cursos */}
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4">Cursos Cadastrados</h3>
-        <div className="overflow-auto max-h-80">
-          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b text-left">
-                  Nivel Academico
-                </th>
-                <th className="py-2 px-4 border-b text-left">Nome do Curso</th>
-                <th className="py-2 px-4 border-b text-left">Periodo</th>
-                <th className="py-2 px-4 border-b text-left">Vagas Totais</th>
-                <th className="py-2 px-4 border-b text-left">
-                  Vagas Disponíveis
-                </th>
-                <th className="py-2 px-4 border-b text-left">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedCourses?.map(course => (
-                <tr key={course.id}>
-                  <td className="py-2 px-4 border-b">
-                    {course.levelCourse.charAt(0).toUpperCase() +
-                      course.levelCourse.slice(1).toLowerCase()}
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    {course.courseName.charAt(0).toUpperCase() +
-                      course.courseName.slice(1).toLowerCase()}
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    {course.period.charAt(0).toUpperCase() +
-                      course.period.slice(1).toLowerCase()}
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    {course.totalVacancies}
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    {course.availableVacancies}
-                  </td>
-                  <td className="py-2 px-4 border-b">
-                    <button
-                      type="button"
-                      className="bg-blue-600 text-white py-1 px-4 rounded-lg"
-                      onClick={() =>
-                        navegate(
-                          `/academic_record/courses/add-subject/${course.id}`
-                        )
-                      }
-                    >
-                      Adicionar Disciplina
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CoursesTable
+        courses={displayedCourses || []}
+        onAddSubject={handleAddSubject}
+      />
     </div>
   )
 }

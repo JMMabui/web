@@ -34,7 +34,7 @@ export function LoginForm() {
       const userTypeToRouteMap: Record<string, string> = {
         ADMIN_IT: '/admin',
         CTA_ADMIN_FINANCEIRO: '/finances',
-        CTA_ADMIN_REG_ACADEMICO: '/academic_record',
+        CTA_ADMIN_REG_ACADEMICO: '/academic_record/dashboard',
         CTA_ADMIN_RH: '/human_resources',
         CTA_ADMIN_BIBLIOTECA: '/cta-admin-biblioteca/dashboard',
         CTA_ADMIN_COORDENADOR: '/cta-admin-coordenador/dashboard',
@@ -117,7 +117,12 @@ export function LoginForm() {
       setMensagemErro('A senha precisa ter no mínimo 6 caracteres.')
       return
     }
-    signupMutation.mutate({ email, password, contact })
+    signupMutation.mutate({
+      email,
+      password,
+      contact,
+      jobPosition: 'ESTUDANTE',
+    })
   }
 
   return (
