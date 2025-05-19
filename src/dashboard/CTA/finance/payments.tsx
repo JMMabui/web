@@ -1,156 +1,85 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getAllInvoice, invoiceExtendedResponse } from '@/http/finances/invoices'
+import { Table } from '@/components/Table'
+import { Column } from 'react-table'
+import { useState } from 'react'
+import { PaymentForm } from '../../../components/paymentForm' // componente do formulário de pagamento
+
+const capitalizeWithAccents = (text: string) => {
+  if (!text) return ''
+  return text
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toLocaleUpperCase('pt-BR') + word.slice(1))
+    .join(' ')
+}
+
 
 export function PaymentsFinances() {
-  // Estado para armazenar os dados da fatura
-  const [invoiceData, setInvoiceData] = useState({
-    id: '',
-    amount: 0,
-    dueDate: '',
-    totalAmount: 0,
-    studentName: '',
-    status: 'Pendente',
+  const { data: faturas, isLoading, isError } = useQuery({
+    queryKey: ['invoice'],
+    queryFn: getAllInvoice,
   })
 
-  // Estado para armazenar os dados do pagamento
-  const [paymentData, setPaymentData] = useState({
-    invoiceId: '',
-    amount: 0,
-    paymentDate: '',
-    method: 'CREDIT_CARD', // Método padrão
-    status: 'PENDING', // Status inicial
-  })
 
-  // Mock de dados da fatura (isso viria de uma API ou banco de dados)
-  useEffect(() => {
-    // Simulação de dados de fatura
-    setInvoiceData({
-      id: 'abc123',
-      amount: 1000,
-      dueDate: '2025-04-05',
-      totalAmount: 1050, // Incluindo multas e descontos, por exemplo
-      studentName: 'João Silva',
-      status: 'Pendente',
-    })
+  const [selectedInvoice, setSelectedInvoice] = useState<invoiceExtendedResponse | null>(null)
 
-    // Inicializar o ID da fatura no pagamento
-    setPaymentData(prevData => ({
-      ...prevData,
-      invoiceId: 'abc123',
-    }))
-  }, [])
+  const columns: Column<invoiceExtendedResponse>[] = [
+    {
+      Header: 'Nome do Estudante',
+      accessor: row => capitalizeWithAccents(`${row.student.name} ${row.student.surname}`),
+    },
+    {
+      Header: 'Valor',
+      accessor: 'amount',
+      Cell: ({ value }: { value: number }) => `${value.toFixed(2)} MT`,
+    },
+    {
+  Header: 'Mês',
+  accessor: row => capitalizeWithAccents(row.month),
+},
+   {
+  Header: 'Status',
+  accessor: row => capitalizeWithAccents(row.status),
+},
+   {
+  Header: 'Multa',
+  accessor: row =>
+    row.LateFee && row.LateFee.length > 0
+      ? row.LateFee.reduce((total, late) => total + late.amount, 0)
+      : 0,
+  Cell: ({ value }:{value: number}) => `${value.toFixed(2)} MT`,
+}
+,
+    {
+      Header: 'Ação',
+      id: 'acao',
+      Cell: ({ row }) => (
+        <button
+          onClick={() => setSelectedInvoice(row.original)}
+          className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          Pagamento
+        </button>
+      ),
+    },
+  ]
 
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
-    setPaymentData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Aqui você pode realizar o processo de envio para o backend para registrar o pagamento
-    console.log('Pagamento registrado:', paymentData)
-  }
+  if (isLoading) return <p>Carregando...</p>
+  if (isError) return <p>Erro ao carregar faturas</p>
 
   return (
-    <div className="w-full max-w-lg mx-auto">
-      <div className="p-6 border border-gray-300 rounded-lg shadow-sm">
-        <h2 className="text-2xl font-semibold mb-6">Registrar Pagamento</h2>
+    <div className="space-y-6 p-6">
+      <h2 className="text-2xl font-semibold text-gray-800">📄 Faturas</h2>
 
-        {/* Dados da Fatura */}
-        <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-          <h3 className="text-xl font-semibold">Dados da Fatura</h3>
-          <p>
-            <strong>Nome do Estudante:</strong> {invoiceData.studentName}
-          </p>
-          <p>
-            <strong>Valor Total:</strong> R$ {invoiceData.totalAmount}
-          </p>
-          <p>
-            <strong>Data de Vencimento:</strong> {invoiceData.dueDate}
-          </p>
-          <p>
-            <strong>Status:</strong> {invoiceData.status}
-          </p>
+      <Table columns={columns} data={faturas ?? []} title="Lista de Faturas" />
+
+      {selectedInvoice && (
+        <div className="mt-10">
+          <h3 className="text-xl font-semibold text-blue-700 mb-4">Registrar Pagamento</h3>
+          <PaymentForm invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} />
         </div>
-
-        {/* Formulário de Pagamento */}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block">ID da Fatura:</label>
-            <input
-              type="text"
-              name="invoiceId"
-              className="w-full max-w-xs border border-gray-300 rounded-lg px-4 py-2"
-              value={paymentData.invoiceId}
-              readOnly
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block">Valor do Pagamento:</label>
-            <input
-              type="number"
-              name="amount"
-              className="w-full max-w-xs border border-gray-300 rounded-lg px-4 py-2"
-              value={paymentData.amount}
-              onChange={handleFormChange}
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block">Data do Pagamento:</label>
-            <input
-              type="date"
-              name="paymentDate"
-              className="w-full max-w-xs border border-gray-300 rounded-lg px-4 py-2"
-              value={paymentData.paymentDate}
-              onChange={handleFormChange}
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block">Método de Pagamento:</label>
-            <select
-              name="method"
-              className="w-full max-w-xs border border-gray-300 rounded-lg px-4 py-2"
-              value={paymentData.method}
-              onChange={handleFormChange}
-              required
-            >
-              <option value="CREDIT_CARD">Cartão de Crédito</option>
-              <option value="DEBIT_CARD">Cartão de Débito</option>
-              <option value="BANK_TRANSFER">Transferência Bancária</option>
-              <option value="MOBILE_MONEY">Dinheiro Mobile</option>
-              <option value="CASH">Dinheiro</option>
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="block">Status do Pagamento:</label>
-            <select
-              name="status"
-              className="w-full max-w-xs border border-gray-300 rounded-lg px-4 py-2"
-              value={paymentData.status}
-              onChange={handleFormChange}
-              required
-            >
-              <option value="PENDING">Pendente</option>
-              <option value="CONFIRMED">Confirmado</option>
-              <option value="FAILED">Falhou</option>
-            </select>
-          </div>
-          <div className="mt-6">
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none"
-            >
-              Registrar Pagamento
-            </button>
-          </div>
-        </form>
-      </div>
+      )}
     </div>
   )
 }
