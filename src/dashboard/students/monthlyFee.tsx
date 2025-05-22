@@ -1,26 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Button from '@/components/Button'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { getInvoicesByStudentId, createInvoice } from '../../http/invoices'
+import {
+  getInvoicesByStudentId,
+  createInvoice,
+  type invoiceExtendedResponse,
+} from '../../http/finances/invoices'
 import { LoadingSkeleton } from '@/components/LoadingSkeleton'
 import { ErrorComponent } from '@/components/ErrorComponent'
 
-interface Invoice {
-  id: string
-  month: string
-  date: string
-  status: string
-  amount: number
-  dueDate: string
-  paymentDate?: string
-  paymentMethod?: string
-  courseId: string
-}
+// interface Invoice {
+//   id: string
+//   month: string
+//   date: string
+//   status: string
+//   amount: number
+//   dueDate: string
+//   paymentDate?: string
+//   paymentMethod?: string
+//   courseId: string
+// }
 
 export function MonthlyFee() {
   const [showForm, setShowForm] = useState(false)
   const [selectedMonths, setSelectedMonths] = useState<string[]>([])
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [selectedInvoice, setSelectedInvoice] =
+    useState<invoiceExtendedResponse | null>(null)
   const studentId = localStorage.getItem('student_login_id')
 
   // Fetch invoices
@@ -59,7 +64,7 @@ export function MonthlyFee() {
   const months = [
     'Janeiro',
     'Fevereiro',
-    'Março',
+    'Marco',
     'Abril',
     'Maio',
     'Junho',
@@ -148,11 +153,15 @@ export function MonthlyFee() {
                   </p>
                   <p>
                     <span className="font-medium">Data de Emissão:</span>{' '}
-                    {selectedInvoice.date}
+                    {selectedInvoice.createdAt instanceof Date
+                      ? selectedInvoice.createdAt.toLocaleDateString('pt-BR')
+                      : selectedInvoice.createdAt}
                   </p>
                   <p>
                     <span className="font-medium">Vencimento:</span>{' '}
-                    {selectedInvoice.dueDate}
+                    {selectedInvoice.dueDate instanceof Date
+                      ? selectedInvoice.dueDate.toLocaleDateString('pt-BR')
+                      : selectedInvoice.dueDate}
                   </p>
                   <p>
                     <span className="font-medium">Valor:</span>{' '}
@@ -165,7 +174,7 @@ export function MonthlyFee() {
                     <span className="font-medium">Status:</span>{' '}
                     <span
                       className={`px-2 py-1 rounded-full text-sm ${
-                        selectedInvoice.status === 'Pago'
+                        selectedInvoice.status === 'PAGO'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}
@@ -189,16 +198,20 @@ export function MonthlyFee() {
                     <span className="font-medium">ID do Estudante:</span>{' '}
                     {studentId}
                   </p>
-                  {selectedInvoice.paymentDate && (
+                  {selectedInvoice.payments[0].paymentDate && (
                     <p>
                       <span className="font-medium">Data do Pagamento:</span>{' '}
-                      {selectedInvoice.paymentDate}
+                      {selectedInvoice.payments[0].paymentDate instanceof Date
+                        ? selectedInvoice.payments[0].paymentDate.toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : selectedInvoice.payments[0].paymentDate}
                     </p>
                   )}
-                  {selectedInvoice.paymentMethod && (
+                  {selectedInvoice.payments[0].paymentMethod && (
                     <p>
                       <span className="font-medium">Método de Pagamento:</span>{' '}
-                      {selectedInvoice.paymentMethod}
+                      {selectedInvoice.payments[0].paymentMethod}
                     </p>
                   )}
                 </div>
@@ -212,7 +225,7 @@ export function MonthlyFee() {
               >
                 Fechar
               </Button>
-              {selectedInvoice.status !== 'Pago' && (
+              {selectedInvoice.status !== 'PAGO' && (
                 <Button
                   onClick={() => {
                     // TODO: Implement payment functionality
@@ -234,7 +247,7 @@ export function MonthlyFee() {
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">Faturas</h2>
         <div className="space-y-4 overflow-auto h-96">
-          {invoices?.map((invoice: Invoice) => (
+          {invoices?.map((invoice: invoiceExtendedResponse) => (
             <div
               key={invoice.id}
               className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
@@ -242,24 +255,55 @@ export function MonthlyFee() {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
-                    Mensalidade - {invoice.month}
+                    Mensalidade -{' '}
+                    {invoice.month
+                      .toLowerCase()
+                      .split(' ')
+                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                      .join(' ')}
                   </h3>
                   <p className="text-gray-600">
-                    Data de emissão: {invoice.date}
+                    Data de emissão: {(() => {
+                      const date =
+                        invoice.createdAt instanceof Date
+                          ? invoice.createdAt
+                          : new Date(invoice.createdAt)
+                      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`
+                    })()}
                   </p>
-                  <p className="text-gray-600">Vencimento: {invoice.dueDate}</p>
+                  <p className="text-gray-600">
+                    Vencimento: {(() => {
+                      const date =
+                        invoice.dueDate instanceof Date
+                          ? invoice.dueDate
+                          : new Date(invoice.dueDate)
+                      return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`
+                    })()}
+                  </p>
                   <p className="text-gray-600">
                     Valor:{' '}
                     {invoice.amount.toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'MZN',
-                    })}
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}{' '}
+                    MT
+                  </p>
+                  <p className="text-gray-600">
+                    Multa:{' '}
+                    {invoice.LateFee.map(fee => fee.amount).toLocaleString(
+                      'pt-BR',
+                      {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }
+                    )}{' '}
+                    MT
                   </p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      invoice.status === 'Pago'
+                      invoice.status === 'PAGO'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}
@@ -274,7 +318,7 @@ export function MonthlyFee() {
                     Detalhes
                   </Button>
 
-                  {invoice.status !== 'Pago' && (
+                  {invoice.status !== 'PAGO' && (
                     <Button
                       size="md"
                       className=" bg-green-400 hover:bg-green-600"

@@ -34,4 +34,5 @@ export const employeeSchema = z.object({
   // loginId: z
   //   .string()
   //   .uuid({ message: 'O ID de login deve ser um UUID válido.' }),
+  status: z.enum(['ATIVO', 'INATIVO']),
 })

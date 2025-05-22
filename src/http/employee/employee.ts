@@ -17,9 +17,10 @@ type employeeRequest = {
   dateOfHire: Date
   salary: number
   loginId: string
+  status: 'ATIVO' | 'INATIVO'
 }
 
-type employee = {
+export type employee = {
   id: string
   createdAt: Date
   updatedAt: Date
@@ -36,6 +37,7 @@ type employee = {
   dateOfHire: Date
   salary: number
   loginId: string
+  status: 'ATIVO' | 'INATIVO'
 }
 
 export type employeeExtended = {
@@ -48,7 +50,7 @@ export type employeeExtended = {
 export type employeeResponse = {
   sucess: boolean
   message: string
-  data: employee[]
+  data: employeeExtended[]
 }
 
 const base_URL = import.meta.env.VITE_API_URL || 'http://localhost:3333'
@@ -61,6 +63,7 @@ export async function createEmployee({
   dateOfHire,
   salary,
   loginId,
+  status,
 }: employeeRequest): Promise<employee> {
   const response = await fetch(`${base_URL}/employee`, {
     method: 'POST',
@@ -75,6 +78,7 @@ export async function createEmployee({
       dateOfHire,
       salary,
       loginId,
+      status,
     }),
   })
 
@@ -105,7 +109,7 @@ export async function getAllEmployees(): Promise<employeeResponse> {
   const result = await response.json()
 
   // Retorna a resposta no formato employeeRequest
-  return result.data
+  return result
 }
 
 export async function getEmployeeById(id: string): Promise<employeeResponse> {
@@ -137,7 +141,22 @@ export async function getEmployeeByLoginId(loginId: string) {
 
   const result = await response.json()
 
-  console.log('api receive: ', result)
+  // console.log('api receive: ', result)
+
+  return result.data
+}
+
+export async function getEmployeeByEmail(email: string) {
+  const response = await fetch(`${base_URL}/employee/email/${email}`)
+
+  if (!response.ok) {
+    const ErrorMessage = await response.text()
+    throw new Error(`Erro ao buscar os dados:  ${ErrorMessage}`)
+  }
+
+  const result = await response.json()
+
+  // console.log('api receive: ', result)
 
   return result.data
 }
@@ -198,4 +217,28 @@ export async function deleteEmployee(id: string): Promise<employeeResponse> {
 
   // Retorna a resposta no formato employeeRequest
   return result.data
+}
+
+export function calculateAverageSalary(employees: employee[]): number {
+  if (employees.length === 0) return 0
+  const totalSalary = employees.reduce((sum, emp) => sum + emp.salary, 0)
+  return totalSalary / employees.length
+}
+
+export function groupEmployeesByDepartment(employees: employee[]) {
+  const grouped = employees.reduce(
+    (acc, emp) => {
+      if (!acc[emp.department]) {
+        acc[emp.department] = []
+      }
+      acc[emp.department].push(emp)
+      return acc
+    },
+    {} as Record<string, employee[]>
+  )
+
+  // Ordena os departamentos por número de funcionários (desc)
+  return Object.fromEntries(
+    Object.entries(grouped).sort(([, a], [, b]) => b.length - a.length)
+  )
 }

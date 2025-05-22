@@ -171,11 +171,42 @@ export function Enrollments() {
         subjectIds: unenrolledSubjects,
       })
 
-      console.log('response: ', response)
+      console.log('Dados recebido da api:', response)
+
+      // console.log('response: ', response)
 
       if (response.error) {
-        alert(response.error)
+        alert(`Erro ao realizar inscrição: ${response.error}`)
         return
+      }
+
+      if (response.status === 'success') {
+        alert('Inscrição realizada com sucesso!')
+
+        // Atualiza a lista de disciplinas do aluno
+        const updatedSubjects = await getStudentsSubjectsByStudentId(
+          studentId ?? ''
+        )
+        if (updatedSubjects) {
+          // Atualiza o estado com as disciplinas atualizadas
+          setSubjectCodes(updatedSubjects.map(subject => subject.subjectId))
+        }
+
+        // Fazer o download do comprovante de inscrição
+
+        if (response.registrationResponse) {
+          const registrationResponse = response.registrationResponse
+          const blob = new Blob([registrationResponse], {
+            type: 'application/pdf',
+          })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `comprovante_inscricao_${studentId}.pdf`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+        }
       }
     } catch (error) {
       console.error('Erro ao inscrever aluno nas disciplinas:', error)

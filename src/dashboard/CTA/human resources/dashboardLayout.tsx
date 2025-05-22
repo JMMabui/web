@@ -1,4 +1,4 @@
-import { data, Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import {
   Users,
   FileText,
@@ -7,14 +7,13 @@ import {
   Home,
   Bell,
   UserCircle,
-  AlertTriangle,
 } from 'lucide-react'
 import logo from '../../../assets/ismmalogo.png'
 import type { LucideProps } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import {
   type employeeExtended,
-  getEmployeeByLoginId,
+  getEmployeeByEmail,
 } from '@/http/employee/employee'
 import LoadingSpinner from '@/components/LoadingSpinner'
 
@@ -47,9 +46,9 @@ const MenuItem = ({ label, icon: Icon, to }: MenuItemProps) => {
 export function DashboardLayout() {
   const navigate = useNavigate()
 
-  const loginId = localStorage.getItem('login_id')
-  console.log('login ', loginId)
-  if (!loginId) {
+  const email = localStorage.getItem('email')
+  console.log('email: ', email)
+  if (!email) {
     alert('Efectue login para ter acesso')
     navigate('/')
     return null
@@ -60,10 +59,8 @@ export function DashboardLayout() {
   >({
     queryKey: ['user'],
     queryFn: () =>
-      loginId
-        ? getEmployeeByLoginId(loginId)
-        : Promise.reject('Login ID is null'),
-    enabled: !!loginId,
+      email ? getEmployeeByEmail(email) : Promise.reject('Login ID is null'),
+    enabled: !!email,
   })
 
   console.log('Dados recebido: ', dataUser)
@@ -77,7 +74,7 @@ export function DashboardLayout() {
     return null
   }
 
-  const user = dataUser.map(data => data.user)
+  const user = dataUser[0].user
 
   return (
     <div className="flex h-screen">
@@ -136,7 +133,9 @@ export function DashboardLayout() {
               ) : (
                 <DefaultAvatar />
               )}
-              <span className="font-medium">{user.map(name => name.name)}</span>
+              <span className="font-medium">
+                {user.name} {user.surname}
+              </span>
             </div>
           </div>
 
@@ -150,6 +149,7 @@ export function DashboardLayout() {
 
             <button
               type="button"
+              onClick={() => navigate('/login')}
               className="px-4 py-2 bg-zinc-400 text-white rounded-md ml-2"
             >
               Sair

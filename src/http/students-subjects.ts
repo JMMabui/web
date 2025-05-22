@@ -47,6 +47,10 @@ export async function createStudentsSubjects({
   studentId,
   subjectIds, // Agora é um array de disciplineId
 }: StudentsSubjectsRequest) {
+  console.log('Dados enviados para a API:', {
+    studentId,
+    subjectIds,
+  }) // Verifica os dados que estão sendo enviados
   try {
     const response = await fetch(`${base_URL}/students_subjects`, {
       method: 'POST',
@@ -55,7 +59,7 @@ export async function createStudentsSubjects({
       },
       body: JSON.stringify({
         studentId,
-        subjectIds, // Passando o array de disciplineId
+        subjectIds,
       }),
     })
 

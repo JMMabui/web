@@ -79,11 +79,12 @@ export function AddEmployee() {
         dateOfHire: new Date(data.dateOfHire),
         salary: Number(data.salary),
         loginId,
+        status: data.status,
       })
 
       const employeerId = employee.id
 
-      const employeeEducation = await createEmployeeEducation({
+      await createEmployeeEducation({
         employeerId,
         institutionName: data.institutionName,
         degree: data.degree,
@@ -92,7 +93,7 @@ export function AddEmployee() {
         endDate: new Date(data.endDate),
       })
 
-      const employeeBank = await createEmployeeBank({
+      await createEmployeeBank({
         employeerId,
         bankName: data.bankName,
         accountNumber: data.accountNumber,
@@ -417,6 +418,16 @@ export function AddEmployee() {
                     value === '' ? undefined : Number.parseFloat(value), // Converte para número
                 })}
                 error={errors.salary?.message}
+              />
+              <SelectField
+                label="Status"
+                id="status"
+                options={[
+                  { value: 'ATIVO', label: 'Activo' },
+                  { value: 'INATIVO', label: 'Inactivo' },
+                ]}
+                {...register('status')}
+                error={errors.status?.message}
               />
             </div>
           </>

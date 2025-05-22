@@ -1,9 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { getAllInvoice, invoiceExtendedResponse } from '@/http/finances/invoices'
-import { Table } from '@/components/Table'
-import { Column } from 'react-table'
+import {
+  getAllInvoice,
+  type invoiceExtendedResponse,
+} from '@/http/finances/invoices'
+// import { Table } from '@/components/Table'
+import type { Column } from 'react-table'
 import { useState } from 'react'
-import { PaymentForm } from '../../../components/paymentForm' // componente do formulário de pagamento
+import { Table } from '@/components/table'
+import { PaymentForm } from '@/components/paymentForm'
 
 const capitalizeWithAccents = (text: string) => {
   if (!text) return ''
@@ -14,20 +18,24 @@ const capitalizeWithAccents = (text: string) => {
     .join(' ')
 }
 
-
 export function PaymentsFinances() {
-  const { data: faturas, isLoading, isError } = useQuery({
+  const {
+    data: faturas,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['invoice'],
     queryFn: getAllInvoice,
   })
 
-
-  const [selectedInvoice, setSelectedInvoice] = useState<invoiceExtendedResponse | null>(null)
+  const [selectedInvoice, setSelectedInvoice] =
+    useState<invoiceExtendedResponse | null>(null)
 
   const columns: Column<invoiceExtendedResponse>[] = [
     {
       Header: 'Nome do Estudante',
-      accessor: row => capitalizeWithAccents(`${row.student.name} ${row.student.surname}`),
+      accessor: row =>
+        capitalizeWithAccents(`${row.student.name} ${row.student.surname}`),
     },
     {
       Header: 'Valor',
@@ -35,27 +43,19 @@ export function PaymentsFinances() {
       Cell: ({ value }: { value: number }) => `${value.toFixed(2)} MT`,
     },
     {
-  Header: 'Mês',
-  accessor: row => capitalizeWithAccents(row.month),
-},
-   {
-  Header: 'Status',
-  accessor: row => capitalizeWithAccents(row.status),
-},
-   {
-  Header: 'Multa',
-  accessor: row =>
-    row.LateFee && row.LateFee.length > 0
-      ? row.LateFee.reduce((total, late) => total + late.amount, 0)
-      : 0,
-  Cell: ({ value }:{value: number}) => `${value.toFixed(2)} MT`,
-}
-,
+      Header: 'Mês',
+      accessor: row => capitalizeWithAccents(row.month),
+    },
+    {
+      Header: 'Status',
+      accessor: row => capitalizeWithAccents(row.status),
+    },
     {
       Header: 'Ação',
       id: 'acao',
       Cell: ({ row }) => (
         <button
+          type="button"
           onClick={() => setSelectedInvoice(row.original)}
           className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
         >
@@ -76,8 +76,10 @@ export function PaymentsFinances() {
 
       {selectedInvoice && (
         <div className="mt-10">
-          <h3 className="text-xl font-semibold text-blue-700 mb-4">Registrar Pagamento</h3>
-          <PaymentForm invoice={selectedInvoice} onClose={() => setSelectedInvoice(null)} />
+          <h3 className="text-xl font-semibold text-blue-700 mb-4">
+            Registrar Pagamento
+          </h3>
+          <PaymentForm invoiceId={selectedInvoice.id} />
         </div>
       )}
     </div>

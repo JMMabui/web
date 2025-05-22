@@ -11,13 +11,40 @@ import {
 } from 'lucide-react'
 import logo from '../../../assets/ismmalogo.png'
 import { Outlet, useNavigate } from 'react-router-dom'
-
+import {
+  type employeeExtended,
+  getEmployeeByEmail,
+} from '@/http/employee/employee'
+import { useQuery } from '@tanstack/react-query'
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { LoadingSkeleton } from '@/components/LoadingSkeleton'
 
 export function DashboardLayoutFinances() {
   const [active, setActive] = useState('Dashboard')
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-
   const navigate = useNavigate()
+  const email = localStorage.getItem('email')
+
+  if (!email) {
+    alert('Efectue login para ter acesso')
+    navigate('/')
+    return null
+  }
+
+  const { data: dataUser, isLoading: isLoadingUser } = useQuery<
+    employeeExtended[]
+  >({
+    queryKey: ['user'],
+    queryFn: () =>
+      email ? getEmployeeByEmail(email) : Promise.reject('Login ID is null'),
+    enabled: !!email,
+  })
+
+  if (isLoadingUser) {
+    return <LoadingSkeleton />
+  }
+
+  const user = dataUser?.map(user => user.user)
 
   const menuItems = [
     {
@@ -114,7 +141,10 @@ export function DashboardLayoutFinances() {
             <Bell className="w-6 h-6 text-gray-600 cursor-pointer hover:text-gray-800" />
             <div className="flex items-center gap-2 cursor-pointer">
               <UserCircle className="w-8 h-8" />
-              <span className="font-medium">Justino Mabui</span>
+              <span className="font-medium">
+                {user?.map(name => name.name)}{' '}
+                {user?.map(surname => surname.surname)}
+              </span>
             </div>
           </div>
         </header>
