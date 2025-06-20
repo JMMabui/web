@@ -15,7 +15,7 @@ import {
   type employeeExtended,
   getEmployeeByEmail,
 } from '@/http/employee/employee'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import { LoadingSpinner} from '@/components/LoadingSpinner'
 
 const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />
 

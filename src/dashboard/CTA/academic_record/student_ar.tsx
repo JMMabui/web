@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import type { RegistrationResponse } from '../../../http/registration'
 import { ErrorComponent } from '@/components/ErrorComponent'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import {LoadingSpinner} from '@/components/LoadingSpinner'
 
 export function Students_ar() {
   const [isAddingStudent] = useState(false)

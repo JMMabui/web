@@ -130,6 +130,38 @@ export function Enrollments() {
       subjects.status === 'INSCRITO' && subjects.result === 'EM_ANDAMENTO'
   )
 
+  const formatPeriodo = (yearStudy: string, semester: string) => {
+    const semestreFormatado = formSemester(semester)
+    const anoFormatado = formatYear(yearStudy)
+    return `${anoFormatado} - ${semestreFormatado}`
+  }
+  const formSemester = (semester: string) => {
+    switch (semester) {
+      case 'PRIMEIRO_SEMESTRE':
+        return '1º Semestre'
+      case 'SEGUNDO_SEMESTRE':
+        return '2º Semestre'
+      default:
+        return semester
+    }
+  }
+
+  const formatYear = (yearStudy: string) => {
+    switch (yearStudy) {
+      case 'PRIMEIRO_ANO':
+        return '1º Ano'
+      case 'SEGUNDO_ANO':
+        return '2º Ano'
+      case 'TERCEIRO_ANO':
+        return '3º Ano'
+      case 'QUARTO_ANO':
+        return '4º Ano'
+      default:
+        return yearStudy
+    }
+  }
+
+  // console.log("disciplinas inscrito",filteredSubjectsEnrolled)
   // ====== Event Handlers ======
   async function handleEnrollClick() {
     const allCodes = [
@@ -316,217 +348,212 @@ export function Enrollments() {
 
   // ====== Main Render ======
   return (
-    <div className="max-w-4xl mx-auto p-6 w-full overflow-y-auto max-h-150">
-      {Array.isArray(filteredSubjectsEnrolled) &&
-      filteredSubjectsEnrolled.length > 0 ? (
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Cadeiras em Andamento</h2>
-          <ul className="space-y-2 overflow-y-auto max-h-96">
-            {filteredSubjectsEnrolled.map(subject => (
-              <li
-                key={subject.id}
-                className="p-4 border border-gray-200 rounded-lg shadow-sm bg-green-100"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">
-                    {subject.Subject.subjectName}
-                  </span>
-                  <span className="text-gray-500">{subject.subjectId}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-2xl p-8 text-white shadow-lg">
+          <h1 className="text-3xl font-bold mb-2">Inscrições</h1>
+          <p className="text-purple-100">
+            Gerencie suas inscrições em disciplinas
+          </p>
         </div>
-      ) : (
-        <div>
-          <h1 className="text-3xl font-bold text-center mb-6">
-            Inscrição em Disciplinas
-          </h1>
 
-          <YearSemesterSelect
-            year={year}
-            semester={semester}
-            setYear={setYear}
-            setSemester={setSemester}
-          />
-
-          <div>
-            {filteredSubjects && filteredSubjects.length > 0 ? (
-              <div>
-                <h2 className="text-2xl font-semibold mb-4">
-                  Disciplinas Disponíveis
-                </h2>
-                <ul className="space-y-2 overflow-y-auto max-h-96">
-                  {filteredSubjects.map(subject => (
-                    <li
-                      key={subject.codigo}
-                      className="p-4 border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50"
-                    >
-                      <div className="flex justify-between items-center">
-                        {/* <span className="font-medium text-lg text-gray-800">
-                          {subject.disciplineName}
-                        </span> */}
-                        <span className="text-gray-500">{subject.codigo}</span>
-                        <span className="text-gray-500">
-                          {subject.subjectName}
+        {/* Main Content */}
+        <div className="bg-white/90 backdrop-blur-sm shadow-sm rounded-2xl p-8 border border-gray-100">
+          {/* Current Enrollments */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Disciplinas Atuais
+            </h2>
+            {filteredSubjectsEnrolled && filteredSubjectsEnrolled.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredSubjectsEnrolled.map(subject => (
+                  <div
+                    key={subject.id}
+                    className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-300"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {subject.subjectId}
+                        </h3>
+                        <p className="text-gray-600 mt-1">
+                          {subject.Subject.subjectName}
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                        Em andamento
+                      </span>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>
+                          Ano:{' '}
+                          {formatPeriodo(
+                            subject.Subject.year_study,
+                            subject.Subject.semester
+                          )}
                         </span>
                       </div>
-                    </li>
-                  ))}
-                </ul>
+                      <div className="mt-2">
+                        <span className="text-gray-500">
+                          Status: {subject.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="text-center text-lg text-gray-500">
-                Nenhuma disciplina encontrada para o ano e semestre
-                selecionados.
+              <div className="text-center py-12 bg-gray-50 rounded-xl">
+                <p className="text-gray-500">
+                  Você não está inscrito em nenhuma disciplina no momento.
+                </p>
               </div>
             )}
           </div>
 
-          <Button
-            variant="primary"
-            className="m-4"
-            onClick={() => setShowExtraFields(!showExtraFields)}
-          >
-            Cadeira em Atraso
-          </Button>
-
-          {showExtraFields && (
-            <div className="mt-6">
-              <h2 className="text-xl font-semibold mb-4">
-                Adicionar Disciplina
-              </h2>
-
-              {/* Additional Subject 1 */}
-              <div className="flex space-x-4 mb-6">
-                <YearSemesterSelect
-                  year={yearAdd}
-                  semester={semesterAdd}
-                  setYear={setYearAdd}
-                  setSemester={setSemesterAdd}
-                  prefix="Add"
-                />
-                <SubjectSelect
-                  subjects={filteredSubjectsAdd}
-                  value={selectedSubject}
-                  onChange={setSelectedSubject}
-                  prefix="Add"
-                />
-              </div>
-
-              {/* Additional Subject 2 */}
-              <div className="flex space-x-4 mb-6">
-                <YearSemesterSelect
-                  year={yearAdd2}
-                  semester={semesterAdd2}
-                  setYear={setYearAdd2}
-                  setSemester={setSemesterAdd2}
-                  prefix="Add2"
-                />
-                <SubjectSelect
-                  subjects={filteredSubjectsAdd2}
-                  value={selectedSubjectAdd2}
-                  onChange={setSelectedSubjectAdd2}
-                  prefix="Add2"
-                />
-              </div>
-
-              {/* Additional Subject 3 */}
-              <div className="flex space-x-4 mb-6">
-                <YearSemesterSelect
-                  year={yearAdd3}
-                  semester={semesterAdd3}
-                  setYear={setYearAdd3}
-                  setSemester={setSemesterAdd3}
-                  prefix="Add3"
-                />
-                <SubjectSelect
-                  subjects={filteredSubjectsAdd3}
-                  value={selectedSubjectAdd3}
-                  onChange={setSelectedSubjectAdd3}
-                  prefix="Add3"
-                />
-              </div>
-            </div>
-          )}
-
-          <Button onClick={() => setShowResume(!showResume)}>
-            {showResume ? 'Esconder Resumo' : 'Resumo'}
-          </Button>
-
-          {showResume && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg w-full sm:w-96">
-                <h2 className="text-2xl font-semibold mb-4">
-                  Resumo da Inscrição
-                </h2>
-
-                <div>
-                  <h3 className="text-xl font-medium">
-                    Disciplinas Obrigatórias:
-                  </h3>
-                  {filteredSubjects && filteredSubjects.length > 0 ? (
-                    <ul className="space-y-2">
-                      {filteredSubjects.map(subject => (
-                        <li key={subject.codigo} className="p-2 border-b">
-                          {subject.subjectName} - Código: {subject.codigo}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>
-                      Nenhuma disciplina encontrada para o ano e semestre
-                      selecionados.
-                    </p>
-                  )}
+          {/* New Enrollment Form */}
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Nova Inscrição
+            </h2>
+            <form className="space-y-8">
+              {/* Primary Subject Selection */}
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Disciplina Principal
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <YearSemesterSelect
+                    year={year}
+                    semester={semester}
+                    setYear={setYear}
+                    setSemester={setSemester}
+                  />
+                  <SubjectSelect
+                    subjects={filteredSubjects}
+                    value={selectedSubject}
+                    onChange={setSelectedSubject}
+                  />
                 </div>
+              </div>
 
-                <div className="mt-4">
-                  <h3 className="text-xl font-medium">
-                    Disciplinas Adicionais Selecionadas:
+              {/* Additional Subjects */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Disciplinas Adicionais
                   </h3>
-                  <div className="space-y-2">
-                    {selectedSubject && <p>1ª Cadeira: {selectedSubject}</p>}
-                    {selectedSubjectAdd2 && (
-                      <p>3ª Cadeira: {selectedSubjectAdd2}</p>
-                    )}
-                    {selectedSubjectAdd3 && (
-                      <p>4ª Cadeira: {selectedSubjectAdd3}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="w-full mt-4 text-center flex justify-between items-center space-x-4">
                   <button
                     type="button"
-                    onClick={() => setShowResume(!showResume)}
-                    className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 transition duration-200 ease-in-out w-full sm:w-auto"
+                    onClick={() => setShowExtraFields(!showExtraFields)}
+                    className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors duration-300"
                   >
-                    Fechar
-                  </button>
-
-                  {showResume && !isEnrolled && (
-                    <button
-                      type="button"
-                      onClick={handleEnrollClick}
-                      className="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition duration-200 ease-in-out w-full sm:w-auto"
+                    <span>{showExtraFields ? 'Ocultar' : 'Adicionar'}</span>
+                    <svg
+                      className={`w-5 h-5 transform transition-transform duration-300 ${
+                        showExtraFields ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      Finalizar Inscrição
-                    </button>
-                  )}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
                 </div>
-              </div>
-            </div>
-          )}
 
-          {isEnrolled && (
-            <div className="mt-6 text-center text-green-500">
-              Submissão da inscrição realizada com sucesso! Códigos das
-              disciplinas: {subjectCodes.join(', ')}
-            </div>
-          )}
+                {showExtraFields && (
+                  <div className="space-y-6">
+                    {/* Additional Subject 1 */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                      <h4 className="text-md font-semibold text-gray-800 mb-4">
+                        Disciplina Adicional 1
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <YearSemesterSelect
+                          year={yearAdd}
+                          semester={semesterAdd}
+                          setYear={setYearAdd}
+                          setSemester={setSemesterAdd}
+                          prefix="add"
+                        />
+                        <SubjectSelect
+                          subjects={filteredSubjectsAdd}
+                          value={selectedSubjectAdd}
+                          onChange={setSelectedSubjectAdd}
+                          prefix="add"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Additional Subject 2 */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                      <h4 className="text-md font-semibold text-gray-800 mb-4">
+                        Disciplina Adicional 2
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <YearSemesterSelect
+                          year={yearAdd2}
+                          semester={semesterAdd2}
+                          setYear={setYearAdd2}
+                          setSemester={setSemesterAdd2}
+                          prefix="add2"
+                        />
+                        <SubjectSelect
+                          subjects={filteredSubjectsAdd2}
+                          value={selectedSubjectAdd2}
+                          onChange={setSelectedSubjectAdd2}
+                          prefix="add2"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Additional Subject 3 */}
+                    <div className="bg-white rounded-xl p-6 shadow-sm">
+                      <h4 className="text-md font-semibold text-gray-800 mb-4">
+                        Disciplina Adicional 3
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <YearSemesterSelect
+                          year={yearAdd3}
+                          semester={semesterAdd3}
+                          setYear={setYearAdd3}
+                          setSemester={setSemesterAdd3}
+                          prefix="add3"
+                        />
+                        <SubjectSelect
+                          subjects={filteredSubjectsAdd3}
+                          value={selectedSubjectAdd3}
+                          onChange={setSelectedSubjectAdd3}
+                          prefix="add3"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleEnrollClick}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 shadow-sm hover:shadow-md"
+                >
+                  Realizar Inscrição
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

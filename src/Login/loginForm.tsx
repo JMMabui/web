@@ -132,11 +132,11 @@ export function LoginForm() {
           <img className="h-24 w-auto" src={logo} alt="ISMMA" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          {isSignup ? 'Criar Conta' : 'Bem-vindo ao ISMMA'}
+          {isSignup ? ' Pré-inscrição' : 'Bem-vindo ao ISMMA'}
         </h2>
         <p className="mt-2 text-center text-sm text-gray-700">
           {isSignup
-            ? 'Preencha os dados para criar sua conta'
+            ? 'Inicia a sua pré-inscrição preenchendo os dados abaixo e siga a instruções.  '
             : 'Faça login para acessar o sistema'}
         </p>
       </div>

@@ -8,7 +8,7 @@ import {
   getStudentsSubjectsByStudentId,
   type StudentsSubjectsWithExtraDataResponse,
 } from '@/http/students-subjects'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import {LoadingSpinner} from '@/components/LoadingSpinner'
 
 const NavbarLink = ({
   section,
@@ -61,9 +61,9 @@ export function LayoutStudents() {
 
   // console.log('Data subjects:', dataSubject)
 
-  if (isLoading) {
-    return <LoadingSpinner />
-  }
+  // if (isLoading) {
+  //   return <LoadingSpinner />
+  // }
 
   if (isError) {
     return (
@@ -138,143 +138,137 @@ export function LayoutStudents() {
       .join(' ')
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <div
-        className={`w-80 h-screen bg-yellow-500 p-6 flex flex-col space-y-6 shadow-lg transition-all duration-300 ${mobileMenuOpen ? 'block' : 'hidden sm:block'}`}
+        className={`w-80 h-screen bg-gradient-to-b from-yellow-500 to-yellow-600 p-6 flex flex-col space-y-6 shadow-lg transition-all duration-300 fixed ${mobileMenuOpen ? 'block' : 'hidden sm:block'}`}
       >
-        <div className="flex items-center mb-4">
+        <div className="flex items-center mb-6">
           <img src={logo} alt="Logo do Sistema" className="w-16 h-16 mr-4" />
-          <h1 className="text-2xl font-semibold">SIGAMMA</h1>
+          <h1 className="text-2xl font-bold text-white">SIGAMMA</h1>
         </div>
 
-        <div className="flex flex-col items-center text-left space-y-4">
-          <UserCircle className="w-24 h-24 text-gray-700" />
-          <div>
-            <p>
-              <strong>Nome: </strong>
-              {formatText(student?.name || '')},{' '}
-              {formatText(student?.surname || '')}
+        <div className="flex flex-col items-center text-left space-y-4 bg-white/10 backdrop-blur-sm rounded-2xl p-6">
+          <div className="relative">
+            <UserCircle className="w-24 h-24 text-white" />
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-yellow-500"></div>
+          </div>
+          <div className="text-white space-y-2">
+            <p className="font-medium">
+              {formatText(student?.name || '')} {formatText(student?.surname || '')}
             </p>
-            <p>
-              <strong>Nº Estudante:</strong> {student?.id}
+            <p className="text-sm text-yellow-100">
+              Nº Estudante: {student?.id}
             </p>
-            <p>
-              <strong>Curso:</strong>{' '}
+            <p className="text-sm text-yellow-100">
               {course
                 ? formatText(course?.courseName || 'Curso não disponível')
                 : 'Nenhum curso encontrado.'}
             </p>
-            <p>
-              <strong>Ano:</strong> 2025
+            <p className="text-sm text-yellow-100">
+              Ano: 2025
             </p>
           </div>
         </div>
 
+        {/* Navigation Menu */}
+        <nav className="space-y-2">
+          {menuItems.map((item) => {
+            const isActive = activeSection === item.name.toLowerCase();
+            return (
+              <a
+                key={item.name}
+                href={item.route}
+                className={`group flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 relative ${
+                  isActive
+                    ? 'bg-white text-yellow-600 shadow-md'
+                    : 'text-white hover:bg-white/10'
+                }`}
+                onClick={() => handleSectionClick(item.name.toLowerCase())}
+              >
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-yellow-400 rounded-r-full" />
+                )}
+                <item.icon className={`w-5 h-5 transition-transform duration-300 ${
+                  isActive ? 'scale-110' : 'group-hover:scale-110'
+                }`} />
+                <span className={`font-medium transition-all duration-300 ${
+                  isActive ? 'translate-x-1' : 'group-hover:translate-x-1'
+                }`}>
+                  {item.name}
+                </span>
+                {isActive && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                  </div>
+                )}
+              </a>
+            );
+          })}
+        </nav>
+
         {/** Cadeiras que estao a decorrer */}
-        <div>
-          <h2 className="text-start font-semibold text-gray-800 mb-4">
+        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+          <h2 className="text-white font-semibold mb-4">
             Cadeiras A Fazer
           </h2>
 
           {Array.isArray(filteredSubjects) && filteredSubjects.length > 0 ? (
-            <table className="min-w-full">
-              <tbody>
-                {filteredSubjects.map(assessmentResult => (
-                  <tr key={assessmentResult.id}>
-                    <td className="p-3 border-b text-gray-700">
-                      {assessmentResult.subjectId}
-                    </td>
-                    {/* <td className="p-3 border-b text-gray-700">
-                      {assessmentResult.subject.subjectName}
-                    </td> */}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="space-y-2">
+              {filteredSubjects.map(assessmentResult => (
+                <div
+                  key={assessmentResult.id}
+                  className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-white hover:bg-white/30 transition-all duration-300"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{assessmentResult.subjectId}</span>
+                    <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                      Em andamento
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
-            <p className="text-center text-gray-500">
-              Nenhuma cadeira Inscrito.
+            <p className="text-center text-yellow-100 text-sm">
+              Nenhuma cadeira em andamento.
             </p>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={toggleMobileMenu}
+          className="sm:hidden fixed bottom-4 right-4 bg-yellow-500 text-white p-3 rounded-full shadow-lg hover:bg-yellow-600 transition-colors duration-300"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            {mobileMenuOpen ? (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            ) : (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            )}
+          </svg>
+        </button>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Navbar */}
-        <nav className="bg-indigo-100 shadow-md">
-          <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between">
-              <div className="hidden sm:flex space-x-4">
-                {menuItems.map(({ name, icon: Icon, route }) => (
-                  <div key={name} className="flex">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveSection(name)
-                        navigate(route)
-                      }}
-                      className={`flex items-center gap-3 p-3 rounded-lg w-full text-left transition font-medium ${activeSection === name ? 'bg-yellow-800' : 'hover:bg-yellow-700'}`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {name}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Mobile Menu Button */}
-              <div className="sm:hidden">
-                <button
-                  type="button"
-                  onClick={toggleMobileMenu}
-                  aria-expanded={mobileMenuOpen ? 'true' : 'false'}
-                  aria-controls="mobile-menu"
-                  className="text-gray-700 hover:bg-indigo-500 hover:text-white p-2 rounded-md"
-                >
-                  <span className="sr-only">Abrir menu</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Menu */}
-            <div
-              className={`${mobileMenuOpen ? 'block' : 'hidden'} sm:hidden`}
-              id="mobile-menu"
-            >
-              <div className="space-y-1 px-2 pt-2 pb-3">
-                {sections.map(section => (
-                  <NavbarLink
-                    key={section}
-                    section={section}
-                    activeSection={activeSection}
-                    handleSectionClick={handleSectionClick}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Section Content */}
-        <main className="flex-1 flex items-center justify-center m-4 rounded-lg border-dashed border-gray-300 bg-gray-50 shadow-sm">
-          <Outlet />
-        </main>
+      <div className="flex-1 sm:ml-80">
+        <Outlet />
       </div>
     </div>
   )

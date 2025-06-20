@@ -191,7 +191,7 @@ export async function getStudentsSubjectsBySubjectId(subjectId: string | null) {
     const result = await response.json()
 
     // Exibindo os dados para depuração
-    console.log('Subjects API response:', result)
+    // console.log('Subjects API response:', result)
 
     // Verificando se a resposta contém dados válidos
     if (!result || !Array.isArray(result.data)) {

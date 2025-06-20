@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { PlusCircle, User } from 'lucide-react'
 import { getTeachers, type teacherData } from '@/http/teacher'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import {LoadingSpinner} from '@/components/LoadingSpinner'
 import { toast } from 'react-toastify'
 
 type TeacherFormData = {

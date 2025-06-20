@@ -9,9 +9,6 @@ import { LoginForm } from './Login/loginForm'
 import { LayoutStudents } from './dashboard/students/layoutStudent'
 import { Signup } from './registration/signup'
 import { Dashboard_cta } from './dashboard/CTA/dashboard'
-import { Pre_Instituto } from './registration/pre_institutos'
-import { Inscricao } from './registration/course'
-import { Invoice } from './registration/invoice'
 import { DashboardLayout2 } from './dashboard/CTA/academic_record/dashboardLayout'
 import { Dashboard_Human_Resourses } from './dashboard/CTA/human resources/dashboard_human_resourses'
 import { AddEmployee } from './dashboard/CTA/human resources/add_employee'
@@ -21,7 +18,8 @@ import { AcademicRecord } from './dashboard/CTA/academic_record/dashboard_academ
 import { CoursesDashboard } from './dashboard/CTA/academic_record/course_AR'
 import { Enrollment_Academic_Record } from './dashboard/CTA/academic_record/registration_academic_record'
 import { Students_ar } from './dashboard/CTA/academic_record/student_ar'
-import { Reports } from './dashboard/CTA/human resources/reports'
+import TeacherReports from './dashboard/Teacher/reports'
+import { Reports as HRReports } from './dashboard/CTA/human resources/reports'
 import { AddStudents } from './dashboard/CTA/academic_record/addStudent'
 import { AddCourse } from './dashboard/CTA/academic_record/addCourse'
 import { AddSubject } from './dashboard/CTA/academic_record/addSubject'
@@ -45,6 +43,26 @@ import { Evaluations } from './dashboard/Teacher/evaluations'
 import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 import { Announcements } from './dashboard/Teacher/announcements'
 import { ActivityHistory } from './dashboard/Teacher/activityHistory'
+import { Attendance } from './dashboard/Teacher/attendance'
+import { LessonPlanning } from './dashboard/Teacher/lessonPlanning'
+import { Syllabus } from './dashboard/Teacher/syllabus'
+import { Recovery } from './dashboard/Teacher/recovery'
+import { Competencies } from './dashboard/Teacher/competencies'
+import { PerformanceAnalysis } from './dashboard/Teacher/performanceAnalysis'
+import { Feedback } from './dashboard/Teacher/feedback'
+import { Communication } from './dashboard/Teacher/communication'
+import { Portfolio } from './dashboard/Teacher/portfolio'
+import { DigitalLibrary } from './dashboard/Teacher/digitalLibrary'
+import { StudentTranscript } from './dashboard/CTA/academic_record/StudentTranscript'
+import { ReportCard } from './dashboard/CTA/academic_record/ReportCard'
+import { StudentTransfer } from './dashboard/CTA/academic_record/StudentTransfer'
+import { AttendanceControl } from './dashboard/CTA/academic_record/AttendanceControl'
+import { FinancialIntegration } from './dashboard/CTA/academic_record/FinancialIntegration'
+import { AcademicNotifications } from './dashboard/CTA/academic_record/AcademicNotifications'
+import { AcademicRequests } from './dashboard/CTA/academic_record/AcademicRequests'
+import { AcademicStatistics } from './dashboard/CTA/academic_record/AcademicStatistics'
+import { ParentDashboard } from './dashboard/CTA/academic_record/ParentDashboard'
+import { GradesManagement } from './dashboard/CTA/academic_record/GradesManagement'
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -78,18 +96,18 @@ export const router = createBrowserRouter([
     path: '/registration',
     element: <Signup />,
   },
-  {
-    path: '/registration/pre-instituto',
-    element: <Pre_Instituto />,
-  },
-  {
-    path: '/registration/course',
-    element: <Inscricao />,
-  },
-  {
-    path: '/registration/resume',
-    element: <Invoice />,
-  },
+  // {
+  //   path: '/registration/pre-instituto',
+  //   element: <Pre_Instituto />,
+  // },
+  // {
+  //   path: '/registration/course',
+  //   element: <Inscricao />,
+  // },
+  // {
+  //   path: '/registration/resume',
+  //   element: <Invoice />,
+  // },
   {
     path: '/student',
     element: <LayoutStudents />,
@@ -172,6 +190,54 @@ export const router = createBrowserRouter([
         path: 'diploma',
         element: <Diploma />,
       },
+      {
+        path: 'student-transcript',
+        element: <StudentTranscript />,
+      },
+      {
+        path: 'student-transcript/export',
+        element: <StudentTranscript />,
+      },
+      {
+        path: 'report-card',
+        element: <ReportCard />,
+      },
+      {
+        path: 'report-card/generate',
+        element: <ReportCard />,
+      },
+      {
+        path: 'student-transfer',
+        element: <StudentTransfer />,
+      },
+      {
+        path: 'attendance',
+        element: <AttendanceControl />,
+      },
+      {
+        path: 'financial',
+        element: <FinancialIntegration />,
+      },
+      {
+        path: 'notifications',
+        element: <AcademicNotifications />,
+      },
+      {
+        path: 'requests',
+        element: <AcademicRequests />,
+      },
+      {
+        path: 'statistics',
+        element: <AcademicStatistics />,
+      },
+      {
+        path: 'parent-dashboard',
+        element: <ParentDashboard />,
+      },
+      {
+        path: 'grades',
+        element: <GradesManagement />,
+      },
     ],
   },
   {
@@ -188,7 +254,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'reports',
-        element: <Reports />,
+        element: <HRReports />,
       },
       {
         path: 'add_employee',
@@ -222,22 +288,69 @@ export const router = createBrowserRouter([
         path: 'dashboard',
         element: <DashboardTeachers />,
       },
-
-      {
-        path: 'evaluations',
-        element: <Evaluations />,
-      },
       {
         path: 'class-management',
         element: <ClassManagement />,
+      },
+      {
+        path: 'activity-history',
+        element: <ActivityHistory />,
       },
       {
         path: 'announcements',
         element: <Announcements />,
       },
       {
-        path: 'activity-history',
-        element: <ActivityHistory />,
+        path: 'attendance',
+        element: <Attendance />,
+      },
+      {
+        path: 'lesson-planning',
+        element: <LessonPlanning />,
+      },
+      {
+        path: 'syllabus',
+        element: <Syllabus />,
+      },
+      {
+        path: 'evaluations',
+        element: <Evaluations />,
+      },
+      {
+        path: 'recovery',
+        element: <Recovery />,
+      },
+      {
+        path: 'competencies',
+        element: <Competencies />,
+      },
+      {
+        path: 'performance-analysis',
+        element: <PerformanceAnalysis />,
+      },
+      {
+        path: 'reports',
+        element: <TeacherReports />,
+      },
+      {
+        path: 'feedback',
+        element: <Feedback />,
+      },
+      {
+        path: 'communication',
+        element: <Communication />,
+      },
+      {
+        path: 'portfolio',
+        element: <Portfolio />,
+      },
+      // {
+      //   path: 'projects',
+      //   element: <Projects />,
+      // },
+      {
+        path: 'digital-library',
+        element: <DigitalLibrary />,
       },
     ],
   },

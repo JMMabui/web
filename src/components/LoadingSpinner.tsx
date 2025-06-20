@@ -3,11 +3,13 @@ import type { FC } from 'react'
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg'
   color?: string
+  className?: string
 }
 
-const LoadingSpinner: FC<LoadingSpinnerProps> = ({
+export const LoadingSpinner: FC<LoadingSpinnerProps> = ({
   size = 'md',
   color = 'text-blue-600',
+  className = '',
 }) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
@@ -16,7 +18,7 @@ const LoadingSpinner: FC<LoadingSpinnerProps> = ({
   }
 
   return (
-    <div className="flex items-center justify-center">
+    <div className={`flex items-center justify-center ${className}`}>
       <output
         className={`${sizeClasses[size]} ${color} animate-spin rounded-full border-2 border-current border-t-transparent`}
         aria-label="Loading"
@@ -26,5 +28,3 @@ const LoadingSpinner: FC<LoadingSpinnerProps> = ({
     </div>
   )
 }
-
-export default LoadingSpinner

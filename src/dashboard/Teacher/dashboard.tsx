@@ -1,7 +1,14 @@
 // src/components/DashboardTeachers.jsx
 import { useState, useMemo } from 'react'
-import { Search } from 'lucide-react'
-import { useTheme } from '@/hooks/useTheme'
+import {
+  Search,
+  BookOpen,
+  Users,
+  GraduationCap,
+  Calendar,
+  BarChart3,
+  TrendingUp,
+} from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -18,12 +25,12 @@ import {
   getStudentsSubjectsBySubjectId,
   type StudentsSubjectsWithExtraDataResponse,
 } from '@/http/students-subjects'
+import Button from '@/components/Button'
 
 export function DashboardTeachers() {
   const [selectedSubject, setSelectedSubject] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedPeriod, setSelectedPeriod] = useState<string>('')
-  const { theme } = useTheme()
 
   const email = localStorage.getItem('email')
 
@@ -69,8 +76,6 @@ export function DashboardTeachers() {
     },
     enabled: subjectIds.length > 0,
   })
-
-  console.log('Dados dos alunos por disciplina:', dataStudentsSubjects)
 
   // Unificar os alunos
   const studentsSubjects = (dataStudentsSubjects || []).map(studentData => ({
@@ -137,8 +142,6 @@ export function DashboardTeachers() {
       )
   }, [teacherSubjects, searchTerm, selectedPeriod])
 
-  console.log('Disciplinas filtradas:', filteredSubjects)
-
   const chartData = useMemo(() => {
     return filteredSubjects.map(subject => {
       const totalAlunos = getTotalAlunos(subject.subject.codigo).length
@@ -158,131 +161,248 @@ export function DashboardTeachers() {
     return Array.from(periods)
   }, [teacherSubjects])
 
+  // Calcular estatísticas gerais
+  const totalStudents = studentsSubjects.length
+  const totalSubjects = filteredSubjects.length
+  const averageStudentsPerSubject =
+    totalSubjects > 0 ? Math.round(totalStudents / totalSubjects) : 0
+
   return (
-    <div
-      className={`p-8 w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}
-    >
-      <div
-        className={`max-w-6xl mx-auto ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md`}
-      >
-        {/* Filtros */}
-        <div className="mb-6 flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar disciplina..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className={`w-full pl-10 p-2 border rounded-md ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-white border-gray-600'
-                  : 'bg-white'
-              }`}
-            />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header com gradiente */}
+        <div className="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl p-6 mb-8 text-white shadow-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <GraduationCap className="h-8 w-8" />
+                Dashboard do Professor
+              </h1>
+              <p className="text-blue-100 mt-2">
+                Bem-vindo, {dataTeacher?.name || 'Professor'}! Acompanhe suas
+                disciplinas e alunos
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/10 rounded-lg">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-blue-100">Período Atual</p>
+                <p className="font-semibold">2024.1</p>
+              </div>
+            </div>
           </div>
-          <select
-            value={selectedPeriod}
-            onChange={e => setSelectedPeriod(e.target.value)}
-            className={`p-2 border rounded-md ${
-              theme === 'dark'
-                ? 'bg-gray-700 text-white border-gray-600'
-                : 'bg-white'
-            }`}
-          >
-            <option value="">Todos os períodos</option>
-            {uniquePeriods.map(period => (
-              <option key={period} value={period}>
-                {period}
-              </option>
-            ))}
-          </select>
         </div>
 
-        {/* Gráfico */}
-        <div className="mb-8 h-64">
-          <h3 className="text-xl font-semibold mb-4">
-            Distribuição de Alunos por Disciplina
-          </h3>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="alunos" fill="#eab308" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSubjects.map((subject, index) => {
-            const totalAlunos = getTotalAlunos(subject.subject.codigo)
-            return (
-              <button
-                type="button"
-                key={index}
-                className={`p-6 rounded-md shadow-md transition-colors cursor-pointer w-full text-left ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 hover:bg-gray-600'
-                    : 'bg-blue-200 hover:bg-blue-300'
-                }`}
-                onClick={() => handleCardClick(subject)}
-              >
-                <h3 className="text-xl font-medium mb-2">
-                  {subject.subject.subjectName}
-                </h3>
-                <p className="text-sm">
-                  Estado: {subject.status === 'ATIVO' ? 'activo' : 'inactivo'}
-                </p>
-                <p className="text-sm">Total de Alunos: {totalAlunos.length}</p>
-                <p className="text-sm">
-                  Período:{' '}
-                  {formatPeriodo(
-                    subject.subject.year_study,
-                    subject.subject.semester
-                  )}
-                </p>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Resumo */}
-        {selectedSubject && (
-          <div
-            className={`mt-8 p-6 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}
-          >
-            <h2 className="text-2xl font-bold mb-4">
-              {selectedSubject.subject.subjectName}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-lg mb-2">
-                  <strong>Código:</strong> {selectedSubject.subject.codigo}
-                </p>
-                <p className="text-lg mb-2">
-                  <strong>Estado:</strong>{' '}
-                  {selectedSubject.status === 'ATIVO' ? 'Ativo' : 'Inativo'}
-                </p>
+        {/* Cards de estatísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <BookOpen className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-lg mb-2">
-                  <strong>Total de Alunos:</strong>{' '}
-                  {getTotalAlunos(selectedSubject.subject.codigo).length}
-                </p>
-                <p className="text-lg mb-2">
-                  <strong>Período:</strong>{' '}
-                  {formatPeriodo(
-                    selectedSubject.subject.year_study,
-                    selectedSubject.subject.semester
-                  )}
+                <p className="text-sm text-gray-600">Disciplinas</p>
+                <p className="text-2xl font-bold text-blue-600">
+                  {totalSubjects}
                 </p>
               </div>
             </div>
           </div>
-        )}
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Users className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Alunos</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {totalStudents}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Média por Disciplina</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {averageStudentsPerSubject}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Períodos</p>
+                <p className="text-2xl font-bold text-purple-600">
+                  {uniquePeriods.length}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtros */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar disciplinas..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <select
+              value={selectedPeriod}
+              onChange={e => setSelectedPeriod(e.target.value)}
+              className="px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Todos os períodos</option>
+              {uniquePeriods.map(period => (
+                <option key={period} value={period}>
+                  {period}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Gráfico */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-8">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Distribuição de Alunos por Disciplina
+              </h3>
+              <p className="text-sm text-gray-600">
+                Visualize a quantidade de alunos em cada disciplina
+              </p>
+            </div>
+          </div>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={100}
+                  fontSize={12}
+                />
+                <YAxis fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                />
+                <Bar dataKey="alunos" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Lista de disciplinas */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <BookOpen className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Suas Disciplinas
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {filteredSubjects.length} disciplinas encontradas
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSubjects.map(subject => {
+                const totalAlunos = getTotalAlunos(
+                  subject.subject.codigo
+                ).length
+                return (
+                  <Button
+                    key={subject.subject.codigo}
+                    onClick={() => handleCardClick(subject)}
+                    className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-6 border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-200 cursor-pointer group w-full text-left"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+                          {subject.subject.subjectName}
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {formatPeriodo(
+                            subject.subject.year_study,
+                            subject.subject.semester
+                          )}
+                        </p>
+                      </div>
+                      <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                        <BookOpen className="h-4 w-4 text-blue-600" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Código:</span>
+                        <span className="text-sm font-medium text-gray-800">
+                          {subject.subject.codigo}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Alunos:</span>
+                        <span className="text-sm font-medium text-green-600">
+                          {totalAlunos}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Status:</span>
+                        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                          Ativa
+                        </span>
+                      </div>
+                    </div>
+                  </Button>
+                )
+              })}
+            </div>
+
+            {filteredSubjects.length === 0 && (
+              <div className="text-center py-12">
+                <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Nenhuma disciplina encontrada</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import Button from '@/components/Button'
-import LoadingSpinner from '@/components/LoadingSpinner'
+import {LoadingSpinner} from '@/components/LoadingSpinner'
 import { mockAnnouncements } from '@/mockData'
 
 export type Priority = 'BAIXA' | 'MEDIA' | 'ALTA'

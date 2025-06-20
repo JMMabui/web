@@ -1,12 +1,4 @@
 import { useState } from 'react'
-import { toast } from 'react-hot-toast'
-import Button from '@/components/Button'
-import { format } from 'date-fns'
-import {
-  mockAttendance,
-  getStudentAttendance,
-  getStudentById,
-} from '@/mockData'
 import { useQuery } from '@tanstack/react-query'
 import { LoadingSkeleton } from '@/components/LoadingSkeleton'
 import { ErrorComponent } from '@/components/ErrorComponent'
@@ -18,22 +10,32 @@ import {
   getStudentsSubjectsBySubjectId,
   type StudentsSubjectsWithExtraDataResponse,
 } from '@/http/students-subjects'
+import {
+  Download,
+  Users,
+  BookOpen,
+  User,
+  Search,
+  Filter,
+  Plus,
+  Edit,
+  Eye,
+  BarChart3,
+  Calendar,
+  GraduationCap,
+} from 'lucide-react'
+import Button from '@/components/Button'
 
 export function ClassManagement() {
   const [turmaSelecionada, setTurmaSelecionada] = useState<string>('')
-  const [selectedDate, setSelectedDate] = useState<string>(
-    format(new Date(), 'yyyy-MM-dd')
-  )
-  const [showJustificativaModal, setShowJustificativaModal] = useState<{
-    studentId: string
-    date: string
-  } | null>(null)
-  const [justificativaText, setJustificativaText] = useState<string>('')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState<
+    'all' | 'active' | 'inactive'
+  >('all')
 
-  // Fetching data
+  // Buscar disciplinas do professor
   const {
-    data: dataTeacherSubjectsApi,
+    data: dataTeacherSubjects,
     isLoading: isLoadingTeacherSubjects,
     isError: isErrorTeacherSubjects,
   } = useQuery<teacherSubjectResponse[]>({
@@ -46,10 +48,11 @@ export function ClassManagement() {
     enabled: !!localStorage.getItem('teacherId'),
   })
 
+  // Buscar alunos da turma selecionada
   const {
-    data: dataStudentsSubjectsApi,
-    isLoading: isLoadingStudentSubjects,
-    isError: isErrorStudentsSubejcts,
+    data: dataStudentsSubjects,
+    isLoading: isLoadingStudents,
+    isError: isErrorStudents,
   } = useQuery<StudentsSubjectsWithExtraDataResponse[]>({
     queryKey: ['studentsSubjects', turmaSelecionada],
     queryFn: async () => {
@@ -59,304 +62,372 @@ export function ClassManagement() {
     enabled: !!turmaSelecionada,
   })
 
-  // Using mock data
-  const dataTeacherSubjects = dataTeacherSubjectsApi?.map(subjectData => ({
-    ...subjectData,
-    subject: {
-      ...subjectData.Subject,
-      year_study: subjectData.Subject.year_study,
-      semester: subjectData.Subject.semester,
-    },
-  }))
-  const dataStudentsSujects = dataStudentsSubjectsApi?.map(subjectData => ({
-    ...subjectData,
-    Subject: {
-      ...subjectData.Subject,
-      year_study: subjectData.Subject.year_study,
-      semester: subjectData.Subject.semester,
-    },
-  }))
+  if (isLoadingTeacherSubjects || isLoadingStudents) return <LoadingSkeleton />
+  if (isErrorTeacherSubjects || isErrorStudents) return <ErrorComponent />
 
-  if (isLoadingTeacherSubjects || isLoadingStudentSubjects) {
-    return <LoadingSkeleton />
-  }
-  if (isErrorTeacherSubjects || isErrorStudentsSubejcts) {
-    return <ErrorComponent />
-  }
-
-  const filteredSubjectsActiveted = dataTeacherSubjects?.filter(
-    subject => subject.status === 'ATIVO'
+  const filteredSubjects = dataTeacherSubjects?.filter(
+    s => s.status === 'ATIVO'
+  )
+  const filteredStudents = dataStudentsSubjects?.filter(
+    s => s.status === 'INSCRITO' && s.result === 'EM_ANDAMENTO'
   )
 
-  // Filter students based on selected subject
-  const filteredStudentsSubject = dataStudentsSujects?.filter(
-    student =>
-      student.status === 'INSCRITO' && student.result === 'EM_ANDAMENTO'
-  )
+  // Filtrar alunos por busca
+  const filteredAndSearchedStudents = filteredStudents?.filter(student => {
+    const matchesSearch =
+      student.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.student.documentNumber
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      student.student.id.toLowerCase().includes(searchTerm.toLowerCase())
+    return matchesSearch
+  })
 
-  // Get attendance records for the selected subject
-  const subjectAttendance = mockAttendance.find(
-    attendance => attendance.subjectId === turmaSelecionada
-  )
+  // Calcular estatísticas
+  const calculateStats = () => {
+    if (!filteredStudents)
+      return { total: 0, active: 0, inactive: 0, averageAge: 0 }
 
-  // Handle subject selection
-  const handleDisciplinaChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setTurmaSelecionada(event.target.value)
+    const total = filteredStudents.length
+    const active = filteredStudents.filter(s => s.status === 'INSCRITO').length
+    const inactive = total - active
+
+    return { total, active, inactive, averageAge: 0 }
   }
 
-  // Handle attendance change
-  const handlePresencaChange = (studentId: string, presente: boolean) => {
-    if (!subjectAttendance) return
-
-    const existingRecord = subjectAttendance.records.find(
-      record => record.date === selectedDate
-    )
-
-    if (existingRecord) {
-      const studentRecord = existingRecord.students.find(
-        s => s.studentId === studentId
-      )
-      if (studentRecord) {
-        studentRecord.present = presente
-        studentRecord.justification = null
-      } else {
-        existingRecord.students.push({
-          studentId,
-          present: presente,
-          justification: null,
-        })
-      }
-    } else {
-      subjectAttendance.records.push({
-        date: selectedDate,
-        students: [
-          {
-            studentId,
-            present: presente,
-            justification: null,
-          },
-        ],
-      })
-    }
-
-    toast.success(
-      `Presença registrada para ${getStudentById(studentId)?.student.name}`
-    )
-  }
-
-  // Handle justification submission
-  const handleJustificativaSubmit = () => {
-    if (!showJustificativaModal || !subjectAttendance) return
-
-    const { studentId, date } = showJustificativaModal
-    const record = subjectAttendance.records.find(r => r.date === date)
-    if (record) {
-      const studentRecord = record.students.find(s => s.studentId === studentId)
-      if (studentRecord) {
-        studentRecord.justification = justificativaText
-      }
-    }
-
-    setShowJustificativaModal(null)
-    setJustificativaText('')
-    toast.success('Justificativa registrada com sucesso!')
-  }
-
-  // Export attendance to CSV
+  // Exportação mock de presenças (apenas nomes e disciplina)
   const exportToCSV = () => {
-    if (!filteredStudentsSubject || !subjectAttendance) return
-
-    const headers = ['Aluno', 'Data', 'Presença', 'Justificativa']
-    const rows = filteredStudentsSubject.flatMap(student => {
-      return subjectAttendance.records.map(record => {
-        const studentRecord = record.students.find(
-          s => s.studentId === student.student.id
-        )
-        return [
-          `${student.student.name} ${student.student.surname}`,
-          format(new Date(record.date), 'dd/MM/yyyy'),
-          studentRecord?.present ? 'Presente' : 'Ausente',
-          studentRecord?.justification || '',
-        ]
-      })
-    })
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(',')),
-    ].join('\n')
-
+    if (!filteredStudents) return
+    const headers = ['Aluno', 'Documento', 'Status', 'Disciplina']
+    const rows = filteredStudents.map(s => [
+      s.student.name,
+      s.student.documentNumber || s.student.id,
+      s.status,
+      turmaSelecionada,
+    ])
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join(
+      '\n'
+    )
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     link.href = URL.createObjectURL(blob)
-    link.download = `presencas_${turmaSelecionada}_${format(new Date(), 'yyyy-MM-dd')}.csv`
+    link.download = `alunos_turma_${turmaSelecionada}.csv`
     link.click()
   }
 
-  return (
-    <div className="p-8 w-full bg-gray-50 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        {/* Filters */}
-        <div className="mb-6 flex gap-4">
-          <div className="flex-1">
-            <label
-              htmlFor="disciplina"
-              className="block text-lg font-medium text-gray-700 mb-2"
-            >
-              Selecione a Disciplina
-            </label>
-            <select
-              id="disciplina"
-              value={turmaSelecionada}
-              onChange={handleDisciplinaChange}
-              className="w-full p-3 border border-gray-300 rounded-md"
-            >
-              <option value="">Escolha uma disciplina</option>
-              {filteredSubjectsActiveted
-                ?.sort((a, b) =>
-                  a.subject.subjectName.localeCompare(b.subject.subjectName)
-                )
-                .map(subject => (
-                  <option key={subject.id} value={subject.subjectId}>
-                    {subject.subject.subjectName}
-                  </option>
-                ))}
-            </select>
-          </div>
+  const stats = calculateStats()
 
-          <div className="flex-1">
-            <label
-              htmlFor="data"
-              className="block text-lg font-medium text-gray-700 mb-2"
-            >
-              Data
-            </label>
-            <input
-              type="date"
-              id="data"
-              value={selectedDate}
-              onChange={e => setSelectedDate(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-md"
-            />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header com gradiente */}
+        <div className="bg-gradient-to-r from-green-600 to-blue-700 rounded-xl p-6 mb-8 text-white shadow-lg">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <GraduationCap className="h-8 w-8" />
+                Gestão de Turmas
+              </h1>
+              <p className="text-green-100 mt-2">
+                Gerencie suas turmas e alunos de forma eficiente
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {}}
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Relatórios
+              </Button>
+              <Button
+                onClick={exportToCSV}
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Exportar CSV
+              </Button>
+            </div>
           </div>
         </div>
 
+        {/* Cards de seleção */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <BookOpen className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Disciplina
+                </h3>
+                <p className="text-sm text-gray-600">Selecione a disciplina</p>
+              </div>
+            </div>
+            <select
+              value={turmaSelecionada}
+              onChange={e => setTurmaSelecionada(e.target.value)}
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            >
+              <option value="">Selecione uma disciplina</option>
+              {filteredSubjects?.map(subject => (
+                <option key={subject.id} value={subject.subjectId}>
+                  {subject.Subject.subjectName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Calendar className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Informações da Turma
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Detalhes da disciplina selecionada
+                </p>
+              </div>
+            </div>
+            {turmaSelecionada && (
+              <div className="space-y-2">
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">Disciplina:</span>{' '}
+                  {
+                    filteredSubjects?.find(
+                      s => s.subjectId === turmaSelecionada
+                    )?.Subject.subjectName
+                  }
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-medium">Status:</span> Ativa
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Estatísticas gerais */}
         {turmaSelecionada && (
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-medium">
-                Alunos da Turma {turmaSelecionada}
-              </h3>
-              <Button onClick={exportToCSV} disabled={isLoading}>
-                Exportar Relatório
-              </Button>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Alunos</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {stats.total}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <table className="min-w-full table-auto border-collapse">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="px-4 py-2 text-left">Aluno</th>
-                  <th className="px-4 py-2 text-left">Faltas</th>
-                  <th className="px-4 py-2 text-left">Presença</th>
-                  <th className="px-4 py-2 text-left">Ausente</th>
-                  <th className="px-4 py-2 text-left">Justificativa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudentsSubject?.map((studentData, index) => {
-                  const studentId = studentData.student.id
-                  const attendance = getStudentAttendance(
-                    studentId,
-                    turmaSelecionada
-                  )
-                  const excluido = attendance.absent > 5
-                  const alreadyMarked = subjectAttendance?.records
-                    .find(record => record.date === selectedDate)
-                    ?.students.find(s => s.studentId === studentId)
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <User className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Ativos</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.active}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-                  return (
-                    <tr
-                      key={index}
-                      className={`${excluido ? 'bg-red-100' : 'bg-white'}`}
-                    >
-                      <td className="px-4 py-2">
-                        {studentData.student.name} {studentData.student.surname}{' '}
-                        {excluido && (
-                          <span className="text-red-500">(Excluído)</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-2">{attendance.absent}</td>
-                      <td className="px-4 py-2">
-                        <Button
-                          onClick={() => handlePresencaChange(studentId, true)}
-                          disabled={!!alreadyMarked || excluido}
-                          className="bg-green-500 text-white px-4 py-2 rounded-md"
-                        >
-                          Presente
-                        </Button>
-                      </td>
-                      <td className="px-4 py-2">
-                        <Button
-                          onClick={() => handlePresencaChange(studentId, false)}
-                          disabled={!!alreadyMarked || excluido}
-                          className="bg-red-500 text-white px-4 py-2 rounded-md"
-                        >
-                          Ausente
-                        </Button>
-                      </td>
-                      <td className="px-4 py-2">
-                        {alreadyMarked?.present === false && (
-                          <Button
-                            onClick={() =>
-                              setShowJustificativaModal({
-                                studentId,
-                                date: selectedDate,
-                              })
-                            }
-                            className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                          >
-                            Adicionar Justificativa
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <User className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Inativos</p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {stats.inactive}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <GraduationCap className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Grupos</p>
+                  <p className="text-2xl font-bold text-purple-600">0</p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {showJustificativaModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-md w-96">
-              <h3 className="text-xl font-semibold mb-4">
-                Adicionar Justificativa
+        {/* Lista de alunos */}
+        {turmaSelecionada && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    Lista de Alunos
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {filteredAndSearchedStudents?.length || 0} alunos
+                    encontrados
+                  </p>
+                </div>
+
+                {/* Busca */}
+                <div className="flex gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Buscar aluno..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="space-y-4">
+                {filteredAndSearchedStudents?.map(student => (
+                  <div
+                    key={student.student.id}
+                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 bg-gradient-to-r from-gray-50 to-white"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <User className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            {student.student.name}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {student.student.documentNumber ||
+                              student.student.id}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium border ${
+                              student.status === 'INSCRITO'
+                                ? 'bg-green-100 text-green-800 border-green-200'
+                                : 'bg-red-100 text-red-800 border-red-200'
+                            }`}
+                          >
+                            {student.status === 'INSCRITO'
+                              ? 'Ativo'
+                              : 'Inativo'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        <Edit className="h-4 w-4" />
+                        Editar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredAndSearchedStudents?.length === 0 && (
+                <div className="text-center py-12">
+                  <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Nenhum aluno encontrado</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Seção de Grupos */}
+        {turmaSelecionada && (
+          <div className="mt-8 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                <Users className="h-5 w-5 text-purple-600" />
+                Grupos de Trabalho
               </h3>
-              <textarea
-                value={justificativaText}
-                onChange={e => setJustificativaText(e.target.value)}
-                className="w-full p-2 border rounded-md mb-4"
-                rows={4}
-                placeholder="Digite a justificativa da falta..."
-              />
-              <div className="flex justify-end gap-2">
+              <p className="text-sm text-gray-600 mt-1">
+                Organize os alunos em grupos para atividades colaborativas
+              </p>
+            </div>
+
+            <div className="p-6">
+              <div className="text-center py-12">
+                <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  Funcionalidade em Desenvolvimento
+                </h3>
+                <p className="text-gray-500 mb-4">
+                  A funcionalidade de grupos será implementada em breve para
+                  facilitar o trabalho colaborativo.
+                </p>
                 <Button
-                  onClick={() => setShowJustificativaModal(null)}
-                  className="bg-gray-500 text-white"
+                  variant="outline"
+                  className="flex items-center gap-2 mx-auto"
+                  disabled
                 >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={handleJustificativaSubmit}
-                  className="bg-blue-500 text-white"
-                >
-                  Salvar
+                  <Plus className="h-4 w-4" />
+                  Criar Primeiro Grupo
                 </Button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Estado vazio */}
+        {!turmaSelecionada && (
+          <div className="text-center py-20">
+            <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">
+              Selecione uma disciplina
+            </h3>
+            <p className="text-gray-500">
+              Escolha uma disciplina para começar a gerenciar sua turma
+            </p>
           </div>
         )}
       </div>

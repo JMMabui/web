@@ -23,6 +23,19 @@ import dayjs from 'dayjs'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import {
+  BookOpen,
+  Plus,
+  Edit2,
+  Trash2,
+  FileText,
+  Users,
+  BarChart3,
+  Calendar,
+  Target,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react'
 
 const assessmentSchema = z.object({
   name: z.string().min(1, { message: 'Nome é obrigatório' }),
@@ -88,8 +101,6 @@ export function Evaluations() {
       refetchInterval: 3000,
     })
 
-  // console.log('Dados do professor:', dataTeacherSubjects)
-
   const { data: dataAssessment } = useQuery({
     queryKey: ['assessment', turmaSelecionada],
     queryFn: () => getAssessmentsBySubjectId(turmaSelecionada),
@@ -102,8 +113,6 @@ export function Evaluations() {
     enabled: !!assessmentId,
   })
 
-  // console.log('assessment result: ', dataAssessmentResult)
-
   const { data: dataStudentsSubject } = useQuery<
     StudentsSubjectsWithExtraDataResponse[]
   >({
@@ -112,14 +121,10 @@ export function Evaluations() {
     enabled: !!turmaSelecionada,
   })
 
-  // console.log('student: ', dataStudentsSubject)
-
   const filteredStudents = dataStudentsSubject?.filter(
     students =>
       students.result === 'EM_ANDAMENTO' && students.status === 'INSCRITO'
   )
-
-  // console.log('estudantes filtrados: ', filteredStudents)
 
   const {
     register: registerAssessment,
@@ -156,38 +161,28 @@ export function Evaluations() {
     }))
   }
 
-  //   // Função para buscar e atualizar as avaliações
-  // async function refreshAssessments() {
-  //   const updatedAssessments = await getAllAssessments(); // Exemplo de função para obter todas as avaliações
-  //   setAssessments(updatedAssessments); // Atualiza o estado com as novas avaliações
-  // }
-
   async function handleOnSubmit(data: z.infer<typeof assessmentSchema>) {
-    // console.log(data)
     try {
       const { name, type, dateApplied, weight } = data
 
       // Verificar se o tipo começa com "EXAME"
       if (type.startsWith('EXAME')) {
-        // Lógica específica para tipos que começam com "EXAME"
         console.log('Tipo de avaliação é um exame:', type)
         await {
           name,
           type,
           dateApplied,
-          weight: 100, // ou outra lógica relacionada
+          weight: 100,
           subjectId: turmaSelecionada,
         }
       } else {
-        // Lógica para tipos que não começam com "EXAME"
         console.log('Tipo de avaliação não é um exame:', type)
 
-        // Neste caso, você pode enviar todos os dados, incluindo o peso
         await createAssessment({
           name,
           assessmentType: type,
           dateApplied,
-          weight, // Envia o peso normalmente
+          weight,
           subjectId: turmaSelecionada,
         })
       }
@@ -218,7 +213,6 @@ export function Evaluations() {
         await deleteAssessment(assessmentId)
         setSuccessMessage('Avaliação eliminada com sucesso!')
         alert('Alerta: Avaliação eliminada com sucesso!')
-        //  await refreshAssessments
       } catch (error) {
         console.error('Erro ao eliminar avaliação:', error)
         setSuccessMessage('Erro ao eliminar avaliação.')
@@ -299,11 +293,8 @@ export function Evaluations() {
     // Aqui vamos pegar as notas, o studentId e o subjectId
     const evaluations = filteredStudents?.map(student => ({
       studentId: student.studentId, // studentId de cada estudante
-      // subjectId: turmaSelecionada, // subjectId (id da disciplina)
       grade: studentGrade[student.id] || 0, // Nota lançada, ou 0 caso não tenha sido lançada
     }))
-
-    // console.log('Avaliações a serem enviadas: ', evaluations)
 
     try {
       const assessmentResults = await Promise.all(
@@ -324,517 +315,331 @@ export function Evaluations() {
   }
 
   return (
-    <div className="p-8 w-full bg-gray-50 min-h-screen">
-      <div className="mb-6 flex items-center space-x-4">
-        <div className="flex-1">
-          <label
-            htmlFor="disciplina"
-            className="block text-lg font-medium text-gray-700 mb-2"
-          >
-            Selecione a Disciplina
-          </label>
-          <select
-            id="disciplina"
-            value={turmaSelecionada}
-            onChange={handleDisciplinaChange}
-            className="w-full p-3 border border-gray-300 rounded-md"
-          >
-            <option value="">Escolha uma disciplina</option>
-            {filteredSubjectsActiveted
-              ?.sort((a, b) => a.subjectId.localeCompare(b.subjectId))
-              .map(subject => (
-                <option key={subject.id} value={subject.subjectId}>
-                  {subject.subjectId} - {subject.Subject.subjectName}
-                </option>
-              ))}
-          </select>
-        </div>
-
-        <div className="flex gap-4">
-          <Button
-            onClick={() => {
-              setShowAddAssessment(!showAddAssessment)
-              setShowEditForm(false)
-              reset()
-            }}
-          >
-            Adicionar Avaliação
-          </Button>
-          <Button
-            onClick={() => {
-              setShowGradeReport(!showGradeReport)
-              // setShowStudent(false)
-              // setShowAddAssessment(false)
-              // setShowEditForm(false)
-            }}
-          >
-            Pauta
-          </Button>
-        </div>
-      </div>
-
-      {showDataAssessments && (
-        <div>
-          {dataAssessment && dataAssessment.length > 0 ? (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header com gradiente */}
+        <div className="bg-gradient-to-r from-blue-600 to-green-600 rounded-xl p-6 mb-8 text-white shadow-lg">
+          <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-                Avaliações para a disciplina:{' '}
-                <span className="text-blue-600">{turmaSelecionada}</span>
-              </h3>
-              <div className="space-y-4">
-                {dataAssessment.map(assessment => (
-                  <div
-                    key={assessment.id}
-                    className="flex justify-between items-center bg-white p-4 border rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex flex-col">
-                      <span className="text-lg font-medium text-gray-700">
-                        {assessment.name}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {new Date(assessment.dateApplied).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-lg font-medium text-gray-700">
-                        {assessment.assessmentType}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        Peso: {assessment.weight}%
-                      </span>
-                    </div>
-                    <div>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleActionChange(assessment.id, 'editar')
-                        }
-                        className="text-blue-600 hover:underline"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleActionChange(assessment.id, 'eliminar')
-                        }
-                        className="text-red-600 hover:underline ml-4"
-                      >
-                        Eliminar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleActionChange(assessment.id, 'nota')
-                        }
-                        className="text-green-600 hover:underline ml-4"
-                      >
-                        Notas
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <FileText className="h-8 w-8" />
+                Sistema de Avaliações
+              </h1>
+              <p className="text-blue-100 mt-2">
+                Gerencie suas avaliações e notas dos alunos
+              </p>
+            </div>
+            {turmaSelecionada && (
+              <div className="flex gap-4">
+                <div className="px-4 py-2 rounded-lg bg-white/10">
+                  <p className="text-sm text-blue-100">Total de Avaliações</p>
+                  <p className="text-xl font-semibold">
+                    {dataAssessment?.length || 0}
+                  </p>
+                </div>
+                <div className="px-4 py-2 rounded-lg bg-white/10">
+                  <p className="text-sm text-blue-100">Alunos</p>
+                  <p className="text-xl font-semibold">
+                    {filteredStudents?.length || 0}
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-center text-gray-500">
-              <p>Não há avaliações disponíveis para esta disciplina.</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      )}
 
-      {showAddAssessment && (
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Criar Avaliação
-          </h2>
-
-          <form
-            className="mt-8 space-y-6 bg-white p-6 rounded-lg shadow-lg"
-            onSubmit={handleSubmit(handleOnSubmit)}
-          >
-            <div className="flex gap-6">
-              <div className="flex-1">
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Nome
-                </label>
-                <input
-                  id="name"
-                  {...registerAssessment('name')}
-                  className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-                  placeholder="Nome da avaliação"
-                />
-                {formState.errors.name && (
-                  <span className="text-red-500 text-sm">
-                    {formState.errors.name.message}
-                  </span>
-                )}
+        {/* Seleção de Disciplina */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 mb-8">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Disciplina
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Selecione a disciplina
+                  </p>
+                </div>
               </div>
-
-              <div className="flex-1">
-                <label
-                  htmlFor="type"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Tipo
-                </label>
-                <select
-                  id="type"
-                  {...registerAssessment('type')}
-                  className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-                  onChange={handleTypeChange} // Atualiza o estado ao mudar o tipo
-                >
-                  <option value="">--Escolha o Tipo--</option>
-                  <option value="TESTE_INDIVIDUAL">Teste Individual</option>
-                  <option value="TESTE_GRUPO">Teste em Grupo</option>
-                  <option value="TRABALHO_INDIVIDUAL">
-                    Trabalho Individual
-                  </option>
-                  <option value="TRABALHO_GRUPO">Trabalho em Grupo</option>
-                  <option value="EXAME_NORMAL">Exame Normal</option>
-                  <option value="EXAME_RECORRENCIA">
-                    Exame de Recorrência
-                  </option>
-                  <option value="EXAME_ESPECIAL">Exame Especial</option>
-                </select>
-                {formState.errors.type && (
-                  <span className="text-red-500 text-sm">
-                    {formState.errors.type.message}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="flex gap-6 mt-4">
-              <div className="flex-1">
-                <label
-                  htmlFor="dateApplied"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Data da Aplicação
-                </label>
-                <input
-                  type="date"
-                  id="dateApplied"
-                  {...registerAssessment('dateApplied')}
-                  className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-                />
-                {formState.errors.dateApplied && (
-                  <span className="text-red-500 text-sm">
-                    {formState.errors.dateApplied.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Condicionalmente renderizar o campo Peso */}
-              {selectedType !== 'EXAME_NORMAL' &&
-                selectedType !== 'EXAME_RECORRENCIA' &&
-                selectedType !== 'EXAME_ESPECIAL' && (
-                  <div className="flex-1">
-                    <label
-                      htmlFor="weight"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Peso
-                    </label>
-                    <input
-                      type="number"
-                      id="weight"
-                      {...registerAssessment('weight')}
-                      className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-                      placeholder="Peso da avaliação"
-                    />
-                    {formState.errors.weight && (
-                      <span className="text-red-500 text-sm">
-                        {formState.errors.weight.message}
-                      </span>
-                    )}
-                  </div>
-                )}
-            </div>
-
-            <div className="flex items-center justify-between mt-6">
-              <button
-                type="submit"
-                disabled={formState.isSubmitting}
-                className="bg-amber-500 text-white px-6 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-amber-600 transition duration-300 active:bg-amber-700"
+              <select
+                value={turmaSelecionada}
+                onChange={handleDisciplinaChange}
+                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               >
-                {formState.isSubmitting ? 'Salvando...' : 'Salvar Avaliação'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {showEditForm && assessmentData && (
-        <form
-          className="mt-8 space-y-6 bg-white p-6 rounded-lg shadow-lg"
-          onSubmit={handleSubmit(handleOnEditAssessment)}
-        >
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Editar Avaliação
-          </h2>
-
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Nome
-            </label>
-            <input
-              id="name"
-              {...registerAssessment('name')}
-              defaultValue={assessmentData.name}
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-              placeholder="Nome da avaliação"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="type"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Tipo
-            </label>
-            <select
-              id="type"
-              {...registerAssessment('type')}
-              defaultValue={assessmentData.type}
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-            >
-              <option value="TESTE_INDIVIDUAL">Teste Individual</option>
-              <option value="TESTE_GRUPO">Teste em Grupo</option>
-              <option value="TRABALHO_INDIVIDUAL">Trabalho Individual</option>
-              <option value="TRABALHO_GRUPO">Trabalho em Grupo</option>
-              <option value="EXAME_NORMAL">Exame Normal</option>
-              <option value="EXAME_RECORRENCIA">Exame de Recorrência</option>
-              <option value="EXAME_ESPECIAL">Exame Especial</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="dateApplied"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Data da Aplicação
-            </label>
-            <input
-              type="date"
-              id="dateApplied"
-              {...registerAssessment('dateApplied')}
-              defaultValue={dayjs(assessmentData.dateApplied).format(
-                'YYYY-MM-DD'
-              )}
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="weight"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Peso
-            </label>
-            <input
-              type="number"
-              id="weight"
-              {...registerAssessment('weight')}
-              defaultValue={assessmentData.weight}
-              className="w-full p-3 mt-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <button
-              type="submit"
-              disabled={formState.isSubmitting}
-              className="bg-amber-500 text-white px-6 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-amber-600 transition duration-300 active:bg-amber-700"
-            >
-              Atualizar Avaliação
-            </button>
-          </div>
-        </form>
-      )}
-
-      {showStudent && (
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">
-            Estudantes da disciplina {turmaSelecionada} - Avaliacao
-          </h1>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-              <thead>
-                <tr className="border-b bg-gray-100">
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Nome
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Nota
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents?.map(student => (
-                  <tr key={student.id} className="border-b">
-                    <td className="px-6 py-4 text-sm text-gray-800">
-                      {student.student.name} {student.student.surname}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {student.status}
-                    </td>
-                    <td className="px-6 py-4">
-                      <input
-                        type="number"
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        value={studentGrade[student.id] || ''}
-                        onChange={e => {
-                          const value = Number(e.target.value)
-
-                          // Validação para garantir que a nota esteja entre 0 e 20
-                          if (value >= 0 && value <= 20) {
-                            handleGradeChange(student.id, value) // Atualiza a nota
-                          } else {
-                            // Caso a nota seja inválida, você pode exibir uma mensagem ou simplesmente ignorar
-                            alert('A nota deve estar entre 0 e 20.')
-                            console.log('A nota deve estar entre 0 e 20.')
-                          }
-                        }}
-                      />
-                    </td>
-                  </tr>
+                <option value="">Selecione uma disciplina</option>
+                {filteredSubjectsActiveted?.map(subject => (
+                  <option key={subject.id} value={subject.subjectId}>
+                    {subject.Subject.subjectName}
+                  </option>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="flex justify-end mt-6 gap-6">
-            <button
-              type="button"
-              className="bg-amber-500 text-white px-6 py-2 rounded-lg hover:bg-amber-600 transition duration-300 active:bg-amber-700"
-              onClick={() => {
-                // Lógica para salvar as notas dos estudantes
-                handleAddEvaluations()
-                setShowDataAssessments(!showDataAssessments)
-                setShowStudent(!showStudent)
-              }}
-            >
-              Guardar Notas
-            </button>
-
+              </select>
+            </div>
             <Button
-              className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition duration-300 active:bg-red-700 "
-              onClick={() => {
-                setShowStudent(!showStudent)
-                setShowDataAssessments(!showDataAssessments)
-                // setShowGradeReport(!showGradeReport)
-                // setShowAddAssessment(!showAddAssessment)
-              }}
+              onClick={() => setShowAddAssessment(true)}
+              className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white"
+              disabled={!turmaSelecionada}
             >
-              fechar
+              <Plus className="mr-2 h-4 w-4" />
+              Nova Avaliação
             </Button>
           </div>
         </div>
-      )}
-      {showGradeReport && (
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">Pauta</h1>
 
-          {/* Tabela de Resultados */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
-              <thead>
-                <tr className="border-b bg-gray-100">
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Nome
-                  </th>
-                  {dataAssessment?.map(assessment => (
-                    <th
-                      key={assessment.id}
-                      className="px-6 py-3 text-left text-sm font-medium text-gray-700"
-                    >
-                      {assessment.name}
+        {/* Mensagem de Sucesso */}
+        {successMessage && (
+          <div className="mb-8 p-4 rounded-lg bg-green-100 text-green-800 flex items-center justify-between">
+            <div className="flex items-center">
+              <CheckCircle className="w-5 h-5 mr-2" />
+              <span>{successMessage}</span>
+            </div>
+            <Button
+              onClick={() => setSuccessMessage('')}
+              className="text-green-600 hover:text-green-800 transition-colors"
+            >
+              <AlertCircle className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Lista de Avaliações */}
+        {turmaSelecionada && showDataAssessments && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <BarChart3 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Avaliações da Disciplina
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Total: {dataAssessment?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nome
                     </th>
-                  ))}
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Média Ponderada
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Situação
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-                    Exame
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredStudents?.map(student => {
-                  // Obter as avaliações do estudante
-                  const studentAssessments = getStudentAssessments(
-                    student.studentId,
-                    dataAssessment,
-                    dataAssessmentResult
-                  )
-
-                  // Calcular a média ponderada
-                  const average = calculateWeightedAverage(studentAssessments)
-
-                  // Determinar a situação e o exame
-                  const situation = getStudentSituation(average)
-                  const examType = getExamType(situation)
-
-                  return (
-                    <tr key={student.id} className="border-b">
-                      <td className="px-6 py-4 text-sm text-gray-800">
-                        {student.student.name} {student.student.surname}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tipo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Data
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Peso
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {dataAssessment?.map((assessment: any) => (
+                    <tr
+                      key={assessment.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-yellow-100">
+                            <FileText className="h-6 w-6 text-yellow-600" />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {assessment.name}
+                            </div>
+                          </div>
+                        </div>
                       </td>
-
-                      {dataAssessment?.map(assessment => {
-                        const result = dataAssessmentResult?.find(
-                          result =>
-                            result.assessmentId === assessment.id &&
-                            result.studentId === student.studentId
-                        )
-                        return (
-                          <td
-                            key={assessment.id}
-                            className="px-6 py-4 text-sm text-gray-500"
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          {assessment.assessmentType.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {dayjs(assessment.dateApplied).format('DD/MM/YYYY')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-yellow-600 h-2.5 rounded-full"
+                              style={{ width: `${assessment.weight}%` }}
+                            />
+                          </div>
+                          <span className="ml-2 text-sm text-gray-600">
+                            {assessment.weight}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            onClick={() =>
+                              handleActionChange(assessment.id, 'editar')
+                            }
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Editar"
                           >
-                            {result ? result.grade : 'Não lançado'}
-                          </td>
-                        )
-                      })}
-
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {average.toFixed(2)}{' '}
-                        {/* Exibe a média ponderada com 2 casas decimais */}
-                      </td>
-
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {situation} {/* Exibe a situação do aluno */}
-                      </td>
-
-                      <td className="px-6 py-4 text-sm text-gray-500">
-                        {examType} {/* Exibe o tipo de exame */}
+                            <Edit2 className="w-5 h-5" />
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              handleActionChange(assessment.id, 'nota')
+                            }
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            title="Lançar Notas"
+                          >
+                            <Target className="w-5 h-5" />
+                          </Button>
+                          <Button
+                            onClick={() =>
+                              handleActionChange(assessment.id, 'eliminar')
+                            }
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Lançamento de Notas */}
+        {showStudent && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Users className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Lançamento de Notas
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Total de Alunos: {filteredStudents?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nome do Aluno
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Nota
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredStudents?.map(student => (
+                    <tr
+                      key={student.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-600">
+                                {student.student.name.charAt(0)}
+                                {student.student.surname.charAt(0)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">
+                              {student.student.name} {student.student.surname}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="relative">
+                          <input
+                            type="number"
+                            min="0"
+                            max="20"
+                            step="0.1"
+                            value={studentGrade[student.id] || ''}
+                            onChange={e =>
+                              handleGradeChange(
+                                student.id,
+                                Number.parseFloat(e.target.value)
+                              )
+                            }
+                            className="w-24 p-2 pl-8 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                          />
+                          <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                            <Target className="h-5 w-5 text-gray-400" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            studentGrade[student.id] >= 10
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {studentGrade[student.id] >= 10
+                            ? 'Aprovado'
+                            : 'Reprovado'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-6 border-t border-gray-200">
+              <div className="flex justify-end gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowStudent(false)
+                    setShowDataAssessments(true)
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Cancelar
+                </button>
+                <Button
+                  onClick={handleAddEvaluations}
+                  className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white"
+                >
+                  Salvar Notas
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
