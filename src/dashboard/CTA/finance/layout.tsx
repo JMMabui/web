@@ -5,9 +5,9 @@ import {
   CreditCard,
   BarChart,
   Settings,
-  Bell,
   UserCircle,
   ChevronDown,
+  AlertTriangle,
 } from 'lucide-react'
 import logo from '../../../assets/ismmalogo.png'
 import { Outlet, useNavigate } from 'react-router-dom'
@@ -16,8 +16,8 @@ import {
   getEmployeeByEmail,
 } from '@/http/employee/employee'
 import { useQuery } from '@tanstack/react-query'
-import LoadingSpinner from '@/components/LoadingSpinner'
 import { LoadingSkeleton } from '@/components/LoadingSkeleton'
+import { FinancialAlerts } from '@/components/FinancialAlerts'
 
 export function DashboardLayoutFinances() {
   const [active, setActive] = useState('Dashboard')
@@ -65,7 +65,18 @@ export function DashboardLayoutFinances() {
       route: '/finances/payments',
       submenu: [],
     },
-    { name: 'Relatórios', icon: BarChart, route: '', submenu: [] },
+    {
+      name: 'Inadimplência',
+      icon: AlertTriangle,
+      route: '/finances/late-fees',
+      submenu: [],
+    },
+    {
+      name: 'Relatórios',
+      icon: BarChart,
+      route: '/finances/reports',
+      submenu: [],
+    },
     // {
     //   name: 'Configurações',
     //   icon: Settings,
@@ -137,8 +148,9 @@ export function DashboardLayoutFinances() {
       <div className="flex-1 flex flex-col">
         {/* Top Navigation */}
         <header className="flex items-center justify-between bg-white p-4 shadow-md">
+          <div />
           <div className="flex items-center gap-4">
-            <Bell className="w-6 h-6 text-gray-600 cursor-pointer hover:text-gray-800" />
+            <FinancialAlerts />
             <div className="flex items-center gap-2 cursor-pointer">
               <UserCircle className="w-8 h-8" />
               <span className="font-medium">

@@ -3,7 +3,7 @@ import {
   updateInvoiceStatus,
   type invoiceExtendedResponse,
 } from '@/http/finances/invoices'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import Input from './Input'
 import { paymentSchema } from '@/validation/payments'
@@ -14,17 +14,24 @@ import SelectField from './selectField'
 import { LoadingSkeleton } from './LoadingSkeleton'
 import dayjs from 'dayjs'
 import { createPayments } from '@/http/finances/payments'
+import toast from 'react-hot-toast'
+import Button from './Button'
 
 type PaymentFormProps = {
   invoiceId: string
+  onPaymentSuccess: () => void
+  onCancel: () => void
 }
 
 type dataSchema = z.infer<typeof paymentSchema>
 
-export function PaymentForm({ invoiceId }: PaymentFormProps) {
-  // console.log('invoiceId:', invoiceId)
-
-  const [paymentMethod, setPaymentMethod] = useState<string>('') // Estado para armazenar o método de pagamento
+export function PaymentForm({
+  invoiceId,
+  onPaymentSuccess,
+  onCancel,
+}: PaymentFormProps) {
+  const queryClient = useQueryClient()
+  const [paymentMethod, setPaymentMethod] = useState<string>('')
 
   const {
     data: invoice,
@@ -38,8 +45,6 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
     refetchOnReconnect: false,
   })
 
-  // console.log('invoice:', invoice)
-
   const {
     register,
     handleSubmit,
@@ -50,19 +55,22 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
     resolver: zodResolver(paymentSchema),
   })
 
-  if (isLoading) {
-    return <LoadingSkeleton />
-  }
-  if (isError) {
-    return <div>Erro ao carregar os dados</div>
-  }
-  if (!invoice) {
-    return <div>Nenhum dado encontrado</div>
+  const getLateFee = (inv: invoiceExtendedResponse | undefined) => {
+    if (!inv) return 0
+    return inv.LateFee?.reduce((sum, fee) => sum + fee.amount, 0) || 0
   }
 
-  // console.log('Erros:', errors)
+  useEffect(() => {
+    if (invoice) {
+      const totalAmount = invoice.amount + getLateFee(invoice)
+      reset({
+        invoiceId: invoice.id,
+        amount: totalAmount,
+        paymentDate: dayjs().format('YYYY-MM-DD'),
+      })
+    }
+  }, [invoice, reset])
 
-  // Função para atualizar o estado 'paymentMethod' e definir o valor no formulário
   const handlePaymentMethodChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -77,64 +85,15 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
         | 'CARTAO_CREDITO'
         | 'CARTAO_DEBITO'
         | 'OUTROS'
-    ) // Atualiza o valor no formulário
+    )
   }
 
-  const studentName = invoice.student.name
-    ? `${invoice.student.name} ${invoice.student.surname}`
-    : 'Nome não disponível'
-  // console.log('studentName:', studentName)
-
-  const amountfee = invoice.LateFee[0] ? invoice.LateFee[0].amount : 0
-  const formattedAmount = invoice.amount.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'MZN',
-  })
-  const formattedDate = new Date().toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-
-  const totalAmount = invoice.amount + amountfee
-
-  const formattedStatus =
-    invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)
-  const formattedMonth =
-    invoice.month.charAt(0).toUpperCase() + invoice.month.slice(1)
-  const formattedStudentName = studentName
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-
-  const formattedStudent = `Estudante ${formattedStudentName}`
-  const formattedAmountValue = `Valor ${formattedAmount}`
-  const formattedMonthValue = `Mês ${formattedMonth}`
-  const formattedStatusValue = `Status ${formattedStatus}`
-  const formattedDateValue = `Data ${formattedDate}`
-  const formattedLateFee = `Multa ${amountfee.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'MZN',
-  })}`
-
-  console.log('errors:', errors)
-  useEffect(() => {
-    if (invoice) {
-      reset({
-        invoiceId: invoice.id,
-        amount: totalAmount,
-        // paymentDate: new Date(),
-        // Adicione outros campos do esquema aqui, se houver
-      })
-    }
-  }, [invoice, reset])
-
   async function onSubmit(data: dataSchema) {
-    console.log('Dados do pagamento:', data)
-    // Aqui você pode fazer a chamada para a API para registrar o pagamento
-    // Exemplo:
-    // registerPayment(data)
+    if (!invoice) {
+      toast.error('Fatura não encontrada para processar o pagamento.')
+      return
+    }
+
     try {
       const payment = await createPayments({
         invoiceId: data.invoiceId,
@@ -144,68 +103,68 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
         reference: data.reference ?? null,
         description: data.description ?? null,
       })
-      // Aqui você pode fazer algo com a resposta da API, como mostrar uma mensagem de sucesso
 
-      console.log('Pagamento registrado:', payment.sucess)
-      if (!payment.error) {
-        const invoiceStatus = await updateInvoiceStatus(data.invoiceId, 'PAGO')
-        console.log('Status da fatura atualizado:', invoiceStatus)
+      if (payment.error) {
+        throw new Error(payment.error.message || 'Erro do servidor')
       }
-      console.log('Pagamento registrado com sucesso:', payment)
-      alert('Pagamento registrado com sucesso!')
-      reset(
-        {
-          invoiceId: '',
-          amount: 0,
-          reference: '',
-          description: '',
-        } // Limpa o formulário após o envio
-      ) // Limpa o formulário após o envio
 
-      setPaymentMethod('') // Reseta o método de pagamento
+      const totalAmountDue = invoice.amount + getLateFee(invoice)
+      const newStatus =
+        data.amount >= totalAmountDue ? 'PAGO' : 'PARCIALMENTE_PAGO'
+
+      await updateInvoiceStatus(data.invoiceId, newStatus)
+
+      toast.success('Pagamento registrado com sucesso!')
+      queryClient.invalidateQueries({ queryKey: ['invoice'] })
+      onPaymentSuccess()
     } catch (error) {
       console.error('Erro ao registrar pagamento:', error)
-      alert('Erro ao registrar pagamento. Tente novamente.')
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível registrar o pagamento.'
+      )
     }
   }
 
+  if (isLoading) {
+    return <LoadingSkeleton />
+  }
+  if (isError) {
+    return <div>Erro ao carregar os dados da fatura.</div>
+  }
+  if (!invoice) {
+    return <div>Fatura não encontrada.</div>
+  }
+
+  const studentName = `${invoice.student.name} ${invoice.student.surname}`
+  const totalAmount = invoice.amount + getLateFee(invoice)
+
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-semibold">Pagamento</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            {/* <label className="text-sm font-semibold">{formattedInvoice}</label> */}
-            <label className="text-sm font-semibold">{formattedStudent}</label>
-            <label className="text-sm font-semibold">
-              {formattedAmountValue}
-            </label>
-            <label className="text-sm font-semibold">
-              {formattedMonthValue}
-            </label>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold">
-              {formattedStatusValue}
-            </label>
-            <label className="text-sm font-semibold">
-              {formattedDateValue}
-            </label>
-            <label className="text-sm font-semibold">{formattedLateFee}</label>
-          </div>
+      <h2 className="text-lg font-semibold">Pagamento de Fatura</h2>
+      <div className="p-4 border rounded-lg bg-gray-50 text-sm space-y-1">
+        <div>
+          <strong>Estudante:</strong> {studentName}
         </div>
-        <div className="text-sm text-gray-500">
-          Total a pagar:{' '}
-          {totalAmount.toLocaleString('pt-BR', {
+        <div>
+          <strong>Mês/Ano:</strong> {invoice.month}/{invoice.year}
+        </div>
+        <div>
+          <strong>Total (com multas):</strong>{' '}
+          {totalAmount.toLocaleString('pt-MZ', {
             style: 'currency',
             currency: 'MZN',
           })}
         </div>
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input
-          label="Valor"
+          label="Valor a Pagar"
           id="amount"
-          {...register('amount')}
+          type="number"
+          step="0.01"
+          {...register('amount', { valueAsNumber: true })}
           error={errors.amount?.message}
         />
         <Input
@@ -215,14 +174,12 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
           {...register('paymentDate')}
           error={errors.paymentDate?.message}
         />
-
-        {/* Método de pagamento */}
         <SelectField
           label="Método de pagamento"
           id="paymentMethod"
           {...register('paymentMethod')}
           value={paymentMethod}
-          onChange={handlePaymentMethodChange} // Atualiza o método de pagamento selecionado
+          onChange={handlePaymentMethodChange}
           options={[
             { value: 'DINHEIRO', label: 'Dinheiro' },
             { value: 'TRANSFERENCIA', label: 'Transferência' },
@@ -233,9 +190,7 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
           ]}
           error={errors.paymentMethod?.message}
         />
-
-        {/* Mostrar o campo de "Referência" apenas se o método não for 'DINHEIRO' */}
-        {paymentMethod !== 'DINHEIRO' && (
+        {paymentMethod !== 'DINHEIRO' && paymentMethod && (
           <Input
             label="Referência"
             id="reference"
@@ -246,16 +201,25 @@ export function PaymentForm({ invoiceId }: PaymentFormProps) {
         <Input
           label="Descrição"
           id="description"
-          placeholder="Descrição do pagamento ex: Pagamento de fatura completa"
+          placeholder="Ex: Pagamento da mensalidade"
           {...register('description')}
           error={errors.description?.message}
         />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Registrar Pagamento
-        </button>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button
+            type="button"
+            onClick={onCancel}
+            className="bg-gray-200 text-gray-800 hover:bg-gray-300"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Registrar Pagamento
+          </Button>
+        </div>
       </form>
     </div>
   )

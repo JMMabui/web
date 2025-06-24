@@ -7,6 +7,9 @@ import {
   Home,
   Bell,
   UserCircle,
+  CalendarCheck,
+  CalendarOff,
+  Star,
 } from 'lucide-react'
 import logo from '../../../assets/ismmalogo.png'
 import type { LucideProps } from 'lucide-react'
@@ -15,7 +18,7 @@ import {
   type employeeExtended,
   getEmployeeByEmail,
 } from '@/http/employee/employee'
-import { LoadingSpinner} from '@/components/LoadingSpinner'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
 
 const DefaultAvatar = () => <div className="w-8 h-8 bg-gray-300 rounded-full" />
 
@@ -95,17 +98,32 @@ export function DashboardLayout() {
             <MenuItem
               label="Funcionários"
               icon={Users}
-              to="/human_resources/employee"
-            />
-            <MenuItem
-              label="Relatórios"
-              icon={FileText}
-              to="/human_resources/reports"
+              to="/human_resources/list_employee"
             />
             <MenuItem
               label="Adicionar Funcionário"
               icon={PlusCircle}
               to="/human_resources/add_employee"
+            />
+            <MenuItem
+              label="Assiduidade"
+              icon={CalendarCheck}
+              to="/human_resources/attendance"
+            />
+            <MenuItem
+              label="Férias e Licenças"
+              icon={CalendarOff}
+              to="/human_resources/leaves"
+            />
+            <MenuItem
+              label="Desempenho"
+              icon={Star}
+              to="/human_resources/performance"
+            />
+            <MenuItem
+              label="Relatórios"
+              icon={FileText}
+              to="/human_resources/reports"
             />
             <li>
               <button

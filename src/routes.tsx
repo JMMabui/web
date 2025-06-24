@@ -33,6 +33,8 @@ import { DashboardLayoutFinances } from './dashboard/CTA/finance/layout'
 import { DashboardFinances } from './dashboard/CTA/finance/dashboard'
 import { InvoicesFinances } from './dashboard/CTA/finance/invoices'
 import { PaymentsFinances } from './dashboard/CTA/finance/payments'
+import { FinancialReports } from './dashboard/CTA/finance/reports'
+import { LateFeesManagement } from './dashboard/CTA/finance/lateFees'
 import { DashboardStudents } from './dashboard/students/dashboard'
 import { Assessments } from './dashboard/students/assessments'
 import { MonthlyFee } from './dashboard/students/monthlyFee'
@@ -43,7 +45,7 @@ import { Evaluations } from './dashboard/Teacher/evaluations'
 import { AddPreInstituto_addCourse } from './dashboard/CTA/academic_record/addPreInstituto_addCourse'
 import { Announcements } from './dashboard/Teacher/announcements'
 import { ActivityHistory } from './dashboard/Teacher/activityHistory'
-import { Attendance } from './dashboard/Teacher/attendance'
+import { Attendance } from './dashboard/CTA/human resources/attendance'
 import { LessonPlanning } from './dashboard/Teacher/lessonPlanning'
 import { Syllabus } from './dashboard/Teacher/syllabus'
 import { Recovery } from './dashboard/Teacher/recovery'
@@ -63,6 +65,9 @@ import { AcademicRequests } from './dashboard/CTA/academic_record/AcademicReques
 import { AcademicStatistics } from './dashboard/CTA/academic_record/AcademicStatistics'
 import { ParentDashboard } from './dashboard/CTA/academic_record/ParentDashboard'
 import { GradesManagement } from './dashboard/CTA/academic_record/GradesManagement'
+import { Leaves } from './dashboard/CTA/human resources/leaves'
+import { Performance } from './dashboard/CTA/human resources/performance'
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -249,7 +254,11 @@ export const router = createBrowserRouter([
         element: <Dashboard_Human_Resourses />,
       },
       {
-        path: 'employee',
+        path: 'add_employee',
+        element: <AddEmployee />,
+      },
+      {
+        path: 'list_employee',
         element: <EmployeeList />,
       },
       {
@@ -257,8 +266,16 @@ export const router = createBrowserRouter([
         element: <HRReports />,
       },
       {
-        path: 'add_employee',
-        element: <AddEmployee />,
+        path: 'attendance',
+        element: <Attendance />,
+      },
+      {
+        path: 'leaves',
+        element: <Leaves />,
+      },
+      {
+        path: 'performance',
+        element: <Performance />,
       },
     ],
   },
@@ -278,10 +295,18 @@ export const router = createBrowserRouter([
         path: 'payments',
         element: <PaymentsFinances />,
       },
+      {
+        path: 'reports',
+        element: <FinancialReports />,
+      },
+      {
+        path: 'late-fees',
+        element: <LateFeesManagement />,
+      },
     ],
   },
   {
-    path: '/Teacher',
+    path: '/teacher',
     element: <LayoutTeachers />,
     children: [
       {

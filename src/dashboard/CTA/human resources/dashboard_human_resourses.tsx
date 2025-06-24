@@ -7,7 +7,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Users, User, FileText, FileDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Pie } from 'react-chartjs-2'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  type ChartOptions,
+} from 'chart.js'
 import Card from '@/components/Card'
 import { TabelaFuncionarios } from '@/components/EmployeeTable'
 import Button from '@/components/Button'
@@ -78,7 +84,7 @@ export function Dashboard_Human_Resourses() {
     ],
   }
 
-  const pieOptions = {
+  const pieOptions: ChartOptions<'pie'> = {
     responsive: true,
     plugins: {
       legend: {
@@ -166,10 +172,7 @@ export function Dashboard_Human_Resourses() {
         />
         <Card
           title="Média Salarial"
-          value={new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'MZN',
-          }).format(averageSalary)}
+          value={averageSalary}
           icon={FileText}
           iconColor="text-yellow-500"
         />
@@ -208,7 +211,9 @@ export function Dashboard_Human_Resourses() {
           Funcionários por Departamento
         </h2>
         {Object.keys(departmentData).length > 0 ? (
-          <Pie data={pieData} options={pieOptions} />
+          <div className="h-100">
+            <Pie data={pieData} options={pieOptions} />
+          </div>
         ) : (
           <p className="text-gray-600 text-center">Sem dados para exibir.</p>
         )}
